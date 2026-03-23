@@ -529,7 +529,6 @@
                 <div class="artist-card">
                     <div class="artist-card-img">
                         <i class="ph ph-image"></i>
-                        <span>Gambar dimasukkan nanti</span>
                     </div>
                     <div class="artist-card-info">
                         <div class="artist-name">Artist Name</div>
