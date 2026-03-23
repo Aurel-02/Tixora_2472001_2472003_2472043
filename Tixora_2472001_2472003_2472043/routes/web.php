@@ -13,3 +13,7 @@ Route::get('/landing', function () {
 Route::get('/login-page', function () {
     return view('login-page');
 });
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+});
