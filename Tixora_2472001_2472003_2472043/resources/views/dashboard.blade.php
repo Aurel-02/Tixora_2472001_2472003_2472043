@@ -482,44 +482,7 @@
     </main>
 
     <script>
-        const data = {
-            indonesia: {
-                artists: [
-                    { name: "Tulus", desc: "Monokrom Tour 2026" },
-                    { name: "Raisa", desc: "Live in Concert" },
-                    { name: "Dewa 19", desc: "Pesta Rakyat 30 Tahun" },
-                    { name: "Nadin Amizah", desc: "Selamat Ulang Tahun" }
-                ],
-                events: [
-                    { month: "AUG", day: "15", name: "Tulus - Monokrom Live in Jakarta", location: "GBK, Jakarta" },
-                    { month: "SEP", day: "02", name: "Dewa 19 - Pesta Rakyat", location: "Stadion Siliwangi, Bandung" }
-                ]
-            },
-            western: {
-                artists: [
-                    { name: "Taylor Swift", desc: "The Eras Tour" },
-                    { name: "Coldplay", desc: "Music of the Spheres" },
-                    { name: "Ed Sheeran", desc: "Mathematics Tour" },
-                    { name: "Bruno Mars", desc: "24K Magic Live" }
-                ],
-                events: [
-                    { month: "NOV", day: "10", name: "Coldplay - Music of the Spheres", location: "GBK, Jakarta" },
-                    { month: "DEC", day: "05", name: "Taylor Swift - The Eras Tour", location: "National Stadium, Singapore" }
-                ]
-            },
-            kpop: {
-                artists: [
-                    { name: "BLACKPINK", desc: "BORN PINK World Tour" },
-                    { name: "BTS", desc: "Permission to Dance On Stage" },
-                    { name: "SEVENTEEN", desc: "FOLLOW To City" },
-                    { name: "TWICE", desc: "READY TO BE Tour" }
-                ],
-                events: [
-                    { month: "OCT", day: "20", name: "SEVENTEEN - FOLLOW Tour", location: "ICE BSD City, Tangerang" },
-                    { month: "DEC", day: "12", name: "BLACKPINK - BORN PINK Encore", location: "JIS, Jakarta" }
-                ]
-            }
-        };
+        const data = @json($frontendData);
 
         const gridContainer = document.getElementById('artistGrid');
         const listContainer = document.getElementById('eventList');
@@ -531,8 +494,8 @@
                         <i class="ph ph-image"></i>
                     </div>
                     <div class="artist-card-info">
-                        <div class="artist-name">Artist Name</div>
-                        <div class="artist-desc">Desc</div>
+                        <div class="artist-name">${artist.name}</div>
+                        <div class="artist-desc"><i class="ph ph-calendar"></i> ${artist.desc}</div>
                     </div>
                 </div>
             `;
@@ -542,13 +505,13 @@
             return `
                 <div class="event-card">
                     <div class="event-date">
-                        <span class="month">month</span>
-                        <span class="day">day</span>
+                        <span class="month">${event.month}</span>
+                        <span class="day">${event.day}</span>
                     </div>
                     <div class="event-details">
-                        <div class="event-name">Event Name</div>
+                        <div class="event-name">${event.name}</div>
                         <div class="event-location">
-                            <i class="ph ph-map-pin"></i> Location
+                            <i class="ph ph-map-pin"></i> ${event.location}
                         </div>
                     </div>
                     <div class="event-action">
@@ -570,11 +533,17 @@
             categoryData.artists.forEach(artist => {
                 artistsHtml += createArtistCard(artist);
             });
+            if (categoryData.artists.length === 0) {
+                artistsHtml = '<p style="color:var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">Tidak ada event terkait dalam 3 bulan ke depan.</p>';
+            }
 
             let eventsHtml = '';
             categoryData.events.forEach(event => {
                 eventsHtml += createEventCard(event);
             });
+            if (categoryData.events.length === 0) {
+                eventsHtml = '<p style="color:var(--queen-pink); padding: 20px;">Tidak ada event lebih dari 3 bulan.</p>';
+            }
 
             gridContainer.style.opacity = '0';
             listContainer.style.opacity = '0';
