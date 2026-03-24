@@ -453,12 +453,6 @@
                 </li>
                 <li>
                     <a href="#" class="sidebar-item">
-                        <i class="ph ph-ticket sidebar-icon"></i>
-                        <span class="sidebar-text">My Tickets</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-item">
                         <i class="ph ph-bell sidebar-icon"></i>
                         <span class="sidebar-text">Notifications</span>
                     </a>
