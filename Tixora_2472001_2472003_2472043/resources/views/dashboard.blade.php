@@ -489,7 +489,7 @@
 
         function createArtistCard(artist) {
             return `
-                <div class="artist-card">
+                <div class="artist-card" onclick="window.location.href='/event/${artist.id}'">
                     <div class="artist-card-img">
                         <i class="ph ph-image"></i>
                     </div>
@@ -503,7 +503,7 @@
 
         function createEventCard(event) {
             return `
-                <div class="event-card">
+                <div class="event-card" onclick="window.location.href='/event/${event.id}'" style="cursor: pointer;">
                     <div class="event-date">
                         <span class="month">${event.month}</span>
                         <span class="day">${event.day}</span>

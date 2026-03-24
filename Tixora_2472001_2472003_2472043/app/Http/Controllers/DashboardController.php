@@ -10,8 +10,8 @@ class DashboardController extends Controller
 {
     private function currentRole()
     {
-        if (auth()->check() && !empty(auth()->user()->role)) {
-            return auth()->user()->role;
+        if (auth()->check()) {
+            return auth()->user()->role ?? 'user';
         }
 
         $adminSession = session('login_admin');
@@ -67,6 +67,18 @@ class DashboardController extends Controller
         return view('organizerdashboard', compact('eventsByCategory'));
     }
 
+    public function showEvent($id)
+    {
+        $role = $this->currentRole();
+        if (!$role) {
+            return redirect('/login-page');
+        }
+
+        $event = Event::findOrFail($id);
+        
+        return view('event-detail', compact('event'));
+    }
+
     private function prepareFrontendData(): array
     {
         $now = Carbon::now();
@@ -97,6 +109,7 @@ class DashboardController extends Controller
 
                 if ($isUpcoming) {
                     $frontendData[$slug]['events'][] = [
+                        'id' => $event->id_event,
                         'month' => strtoupper($tanggal->format('M')),
                         'day' => $tanggal->format('d'),
                         'name' => $event->nama_event,
@@ -104,6 +117,7 @@ class DashboardController extends Controller
                     ];
                 } else {
                     $frontendData[$slug]['artists'][] = [
+                        'id' => $event->id_event,
                         'name' => $event->nama_event,
                         'desc' => $tanggal ? $tanggal->format('d M Y') : 'TBD'
                     ];
