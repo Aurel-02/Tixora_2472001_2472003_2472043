@@ -177,15 +177,21 @@
         <div class="logo">TIXORA</div>
         <p class="subtitle">Log in to Your Concert Experience</p>
         
-        <form>
+        <form method="POST" action="{{ route('login.post') }}">
+            @csrf
             <div class="form-group">
-                <label>Username</label>
-                <input type="text" class="form-control" placeholder="uname" required>
+                <label>Email</label>
+                <input type="text" name="email" class="form-control" placeholder="uname@email.com" value="{{ old('email') }}">
             </div>
             
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" class="form-control" placeholder="••••••••" required>
+                <input type="password" name="password" class="form-control" placeholder="••••••••">
+                @if($errors->has('loginError'))
+                    <div style="color: #ffb3b3; font-size: 0.85rem; margin-top: 8px; text-align: left; padding-left: 5px;">
+                        {{ $errors->first('loginError') }}
+                    </div>
+                @endif
             </div>
             
             <button type="submit" class="btn btn-primary">Login</button>
