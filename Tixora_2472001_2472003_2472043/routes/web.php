@@ -14,7 +14,9 @@ Route::get('/landing', function () {
 
 Route::get('/login-page', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'index']);
-
 Route::get('/organizerdashboard', [DashboardController::class, 'organizer']);
+Route::get('/organizer/dashboard', [DashboardController::class, 'organizer']);
+

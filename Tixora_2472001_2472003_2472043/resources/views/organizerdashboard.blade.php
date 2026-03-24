@@ -431,36 +431,50 @@
 
     <header class="topbar">
         <div class="logo">TIXORA</div>
-        <div class="profile" title="My Profile">U</div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="profile" title="My Profile">U</div>
+        </div>
     </header>
 
     <aside class="sidebar">
-        <ul class="sidebar-menu">
-            <li>
-                <a href="#" class="sidebar-item active">
-                    <i class="ph ph-house sidebar-icon"></i>
-                    <span class="sidebar-text">Home</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="sidebar-item">
-                    <i class="ph ph-magnifying-glass sidebar-icon"></i>
-                    <span class="sidebar-text">Search</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="sidebar-item">
-                    <i class="ph ph-ticket sidebar-icon"></i>
-                    <span class="sidebar-text">My Tickets</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="sidebar-item">
-                    <i class="ph ph-bell sidebar-icon"></i>
-                    <span class="sidebar-text">Notifications</span>
-                </a>
-            </li>
-        </ul>
+        <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
+            <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
+                <li>
+                    <a href="#" class="sidebar-item active">
+                        <i class="ph ph-house sidebar-icon"></i>
+                        <span class="sidebar-text">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item">
+                        <i class="ph ph-magnifying-glass sidebar-icon"></i>
+                        <span class="sidebar-text">Search</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item">
+                        <i class="ph ph-ticket sidebar-icon"></i>
+                        <span class="sidebar-text">My Tickets</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item">
+                        <i class="ph ph-bell sidebar-icon"></i>
+                        <span class="sidebar-text">Notifications</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div style="padding: 10px 0;">
+                <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
+                    @csrf
+                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; padding: 15px 22px; cursor: pointer;">
+                        <i class="ph ph-sign-out sidebar-icon"></i>
+                        <span class="sidebar-text">Logout</span>
+                    </button>
+                </form>
+            </div>
+        </div>
     </aside>
 
     <main class="main-wrapper">
@@ -486,40 +500,28 @@
     </main>
 
     <script>
-        const data = @json($frontendData);
+        const data = @json($eventsByCategory ?? ['indonesia' => [], 'western' => [], 'kpop' => []]);
 
         const gridContainer = document.getElementById('artistGrid');
-        const listContainer = document.getElementById('eventList');
 
-        function createArtistCard(artist) {
-            return `
-                <div class="artist-card">
-                    <div class="artist-card-img">
-                        <i class="ph ph-image"></i>
-                    </div>
-                    <div class="artist-card-info">
-                        <div class="artist-name">${artist.name}</div>
-                        <div class="artist-desc"><i class="ph ph-calendar"></i> ${artist.desc}</div>
-                    </div>
-                </div>
-            `;
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const d = new Date(dateString);
+            const options = { day: '2-digit', month: 'short', year: 'numeric' };
+            return d.toLocaleDateString('id-ID', options);
         }
 
         function createEventCard(event) {
+            const eventDate = event.tanggal_pelaksanaan ? formatDate(event.tanggal_pelaksanaan) : '-';
             return `
-                <div class="event-card">
-                    <div class="event-date">
-                        <span class="month">${event.month}</span>
-                        <span class="day">${event.day}</span>
+                <div class="artist-card">
+                    <div class="artist-card-img">
+                        <i class="ph ph-ticket"></i>
                     </div>
-                    <div class="event-details">
-                        <div class="event-name">${event.name}</div>
-                        <div class="event-location">
-                            <i class="ph ph-map-pin"></i> ${event.location}
-                        </div>
-                    </div>
-                    <div class="event-action">
-                        <a href="#" class="btn-buy">Buy Tickets</a>
+                    <div class="artist-card-info">
+                        <div class="artist-name">${event.nama_event}</div>
+                        <div class="artist-desc"><i class="ph ph-map-pin"></i> ${event.lokasi_event || 'Lokasi belum diset'}</div>
+                        <div class="artist-desc"><i class="ph ph-calendar"></i> ${eventDate}</div>
                     </div>
                 </div>
             `;
@@ -527,74 +529,25 @@
 
         function renderCategory(category, btnElement) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            if(btnElement) {
-                btnElement.classList.add('active');
+            if (btnElement) btnElement.classList.add('active');
+
+            const categoryEvents = data[category] || [];
+
+            if (!categoryEvents.length) {
+                gridContainer.innerHTML = '<p style="color: var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">Belum ada event untuk kategori ini.</p>';
+                return;
             }
 
-            const categoryData = data[category] || { artists: [], events: [] };
-            
-            let artistsHtml = '';
-            categoryData.artists.forEach(artist => {
-                artistsHtml += createArtistCard(artist);
+            let html = '';
+            categoryEvents.forEach(event => {
+                html += createEventCard(event);
             });
-            if (categoryData.artists.length === 0) {
-                artistsHtml = '<p style="color:var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">Tidak ada event terkait dalam 3 bulan ke depan.</p>';
-            }
-
-            let eventsHtml = '';
-            categoryData.events.forEach(event => {
-                eventsHtml += createEventCard(event);
-            });
-            if (categoryData.events.length === 0) {
-                eventsHtml = '<p style="color:var(--queen-pink); padding: 20px;">Tidak ada event lebih dari 3 bulan.</p>';
-            }
-
-            gridContainer.style.opacity = '0';
-            listContainer.style.opacity = '0';
-            
-            setTimeout(() => {
-                gridContainer.innerHTML = artistsHtml;
-                listContainer.innerHTML = eventsHtml;
-                
-                gridContainer.style.transition = 'opacity 0.4s ease';
-                listContainer.style.transition = 'opacity 0.4s ease';
-                gridContainer.style.opacity = '1';
-                listContainer.style.opacity = '1';
-            }, 200);
+            gridContainer.innerHTML = html;
         }
 
         window.onload = () => {
             renderCategory('indonesia', document.querySelector('.tab-btn.active'));
         };
-
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        listContainer.addEventListener('mousedown', (e) => {
-            isDown = true;
-            listContainer.style.cursor = 'grabbing';
-            startX = e.pageX - listContainer.offsetLeft;
-            scrollLeft = listContainer.scrollLeft;
-        });
-
-        listContainer.addEventListener('mouseleave', () => {
-            isDown = false;
-            listContainer.style.cursor = 'default';
-        });
-
-        listContainer.addEventListener('mouseup', () => {
-            isDown = false;
-            listContainer.style.cursor = 'default';
-        });
-
-        listContainer.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - listContainer.offsetLeft;
-            const walk = (x - startX) * 2; 
-            listContainer.scrollLeft = scrollLeft - walk;
-        });
     </script>
 </body>
 </html>
