@@ -16,3 +16,5 @@ Route::get('/login-page', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index']);
+
+Route::get('/organizerdashboard', [DashboardController::class, 'organizer']);

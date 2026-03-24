@@ -10,6 +10,18 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $frontendData = $this->prepareFrontendData();
+        return view('dashboard', compact('frontendData'));
+    }
+
+    public function organizer()
+    {
+        $frontendData = $this->prepareFrontendData();
+        return view('organizerdashboard', compact('frontendData'));
+    }
+
+    private function prepareFrontendData(): array
+    {
         $now = Carbon::now();
         $threeMonthsLater = $now->copy()->addMonths(3);
 
@@ -29,10 +41,10 @@ class DashboardController extends Controller
 
         foreach ($allEvents as $event) {
             $catId = $event->id_kategori;
-            
+
             if (array_key_exists($catId, $kategoriMap)) {
                 $slug = $kategoriMap[$catId];
-                
+
                 $tanggal = $event->tanggal_pelaksanaan ? Carbon::parse($event->tanggal_pelaksanaan) : null;
                 $isUpcoming = $tanggal && $tanggal->isAfter($threeMonthsLater);
 
@@ -52,6 +64,6 @@ class DashboardController extends Controller
             }
         }
 
-        return view('dashboard', compact('frontendData'));
+        return $frontendData;
     }
 }
