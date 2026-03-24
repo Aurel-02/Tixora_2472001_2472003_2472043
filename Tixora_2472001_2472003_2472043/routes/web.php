@@ -20,3 +20,5 @@ Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::get('/organizerdashboard', [DashboardController::class, 'organizer']);
 Route::get('/organizer/dashboard', [DashboardController::class, 'organizer']);
 
+Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
+
