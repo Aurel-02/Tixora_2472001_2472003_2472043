@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 namespace App\Http\Controllers;
 
@@ -20,29 +20,35 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        $admin = DB::table('admin')->where('email', $credentials['email'])->first();
+        $user = DB::table('user')->where('email', $credentials['email'])->first();
 
-        if (!$admin || !Hash::check($credentials['password'], $admin->password)) {
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return back()->withErrors(['loginError' => 'Email atau password salah'])->withInput();
         }
 
-        session([ 'admin' => [
-            'id' => $admin->id_admin,
-            'name' => $admin->nama,
-            'role' => $admin->role,
-            'email' => $admin->email,
+        session(['login_admin' => [
+            'id' => $user->id_user,
+            'name' => $user->nama_lengkap,
+            'role' => $user->role,
+            'email' => $user->email,
         ]]);
 
-        if ($admin->role === 'organizer') {
+        // role 1: admin, role 2: organizer, role 3: regular user
+        if ($user->role == 2) {
             return redirect('/organizerdashboard');
         }
 
-        return redirect('/dashboard');
+        if ($user->role == 3) {
+            return redirect('/dashboard');
+        }
+
+        // fallback: if role is admin or unknown
+        return redirect('/admin/dashboard');
     }
 
     public function logout(Request $request)
     {
-        $request->session()->forget('admin');
+        $request->session()->forget('login_admin');
         return redirect('/login-page');
     }
 }

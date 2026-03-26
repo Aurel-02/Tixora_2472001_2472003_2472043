@@ -56,10 +56,13 @@ class LoginController extends Controller
 
                 $role = $user->role ?? null;
 
-                if ($role === 'organizer') {
+                if ($role == 2) {
                     return redirect()->intended('organizerdashboard');
+                } elseif ($role == 3) {
+                    return redirect()->intended('dashboard');
                 }
 
+                // Default fallback if role doesn't match predefined integer roles
                 return redirect()->intended('dashboard');
             }
         }

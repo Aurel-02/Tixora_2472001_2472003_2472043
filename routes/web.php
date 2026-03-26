@@ -1,10 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\AdminAuthController;
-use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Admin\EventController;
 
 Route::get('/', function () {
@@ -17,15 +16,15 @@ Route::get('/landing', function () {
 
 Route::get('/login-page', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
-Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
-Route::get('/admin/login', [AdminAuthController::class, 'loginPage']);
-Route::post('/admin/login', [AdminAuthController::class, 'login']);
+Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:1']);
+Route::get('/admin/login', [AuthController::class, 'loginPage']);
+Route::post('/admin/login', [AuthController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-Route::get('/admin/logout', [AdminAuthController::class, 'logout']);
+Route::get('/admin/logout', [AuthController::class, 'logout']);
 
-Route::get('/dashboard', [DashboardController::class, 'index']);
-Route::get('/organizerdashboard', [DashboardController::class, 'organizer']);
-Route::get('/organizer/dashboard', [DashboardController::class, 'organizer']);
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:3']);
+Route::get('/organizerdashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
+Route::get('/organizer/dashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
 
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
 Route::get('/admin/events', [EventController::class, 'index']);

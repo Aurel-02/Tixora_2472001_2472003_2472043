@@ -16,7 +16,7 @@ class Event extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_admin',
+        'id_user',
         'id_kategori',
         'nama_event',
         'waktu_pelaksanaan',
