@@ -1,10 +1,12 @@
 <?php
-require 'vendor/autoload.php';
-$app = require_once 'bootstrap/app.php';
-$app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-
-$users = \Illuminate\Support\Facades\DB::table('user')->select('email', 'password')->get()->toArray();
-$admins = \Illuminate\Support\Facades\DB::table('admin')->select('email', 'password', 'role')->get()->toArray();
-
-file_put_contents('auth_output.json', json_encode(['users' => $users, 'admins' => $admins], JSON_PRETTY_PRINT));
-echo "Done\n";
+$conn = new mysqli('127.0.0.1', 'root', '');
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+$res = $conn->query("SHOW DATABASES");
+$dbs = [];
+while($row = $res->fetch_assoc()) {
+    $dbs[] = $row['Database'];
+}
+file_put_contents('auth_output.json', json_encode($dbs));
+echo "Databases written to auth_output.json\n";
