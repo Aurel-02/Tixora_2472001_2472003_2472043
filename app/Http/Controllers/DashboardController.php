@@ -5,16 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     private function currentRole()
     {
-        if (auth()->check()) {
-            return auth()->user()->role ?? 'user';
+        if (Auth::check()) { // Mengganti auth()->check()
+            return Auth::user()->role; // Mengambil kolom role dari database
         }
 
-        $adminSession = session('login_admin');
+        // Cek session manual jika kamu masih pakai cara lama
+        $adminSession = session('login admin');
         if (is_array($adminSession) && isset($adminSession['role'])) {
             return $adminSession['role'];
         }

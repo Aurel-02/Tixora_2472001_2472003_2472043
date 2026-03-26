@@ -181,12 +181,12 @@
             @csrf
             <div class="form-group">
                 <label>Email</label>
-                <input type="text" name="email" class="form-control" placeholder="uname@email.com" value="{{ old('email') }}">
+                <input type="email" name="email" class="form-control" placeholder="uname@email.com" value="{{ old('email') }}" required>
             </div>
             
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" class="form-control" placeholder="••••••••">
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
                 @if($errors->has('loginError'))
                     <div style="color: #ffb3b3; font-size: 0.85rem; margin-top: 8px; text-align: left; padding-left: 5px;">
                         {{ $errors->first('loginError') }}
