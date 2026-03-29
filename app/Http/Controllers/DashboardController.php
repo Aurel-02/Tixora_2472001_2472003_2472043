@@ -11,14 +11,13 @@ class DashboardController extends Controller
 {
     private function currentRole()
     {
-        if (Auth::check()) { // Mengganti auth()->check()
-            return Auth::user()->role; // Mengambil kolom role dari database
+        if (Auth::check()) { 
+            return strtolower(trim(Auth::user()->role)); 
         }
 
-        // Cek session manual jika kamu masih pakai cara lama
-        $adminSession = session('login admin');
+        $adminSession = session('login_admin');
         if (is_array($adminSession) && isset($adminSession['role'])) {
-            return $adminSession['role'];
+            return strtolower(trim($adminSession['role']));
         }
 
         return null;
@@ -28,7 +27,7 @@ class DashboardController extends Controller
     {
         $role = $this->currentRole();
         if (!$role) {
-            return redirect('/login-page');
+            return redirect('/login');
         }
 
         $frontendData = $this->prepareFrontendData();
@@ -38,8 +37,13 @@ class DashboardController extends Controller
     public function organizer()
     {
         $role = $this->currentRole();
-        if ($role !== 'organizer') {
+
+        if ($role === 'buyer' || $role === '3') {
             return redirect('/dashboard');
+        }
+
+        if ($role !== 'organizer' && $role !== '2') {
+            return redirect('/login');
         }
 
         $adminId = session('login_admin.id');
@@ -47,7 +51,7 @@ class DashboardController extends Controller
             return redirect('/dashboard');
         }
 
-        $events = Event::where('id_admin', $adminId)->get();
+        $events = Event::where('id_user', $adminId)->get();
 
         $kategoriMap = [
             1 => 'indonesia',
@@ -73,7 +77,7 @@ class DashboardController extends Controller
     {
         $role = $this->currentRole();
         if (!$role) {
-            return redirect('/login-page');
+            return redirect('/login');
         }
 
         $event = Event::findOrFail($id);

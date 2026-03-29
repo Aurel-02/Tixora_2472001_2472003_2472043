@@ -7,14 +7,14 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Admin\EventController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 });
 
 Route::get('/landing', function () {
     return view('landing');
 });
 
-Route::get('/login-page', [LoginController::class, 'show'])->name('login');
+Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
 Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:1']);
 Route::get('/admin/login', [AuthController::class, 'loginPage']);

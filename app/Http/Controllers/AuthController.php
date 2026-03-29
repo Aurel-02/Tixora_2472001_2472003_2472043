@@ -1,4 +1,4 @@
-    <?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -10,7 +10,7 @@ class AuthController extends Controller
 {
     public function loginPage()
     {
-        return view('login-page');
+        return view('login');
     }
 
     public function login(Request $request)
@@ -33,22 +33,22 @@ class AuthController extends Controller
             'email' => $user->email,
         ]]);
 
-        // role 1: admin, role 2: organizer, role 3: regular user
-        if ($user->role == 2) {
+        $role = strtolower(trim($user->role ?? ''));
+        
+        if ($role == '2' || $role == 'organizer') {
             return redirect('/organizerdashboard');
         }
 
-        if ($user->role == 3) {
+        if ($role == '3' || $role == 'buyer') {
             return redirect('/dashboard');
         }
 
-        // fallback: if role is admin or unknown
         return redirect('/admin/dashboard');
     }
 
     public function logout(Request $request)
     {
         $request->session()->forget('login_admin');
-        return redirect('/login-page');
+        return redirect('/login');
     }
 }

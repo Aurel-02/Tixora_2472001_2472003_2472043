@@ -266,7 +266,7 @@
     <!-- navbar -->
     <nav class="navbar">
         <a href="/" class="logo">Tixora</a>
-        <a href="/login-page" class="btn-login">Login</a>
+        <a href="/login" class="btn-login">Login</a>
     </nav>
 
     <!-- Header Text -->

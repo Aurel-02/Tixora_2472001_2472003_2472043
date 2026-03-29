@@ -11,7 +11,7 @@ class LoginController extends Controller
 {
     public function show()
     {
-        return view('login-page');
+        return view('login');
     }
 
     public function authenticate(Request $request)
@@ -42,9 +42,20 @@ class LoginController extends Controller
             }
 
             if ($passwordMatches) {
+                $role = strtolower(trim($user->role ?? ''));
+
                 if ($user instanceof \App\Models\User) {
                     Auth::login($user);
                     $request->session()->regenerate();
+
+                    if ($role == '2' || $role == 'organizer') {
+                        session(['login_admin' => [
+                            'id' => $user->id_user,
+                            'name' => $user->nama_user,
+                            'role' => $user->role,
+                            'email' => $user->email,
+                        ]]);
+                    }
                 } else {
                     session(['login_admin' => [
                         'id' => $user->id_admin,
@@ -53,17 +64,16 @@ class LoginController extends Controller
                         'email' => $user->email,
                     ]]);
                 }
-
-                $role = $user->role ?? null;
-
-                if ($role == 2) {
-                    return redirect()->intended('organizerdashboard');
-                } elseif ($role == 3) {
-                    return redirect()->intended('dashboard');
+                
+                if ($role == '2' || $role == 'organizer') {
+                     return redirect('/organizerdashboard');
+                } elseif ($role == '1' || $role == 'admin') {
+                    return redirect('/admin/dashboard');
+                } elseif ($role == '3' || $role == 'buyer') {
+                    return redirect('/dashboard');
                 }
 
-                // Default fallback if role doesn't match predefined integer roles
-                return redirect()->intended('dashboard');
+                return redirect('/');
             }
         }
 
@@ -79,7 +89,7 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login-page');
+        return redirect('/login');
     }
 
     private function isBcryptHash(?string $hash): bool
