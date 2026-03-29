@@ -431,7 +431,11 @@
 
     <header class="topbar">
         <div class="logo">TIXORA</div>
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="search-box" style="display: flex; align-items: center; border: 1px solid rgba(243, 200, 221, 0.5); border-radius: 999px; background: rgba(255, 255, 255, 0.08); padding: 6px 12px; min-width: 220px;">
+                <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1rem; margin-right: 8px;"></i>
+                <input type="text" placeholder="Search" style="width: 100%; border: none; outline: none; background: transparent; color: var(--queen-pink); font-size: 0.95rem;" />
+            </div>
             <div class="profile" title="My Profile">U</div>
         </div>
     </header>
@@ -445,10 +449,11 @@
                         <span class="sidebar-text">Home</span>
                     </a>
                 </li>
+
                 <li>
-                    <a href="#" class="sidebar-item">
-                        <i class="ph ph-magnifying-glass sidebar-icon"></i>
-                        <span class="sidebar-text">Search</span>
+                    <a href="{{ route('organizer.events.create') }}" class="sidebar-item">
+                        <i class="ph ph-plus-circle sidebar-icon"></i>
+                        <span class="sidebar-text">Tambah Event</span>
                     </a>
                 </li>
                 <li>
@@ -486,9 +491,6 @@
 
         </div>
 
-        <div class="section-header" id="eventHeader">
-            Add Event
-        </div>
         <div class="event-list" id="eventList">
         </div>
     </main>
@@ -497,6 +499,8 @@
         const data = @json($eventsByCategory ?? ['indonesia' => [], 'western' => [], 'kpop' => []]);
 
         const gridContainer = document.getElementById('artistGrid');
+        const searchInput = document.querySelector('.search-box input');
+        let currentCategory = 'indonesia';
 
         function formatDate(dateString) {
             if (!dateString) return '-';
@@ -506,14 +510,16 @@
         }
 
         function createEventCard(event) {
+            const imageUrl = event.gambar_event || event.image_url || event.banner || event.image || null;
             const eventDate = event.tanggal_pelaksanaan ? formatDate(event.tanggal_pelaksanaan) : '-';
+
             return `
                 <div class="artist-card">
                     <div class="artist-card-img">
-                        <i class="ph ph-ticket"></i>
+                        ${imageUrl ? `<img src="${imageUrl}" alt="${event.nama_event}" style="width: 100%; height: 100%; object-fit: cover;" />` : '<i class="ph ph-ticket"></i>'}
                     </div>
                     <div class="artist-card-info">
-                        <div class="artist-name">${event.nama_event}</div>
+                        <div class="artist-name">${event.nama_event || 'Nama event tidak tersedia'}</div>
                         <div class="artist-desc"><i class="ph ph-map-pin"></i> ${event.lokasi_event || 'Lokasi belum diset'}</div>
                         <div class="artist-desc"><i class="ph ph-calendar"></i> ${eventDate}</div>
                     </div>
@@ -521,26 +527,47 @@
             `;
         }
 
-        function renderCategory(category, btnElement) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            if (btnElement) btnElement.classList.add('active');
-
-            const categoryEvents = data[category] || [];
-
-            if (!categoryEvents.length) {
-                gridContainer.innerHTML = '<p style="color: var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">Belum ada event untuk kategori ini.</p>';
+        function renderEvents(events) {
+            if (!events.length) {
+                gridContainer.innerHTML = '<p style="color: var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">Belum ada event sesuai pencarian.</p>';
                 return;
             }
 
-            let html = '';
-            categoryEvents.forEach(event => {
-                html += createEventCard(event);
-            });
+            const html = events.map(createEventCard).join('');
             gridContainer.innerHTML = html;
         }
 
+        function getCurrentCategoryEvents() {
+            return data[currentCategory] || [];
+        }
+
+        function renderCategory(category, btnElement) {
+            currentCategory = category;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+
+            applySearchFilter();
+        }
+
+        function applySearchFilter() {
+            const query = (searchInput.value || '').trim().toLowerCase();
+            let events = getCurrentCategoryEvents();
+
+            if (query) {
+                events = events.filter(event => {
+                    const name = (event.nama_event || '').toLowerCase();
+                    const location = (event.lokasi_event || '').toLowerCase();
+                    return name.includes(query) || location.includes(query);
+                });
+            }
+
+            renderEvents(events);
+        }
+
+        searchInput.addEventListener('input', applySearchFilter);
+
         window.onload = () => {
-            renderCategory('indonesia', document.querySelector('.tab-btn.active'));
+            renderCategory(currentCategory, document.querySelector('.tab-btn.active'));
         };
     </script>
 </body>

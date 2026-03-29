@@ -25,6 +25,7 @@ Route::get('/admin/logout', [AuthController::class, 'logout']);
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:3']);
 Route::get('/organizerdashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
 Route::get('/organizer/dashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
+Route::get('/organizer/events/create', [DashboardController::class, 'createEvent'])->middleware(['auth', 'role:2'])->name('organizer.events.create');
 
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
 Route::get('/admin/events', [EventController::class, 'index']);
