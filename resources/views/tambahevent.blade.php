@@ -149,7 +149,7 @@
         .main-wrapper {
             margin-left: var(--sidebar-width-collapsed);
             padding-top: var(--topbar-height);
-            min-height: 100vh;
+            min-height: calc(100vh - var(--topbar-height));
             display: flex;
             flex-direction: column;
         }
@@ -159,8 +159,6 @@
             width: 100%;
             max-width: 100%;
             padding: 10px 0;
-            background: transparent;
-            border: none;
             font-size: 1.5rem;
             font-weight: 700;
             color: #fff;
@@ -172,27 +170,16 @@
             z-index: 800;
         }
 
-        .section-header::before,
-        .section-header::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.6);
-        }
-
-        .section-header::before {
-            left: 0;
-            right: 50%;
-            margin-right: 200px;
-            transform: translateY(-50%);
-        }
-
-        .section-header::after {
-            left: 50%;
-            right: 0;
-            margin-left: 200px;
-            transform: translateY(-50%);
+        .section-header .section-title {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 10px;
+            padding: 35px 18px;
+            backdrop-filter: blur(6px);
+            width: 95%;
+            font-size: 3rem;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
         }
 
     </style>
@@ -202,10 +189,6 @@
     <header class="topbar">
         <div class="logo">TIXORA</div>
         <div style="display: flex; align-items: center; gap: 12px;">
-            <div class="search-box" style="display: flex; align-items: center; border: 1px solid rgba(243, 200, 221, 0.5); border-radius: 999px; background: rgba(255, 255, 255, 0.08); padding: 6px 12px; min-width: 220px;">
-                <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1rem; margin-right: 8px;"></i>
-                <input type="text" placeholder="Search" style="width: 100%; border: none; outline: none; background: transparent; color: var(--queen-pink); font-size: 0.95rem;" />
-            </div>
             <div class="profile" title="My Profile">U</div>
         </div>
     </header>
@@ -214,13 +197,13 @@
         <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
             <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
                 <li>
-                    <a href="{{ url('/organizerdashboard') }}" class="sidebar-item active">
+                    <a href="{{ url('/organizerdashboard') }}" class="sidebar-item">
                         <i class="ph ph-house sidebar-icon"></i>
                         <span class="sidebar-text">Home</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item active">
                         <i class="ph ph-plus-circle sidebar-icon"></i>
                         <span class="sidebar-text">Tambah Event</span>
                     </a>
@@ -247,43 +230,128 @@
 
     <main class="main-wrapper">
         <div class="section-header">
-            Daftarkan event kamu disini
+            <span class="section-title">Daftarkan event kamu disini !</span>
         </div>
-        <!-- Tambahkan form input event disini -->
-    </main>
-        <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
-            <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
-                <li>
-                    <a href="#" class="sidebar-item active">
-                        <i class="ph ph-house sidebar-icon"></i>
-                        <span class="sidebar-text">Home</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-item">
-                        <i class="ph ph-plus-circle sidebar-icon"></i>
-                        <span class="sidebar-text">Tambah Event</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-item">
-                        <i class="ph ph-bell sidebar-icon"></i>
-                        <span class="sidebar-text">Notifications</span>
-                    </a>
-                </li>
-            </ul>
 
-            <div style="padding: 10px 0;">
-                <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
-                    @csrf
-                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; padding: 15px 22px; cursor: pointer;">
-                        <i class="ph ph-sign-out sidebar-icon"></i>
-                        <span class="sidebar-text">Logout</span>
-                    </button>
-                </form>
+        @if(session('success'))
+            <div style="margin: 16px auto; width: 95%; max-width: 960px; background: rgba(69, 209, 103, 0.2); color: #e6ffe6; border: 1px solid #5fcc72; border-radius: 8px; padding: 10px; text-align: center;">{{ session('success') }}</div>
+        @endif
+
+        @if($errors->any())
+            <div style="margin: 16px auto; width: 95%; max-width: 960px; background: rgba(255, 68, 68, 0.15); color: #fff; border: 1px solid #ff8b8b; border-radius: 8px; padding: 10px;">
+                <ul style="margin:0; padding-left: 18px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
-        </div>
-    </aside>
+        @endif
+
+        <form action="{{ route('organizer.events.store') }}" method="POST" enctype="multipart/form-data" style="margin: 20px auto; width: 95%; max-width: 95%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.25); border-radius: 14px; padding: 28px; font-size: 1.1rem; line-height: 1.4;">
+            @csrf
+
+
+            <div style="display: grid; gap: 20px; grid-template-columns: 2fr 1fr; align-items: start;">
+                <div>
+                    <div style="display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                        <div>
+                            <label for="nama_event" style="font-weight: 700; font-size: 1.1rem;">Nama Event</label>
+                            <input id="nama_event" name="nama_event" value="{{ old('nama_event') }}" required type="text" style="width:100%; margin-top:8px; height:44px; background: rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.45); color:#fff; padding:12px; border-radius:10px; font-size:1.05rem;" />
+                        </div>
+
+                        <div>
+                            <label for="id_kategori" style="font-weight: 700; font-size: 1.1rem;">Kategori</label>
+                            <select id="id_kategori" name="id_kategori" required style="width:100%; margin-top:8px; height:44px; background: rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.45); color:#fff; padding:11px; border-radius:10px; font-size:1.05rem;">
+                                <option value="">Pilih kategori</option>
+                                <option value="1" {{ old('id_kategori')==1 ? 'selected' : '' }}>Indonesia</option>
+                                <option value="2" {{ old('id_kategori')==2 ? 'selected' : '' }}>Western</option>
+                                <option value="3" {{ old('id_kategori')==3 ? 'selected' : '' }}>K-Pop</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="tanggal_pelaksanaan" style="font-weight: 600;">Tanggal Pelaksanaan</label>
+                            <input id="tanggal_pelaksanaan" name="tanggal_pelaksanaan" value="{{ old('tanggal_pelaksanaan') }}" required type="date" style="width:100%; margin-top:6px; height:44px; background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:8px; border-radius:8px;" />
+                        </div>
+
+                        <div>
+                            <label for="waktu_pelaksanaan" style="font-weight: 600;">Waktu Pelaksanaan</label>
+                            <input id="waktu_pelaksanaan" name="waktu_pelaksanaan" value="{{ old('waktu_pelaksanaan') }}" required type="time" style="width:100%; margin-top:6px; height:44px; background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:8px; border-radius:8px;" />
+                        </div>
+
+                        <div style="grid-column: span 2;">
+                            <label for="lokasi_event" style="font-weight: 600;">Lokasi Event</label>
+                            <input id="lokasi_event" name="lokasi_event" value="{{ old('lokasi_event') }}" required type="text" style="width:100%; margin-top:6px; height:44px; background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:8px; border-radius:8px;" />
+                        </div>
+
+                    </div>
+
+                    <div style="margin-top: 24px; padding: 16px; background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px;">
+                        <h3 style="font-size: 1.05rem; margin-bottom: 10px;">Jenis Tiket (opsional)</h3>
+                        <p style="margin-top: -8px; margin-bottom: 12px; color: rgba(255,255,255,0.7);">Isi jika ingin menambahkan tiket (boleh kosong).</p>
+                        @php $ticketTypes = ['REGULER', 'VIP', 'VVIP']; @endphp
+                        <div style="display: grid; gap: 10px;">
+                            @foreach($ticketTypes as $idx => $type)
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: flex-end;">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <label style="font-weight: 600;">{{ strtoupper($type) }}</label>
+                                        <input type="hidden" name="tickets[{{ $idx }}][jenis_tiket]" value="{{ $type }}" />
+                                    </div>
+                                    <div style="display: flex; flex-direction: column;">
+                                        <label for="tickets_{{ $type }}_harga" style="font-weight: 600;">Harga</label>
+                                        <input id="tickets_{{ $type }}_harga" name="tickets[{{ $idx }}][harga]" value="{{ old('tickets.' . $idx . '.harga') }}" type="number" min="0" style="width:100%; margin-top:6px; background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:8px; border-radius:8px;" />
+                                    </div>
+                                    <div style="display: flex; flex-direction: column;">
+                                        <label for="tickets_{{ $type }}_kuota" style="font-weight: 600;">Kuota</label>
+                                        <input id="tickets_{{ $type }}_kuota" name="tickets[{{ $idx }}][kuota]" value="{{ old('tickets.' . $idx . '.kuota') }}" type="number" min="0" style="width:100%; margin-top:6px; background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:8px; border-radius:8px;" />
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 18px; justify-content: flex-start;">
+                    <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0;">Foto Event</h3>
+                        <input id="foto_event" type="file" accept="image/*" style="width: 100%; color: #fff;" />
+                        <div id="foto-preview" style="width: 100%; height: 150px; border: 1px dashed rgba(255,255,255,0.45); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7);">Preview foto</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                        <label for="deskripsi" style="font-weight: 600;">Deskripsi</label>
+                        <textarea id="deskripsi" name="deskripsi" required rows="4" style="width:100%; height:140px; margin-top:8px; background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:10px; resize: vertical; border-radius:8px;">{{ old('deskripsi') }}</textarea>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <button type="submit" style="background: #f3c8dd; color: #3a345b; border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 1.1rem; cursor: pointer; min-width: 200px;">Daftarkan Event</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const fotoInput = document.getElementById('foto_event');
+        const fotoPreview = document.getElementById('foto-preview');
+        fotoInput.addEventListener('change', () => {
+            const file = fotoInput.files[0];
+            if (!file) {
+                fotoPreview.textContent = 'Preview foto';
+                fotoPreview.style.backgroundImage = 'none';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                fotoPreview.style.backgroundImage = `url(${e.target.result})`;
+                fotoPreview.style.backgroundSize = 'cover';
+                fotoPreview.style.backgroundPosition = 'center';
+                fotoPreview.textContent = '';
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>                
 
     
 </body>

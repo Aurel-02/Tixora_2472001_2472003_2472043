@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -73,20 +74,6 @@ class DashboardController extends Controller
         return view('organizerdashboard', compact('eventsByCategory'));
     }
 
-    public function createEvent()
-    {
-        $role = $this->currentRole();
-
-        if ($role === 'buyer' || $role === '3') {
-            return redirect('/dashboard');
-        }
-
-        if ($role !== 'organizer' && $role !== '2') {
-            return redirect('/login');
-        }
-
-        return view('tambahevent');
-    }
 
     public function showEvent($id)
     {
