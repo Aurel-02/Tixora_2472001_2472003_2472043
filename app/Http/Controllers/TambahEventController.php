@@ -39,7 +39,7 @@ class TambahEventController extends Controller
             'lokasi_event' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'tickets' => 'nullable|array',
-            'tickets.*.jenis_tiket' => 'nullable|in:biasa,VIP,VVIP',
+            'tickets.*.jenis_tiket' => 'nullable|in:REGULER,VIP,VVIP',
             'tickets.*.harga' => 'nullable|numeric|min:0',
             'tickets.*.kuota' => 'nullable|integer|min:0',
         ]);
