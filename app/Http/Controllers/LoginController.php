@@ -51,7 +51,7 @@ class LoginController extends Controller
                     if ($role == '2' || $role == 'organizer') {
                         session(['login_admin' => [
                             'id' => $user->id_user,
-                            'name' => $user->nama_user,
+                            'name' => $user->nama_lengkap,
                             'role' => $user->role,
                             'email' => $user->email,
                         ]]);

@@ -271,23 +271,48 @@
         }
 
         .map-placeholder {
-            width: 120px;
+            width: 140px;
             height: 140px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             margin-left: 20px;
             border: 1px solid rgba(243, 200, 221, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
         }
 
+        .map-placeholder:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(243, 200, 221, 0.3);
+        }
+
+        .preview-map-wrapper {
+            transform: scale(0.35);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            width: 320px; /* Force width layout */
+        }
+
+        /* Map UI matching select-seat */
+        .stage-box { background: #dcdcdc; color: #000; font-weight: 800; padding: 8px 40px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; border-bottom: 4px solid #b0b0b0; border-radius: 4px; font-size: 0.8rem; width: 220px;}
+        .arena { display: flex; gap: 10px; align-items: stretch; justify-content: center; }
+        .wing { width: 35px; background: #e5b3c9; color: #000; font-weight: 700; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); border-left: 4px solid #c895ab; text-align: center; border-radius: 4px; letter-spacing: 1px; }
+        .center-blocks { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .row-blocks { display: flex; gap: 8px; }
+        .seat-block { width: 100px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 0.7rem; color: #000; text-align: center; border-radius: 4px; }
+        .vip-block { background: #94c4e0; border-bottom: 4px solid #7ba5bf; }
+        .regular-block { background: #84d8a5; border-bottom: 4px solid #6cb288; }
+        .tribune-box { width: 100%; max-width: 320px; height: 35px; background: #84d8a5; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; color: #000; margin-top: 8px; border-bottom: 4px solid #6cb288; border-radius: 4px; letter-spacing: 1px; }
+
         .map-placeholder-text {
-            font-size: 0.7rem;
-            margin-top: 10px;
-            opacity: 0.5;
-            text-align: center;
+            display: none; /* Hide old text */
         }
 
         .right-column {
@@ -409,7 +434,7 @@
             <i class="ph ph-list menu-trigger" id="menuToggle"></i>
             <div class="logo">TIXORA</div>
         </div>
-        <div class="profile" title="My Profile">U</div>
+        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">U</a>
     </header>
 
     <aside class="sidebar" id="sidebar">
@@ -470,9 +495,19 @@
                                 <li>Ticket Cancellation & Waiting List</li>
                             </ul>
                         </div>
-                        <div class="map-placeholder">
-                            <i class="ph ph-map-trifold" style="font-size: 2.5rem; color: var(--middle-purple);"></i>
-                            <div class="map-placeholder-text">Seat Map</div>
+                        <div class="map-placeholder" onclick="window.location.href='{{ route('event.select-seat', $event->id ?? $event->id_event) }}'">
+                            <div class="preview-map-wrapper">
+                                <div class="stage-box">STAGE</div>
+                                <div class="arena">
+                                    <div class="wing">FESTIVAL</div>
+                                    <div class="center-blocks">
+                                        <div class="row-blocks"><div class="seat-block vip-block">VIP</div><div class="seat-block vip-block">VIP</div></div>
+                                        <div class="row-blocks"><div class="seat-block regular-block">REGULAR</div><div class="seat-block regular-block">REGULAR</div></div>
+                                    </div>
+                                    <div class="wing">FESTIVAL</div>
+                                </div>
+                                <div class="tribune-box" style="margin: 8px auto 0 auto; width: 320px;">REGULAR</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -505,7 +540,7 @@
                         </div>
 
                         <div class="btn-buy-wrapper">
-                            <button class="btn-buy">BUY TICKET</button>
+                            <a href="{{ route('event.select-seat', $event->id ?? $event->id_event) }}" class="btn-buy" style="text-align: center;">BUY TICKET</a>
                         </div>
                     </div>
                 </div>

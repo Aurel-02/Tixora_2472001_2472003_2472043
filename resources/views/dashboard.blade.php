@@ -431,7 +431,7 @@
 
     <header class="topbar">
         <div class="logo">TIXORA</div>
-        <div class="profile" title="My Profile">U</div>
+        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">U</a>
     </header>
 
     <aside class="sidebar">

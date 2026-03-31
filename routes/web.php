@@ -24,12 +24,17 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/admin/logout', [AuthController::class, 'logout']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:3']);
+
+// Buyer Profile Routes
+Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->middleware(['auth', 'role:3'])->name('profile.edit');
+Route::post('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->middleware(['auth', 'role:3'])->name('profile.update');
 Route::get('/organizerdashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
 Route::get('/organizer/dashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
 Route::get('/organizer/events/create', [TambahEventController::class, 'create'])->middleware(['auth', 'role:2'])->name('organizer.events.create');
 Route::post('/organizer/events', [TambahEventController::class, 'store'])->middleware(['auth', 'role:2'])->name('organizer.events.store');
 
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
+Route::get('/event/{id}/select-seat', [DashboardController::class, 'bookEvent'])->name('event.select-seat');
 Route::get('/admin/events', [EventController::class, 'index']);
 Route::get('/admin/events/create', [EventController::class, 'create']);
 Route::post('/admin/events', [EventController::class, 'store']);

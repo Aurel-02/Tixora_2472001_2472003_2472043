@@ -87,6 +87,18 @@ class DashboardController extends Controller
         return view('event-detail', compact('event'));
     }
 
+    public function bookEvent($id)
+    {
+        $role = $this->currentRole();
+        if (!$role) {
+            return redirect('/login');
+        }
+
+        $event = Event::findOrFail($id);
+        
+        return view('select-seat', compact('event'));
+    }
+
     private function prepareFrontendData(): array
     {
         $now = Carbon::now();
