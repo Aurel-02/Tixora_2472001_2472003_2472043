@@ -34,7 +34,7 @@ Route::get('/organizer/events/create', [TambahEventController::class, 'create'])
 Route::post('/organizer/events', [TambahEventController::class, 'store'])->middleware(['auth', 'role:2'])->name('organizer.events.store');
 
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
-Route::get('/event/{id}/select-seat', [DashboardController::class, 'bookEvent'])->name('event.select-seat');
+Route::get('/event/{id}/select-seat', [\App\Http\Controllers\SelectSeatController::class, 'index'])->name('event.select-seat');
 Route::get('/admin/events', [EventController::class, 'index']);
 Route::get('/admin/events/create', [EventController::class, 'create']);
 Route::post('/admin/events', [EventController::class, 'store']);

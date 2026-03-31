@@ -281,14 +281,7 @@
             margin-left: 20px;
             border: 1px solid rgba(243, 200, 221, 0.1);
             overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
             position: relative;
-        }
-
-        .map-placeholder:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(243, 200, 221, 0.3);
         }
 
         .preview-map-wrapper {
@@ -495,7 +488,7 @@
                                 <li>Ticket Cancellation & Waiting List</li>
                             </ul>
                         </div>
-                        <div class="map-placeholder" onclick="window.location.href='{{ route('event.select-seat', $event->id ?? $event->id_event) }}'">
+                        <div class="map-placeholder">
                             <div class="preview-map-wrapper">
                                 <div class="stage-box">STAGE</div>
                                 <div class="arena">

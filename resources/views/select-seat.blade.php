@@ -234,13 +234,18 @@
             border-radius: 4px;
         }
 
+        .vvip-block {
+            background: #f9e596; 
+            border-bottom: 4px solid #d6b656;
+        }
+
         .vip-block {
-            background: #94c4e0; /* Blueish */
+            background: #94c4e0; 
             border-bottom: 4px solid #7ba5bf;
         }
 
         .regular-block {
-            background: #84d8a5; /* Greenish */
+            background: #84d8a5; 
             border-bottom: 4px solid #6cb288;
         }
 
@@ -248,7 +253,7 @@
             width: 100%;
             max-width: 320px;
             height: 35px;
-            background: #84d8a5; /* Greenish */
+            background: #84d8a5; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -428,28 +433,53 @@
                         <div class="stage-box">STAGE</div>
                         
                         <div class="arena">
+                            @if(in_array('FESTIVAL', $availableTypes))
                             <div class="wing">FESTIVAL</div>
+                            @endif
 
                             <div class="center-blocks">
+                                @if(in_array('VVIP', $availableTypes))
+                                <div class="row-blocks">
+                                    <div class="seat-block vvip-block">VVIP</div>
+                                    <div class="seat-block vvip-block">VVIP</div>
+                                </div>
+                                @endif
+                                @if(in_array('VIP', $availableTypes))
                                 <div class="row-blocks">
                                     <div class="seat-block vip-block">VIP</div>
                                     <div class="seat-block vip-block">VIP</div>
                                 </div>
+                                @endif
+                                @if(in_array('REGULAR', $availableTypes) || in_array('REGULER', $availableTypes))
                                 <div class="row-blocks">
                                     <div class="seat-block regular-block">REGULAR</div>
                                     <div class="seat-block regular-block">REGULAR</div>
                                 </div>
+                                @endif
                             </div>
 
+                            @if(in_array('FESTIVAL', $availableTypes))
                             <div class="wing">FESTIVAL</div>
+                            @endif
                         </div>
 
+                        @if(in_array('REGULAR', $availableTypes) || in_array('REGULER', $availableTypes))
                         <div class="tribune-box">REGULAR</div>
+                        @endif
 
-                        <div style="display: flex; justify-content: center; gap: 20px; width: 100%; margin-top: 30px; font-size: 0.8rem;">
+                        <div style="display: flex; justify-content: center; gap: 20px; width: 100%; margin-top: 30px; font-size: 0.8rem; flex-wrap: wrap;">
+                            @if(in_array('VVIP', $availableTypes))
+                            <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width:15px; height:15px; background:#f9e596; border-radius:2px;"></span> VVIP</div>
+                            @endif
+                            @if(in_array('VIP', $availableTypes))
                             <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width:15px; height:15px; background:#94c4e0; border-radius:2px;"></span> VIP</div>
+                            @endif
+                            @if(in_array('FESTIVAL', $availableTypes))
                             <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width:15px; height:15px; background:#e5b3c9; border-radius:2px;"></span> FESTIVAL</div>
+                            @endif
+                            @if(in_array('REGULAR', $availableTypes) || in_array('REGULER', $availableTypes))
                             <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width:15px; height:15px; background:#84d8a5; border-radius:2px;"></span> REGULAR</div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -458,11 +488,11 @@
                     <h2 style="font-size: 1.2rem; margin-bottom: 20px; color: #fff;">Choose Category & Quantity</h2>
                     
                     <div class="ticket-list" id="ticketList">
-
-                        <div class="ticket-item" data-price="1500000">
+                        @foreach($tikets as $tiket)
+                        <div class="ticket-item" data-price="{{ $tiket->harga }}">
                             <div class="ticket-info">
-                                <span class="ticket-name">VIP (Seating)</span>
-                                <span class="ticket-price">Rp 1.500.000</span>
+                                <span class="ticket-name">{{ strtoupper($tiket->jenis_tiket) }}</span>
+                                <span class="ticket-price">Rp {{ number_format($tiket->harga, 0, ',', '.') }}</span>
                             </div>
                             <div class="ticket-controls">
                                 <button class="btn-qty btn-minus" disabled><i class="ph ph-minus"></i></button>
@@ -470,30 +500,7 @@
                                 <button class="btn-qty btn-plus"><i class="ph ph-plus"></i></button>
                             </div>
                         </div>
-
-                        <div class="ticket-item" data-price="500000">
-                            <div class="ticket-info">
-                                <span class="ticket-name">Regular (Seating)</span>
-                                <span class="ticket-price">Rp 500.000</span>
-                            </div>
-                            <div class="ticket-controls">
-                                <button class="btn-qty btn-minus" disabled><i class="ph ph-minus"></i></button>
-                                <span class="ticket-qty">0</span>
-                                <button class="btn-qty btn-plus"><i class="ph ph-plus"></i></button>
-                            </div>
-                        </div>
-
-                        <div class="ticket-item" data-price="300000">
-                            <div class="ticket-info">
-                                <span class="ticket-name">Festival (Standing)</span>
-                                <span class="ticket-price">Rp 300.000</span>
-                            </div>
-                            <div class="ticket-controls">
-                                <button class="btn-qty btn-minus" disabled><i class="ph ph-minus"></i></button>
-                                <span class="ticket-qty">0</span>
-                                <button class="btn-qty btn-plus"><i class="ph ph-plus"></i></button>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
 
                     <div class="checkout-box">
