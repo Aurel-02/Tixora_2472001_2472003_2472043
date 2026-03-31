@@ -527,15 +527,15 @@
                         <div class="ticket-stats">
                             <div class="stat-row">
                                 <span class="stat-label">Total Tickets</span>
-                                <span class="stat-value">13,200</span>
+                                <span class="stat-value">{{ number_format($totalTickets) }}</span>
                             </div>
                             <div class="stat-row">
                                 <span class="stat-label">Tickets Sold</span>
-                                <span class="stat-value">13,200</span>
+                                <span class="stat-value">{{ number_format($ticketsSold) }}</span>
                             </div>
                             <div class="stat-row">
                                 <span class="stat-label">Tickets Available</span>
-                                <span class="stat-value">13,200</span>
+                                <span class="stat-value">{{ number_format($ticketsAvailable) }}</span>
                             </div>
                         </div>
 
