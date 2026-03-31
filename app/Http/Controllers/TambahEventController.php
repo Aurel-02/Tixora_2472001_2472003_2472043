@@ -45,31 +45,45 @@ class TambahEventController extends Controller
         ]);
 
         $adminId = session('login_admin.id');
-        $event = Event::create([
-            'id_user' => $adminId,
-            'id_kategori' => $validated['id_kategori'],
-            'nama_event' => $validated['nama_event'],
-            'waktu_pelaksanaan' => $validated['waktu_pelaksanaan'],
-            'deskripsi' => $validated['deskripsi'],
-            'lokasi_event' => $validated['lokasi_event'],
-            'tanggal_pelaksanaan' => $validated['tanggal_pelaksanaan'],
-        ]);
 
         $ticketData = $request->input('tickets', []);
+        $formattedTickets = [];
         foreach ($ticketData as $ticket) {
             if (!empty($ticket['jenis_tiket']) && isset($ticket['harga']) && isset($ticket['kuota'])) {
-                if ($ticket['harga'] !== '' && $ticket['kuota'] !== '') {
-                    DB::table('tiket')->insert([
-                        'id_event' => $event->id_event,
-                        'jenis_tiket' => $ticket['jenis_tiket'],
-                        'harga' => $ticket['harga'],
-                        'kuota' => $ticket['kuota'],
-                    ]);
-                }
+                $formattedTickets[] = [
+                    'jenis' => $ticket['jenis_tiket'],
+                    'harga' => (int) $ticket['harga'],
+                    'kuota' => (int) $ticket['kuota'],
+                ];
             }
         }
+        $ticketsJson = json_encode($formattedTickets);
 
-        return redirect()->route('organizerdashboard')->with('success', 'Event berhasil disimpan');
+        try {
+            DB::statement("CALL sp_tambah_event_lengkap(?, ?, ?, ?, ?, ?, ?, ?)", [
+                $validated['id_kategori'],
+                $validated['nama_event'],
+                $validated['waktu_pelaksanaan'],
+                $validated['deskripsi'],
+                $validated['lokasi_event'],
+                $validated['tanggal_pelaksanaan'],
+                $adminId,
+                $ticketsJson
+            ]);
+
+            return redirect()->route('organizerdashboard')->with('success', 'Event berhasil disimpan');
+        } catch (\Illuminate\Database\QueryException $e) {
+            $errorMessage = $e->getMessage();
+            if (str_contains($errorMessage, 'Event sudah ada pada tanggal, waktu, dan lokasi yang sama')) {
+                return redirect()->back()
+                    ->withErrors(['error' => 'Gagal: Event sudah ada pada tanggal, waktu, dan lokasi yang sama!'])
+                    ->withInput();
+            }
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Gagal menambahkan event: Database Error.'])
+                ->withInput();
+        }
     }
 
     private function currentRole()
