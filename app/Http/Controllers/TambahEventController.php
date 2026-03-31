@@ -59,6 +59,18 @@ class TambahEventController extends Controller
         }
         $ticketsJson = json_encode($formattedTickets);
 
+        $exists = Event::where('nama_event', $validated['nama_event'])
+            ->where('tanggal_pelaksanaan', $validated['tanggal_pelaksanaan'])
+            ->where('waktu_pelaksanaan', $validated['waktu_pelaksanaan'])
+            ->where('lokasi_event', $validated['lokasi_event'])
+            ->exists();
+
+        if ($exists) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Gagal: Event sudah ada pada tanggal, waktu, dan lokasi yang sama!'])
+                ->withInput();
+        }
+
         try {
             DB::statement("CALL sp_tambah_event_lengkap(?, ?, ?, ?, ?, ?, ?, ?)", [
                 $validated['id_kategori'],

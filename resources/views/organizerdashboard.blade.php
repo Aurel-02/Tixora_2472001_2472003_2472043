@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+or<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -512,18 +512,21 @@
         function createEventCard(event) {
             const imageUrl = event.gambar_event || event.image_url || event.banner || event.image || null;
             const eventDate = event.tanggal_pelaksanaan ? formatDate(event.tanggal_pelaksanaan) : '-';
+            const eventId = event.id_event || event.id;
 
             return `
-                <div class="artist-card">
-                    <div class="artist-card-img">
-                        ${imageUrl ? `<img src="${imageUrl}" alt="${event.nama_event}" style="width: 100%; height: 100%; object-fit: cover;" />` : '<i class="ph ph-ticket"></i>'}
+                <a href="/organizer/event/${eventId}" style="text-decoration: none; display: block; color: inherit;">
+                    <div class="artist-card">
+                        <div class="artist-card-img">
+                            ${imageUrl ? `<img src="${imageUrl}" alt="${event.nama_event}" style="width: 100%; height: 100%; object-fit: cover;" />` : '<i class="ph ph-ticket"></i>'}
+                        </div>
+                        <div class="artist-card-info">
+                            <div class="artist-name">${event.nama_event || 'Nama event tidak tersedia'}</div>
+                            <div class="artist-desc"><i class="ph ph-map-pin"></i> ${event.lokasi_event || 'Lokasi belum diset'}</div>
+                            <div class="artist-desc"><i class="ph ph-calendar"></i> ${eventDate}</div>
+                        </div>
                     </div>
-                    <div class="artist-card-info">
-                        <div class="artist-name">${event.nama_event || 'Nama event tidak tersedia'}</div>
-                        <div class="artist-desc"><i class="ph ph-map-pin"></i> ${event.lokasi_event || 'Lokasi belum diset'}</div>
-                        <div class="artist-desc"><i class="ph ph-calendar"></i> ${eventDate}</div>
-                    </div>
-                </div>
+                </a>
             `;
         }
 

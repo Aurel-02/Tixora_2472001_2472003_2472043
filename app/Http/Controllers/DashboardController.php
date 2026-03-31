@@ -103,6 +103,51 @@ class DashboardController extends Controller
         return view('event-detail', compact('event', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
     }
 
+    public function showEventOrganizer($id)
+    {
+        $role = $this->currentRole();
+        if ($role !== 'organizer' && $role !== '2') {
+            return redirect('/login');
+        }
+
+        $event = Event::findOrFail($id);
+        
+        // Fetch tickets and their stats logic
+        $tikets = \Illuminate\Support\Facades\DB::table('tiket')
+            ->where('id_event', $id)
+            ->get();
+            
+        $ticketStats = [];
+        $totalTickets = 0;
+        $ticketsSold = 0;
+
+        foreach ($tikets as $t) {
+            $sold = \Illuminate\Support\Facades\DB::table('detail_transaksi')
+                ->where('id_tiket', $t->id_tiket)
+                ->sum('jumlah_beli') ?? 0;
+                
+            $available = (int)$t->kuota - (int)$sold;
+            if ($available < 0) $available = 0;
+
+            $ticketStats[] = (object)[
+                'id_tiket' => $t->id_tiket,
+                'jenis_tiket' => $t->jenis_tiket,
+                'harga' => $t->harga,
+                'kuota' => $t->kuota,
+                'terjual' => $sold,
+                'sisa' => $available,
+            ];
+
+            $totalTickets += $t->kuota;
+            $ticketsSold += $sold;
+        }
+
+        $ticketsAvailable = $totalTickets - $ticketsSold;
+        if ($ticketsAvailable < 0) $ticketsAvailable = 0;
+
+        return view('eventdetailorganizer', compact('event', 'ticketStats', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
+    }
+
     public function bookEvent($id)
     {
         $role = $this->currentRole();

@@ -3,4 +3,4 @@ nama_lengkap : varchar(150)
 email : varchar(100)
 no_telp : varchar(20)
 password : varchar(255)
-tanggal_daftar : date
+role : varchar(20)
