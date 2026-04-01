@@ -375,7 +375,25 @@
 
     <main class="main-wrapper">
         <div class="content-container">
+            <!-- Alerts for Success/Error -->
+            @if(session('success'))
+                <div style="background: rgba(132, 216, 165, 0.2); color: #84d8a5; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid rgba(132, 216, 165, 0.3);">
+                    <i class="ph ph-check-circle" style="margin-right: 8px;"></i> {{ session('success') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div style="background: rgba(239, 83, 80, 0.2); color: #ef5350; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid rgba(239, 83, 80, 0.3);">
+                    <ul style="list-style: none;">
+                        @foreach($errors->all() as $error)
+                            <li><i class="ph ph-warning-circle" style="margin-right: 8px;"></i> {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <!-- Header section with Name and Poster -->
+
             <div class="event-header">
                 <h1 class="event-title">{{ $event->nama_event }}</h1>
                 
@@ -439,21 +457,28 @@
                 <div class="actions-grid">
                     <!-- Update Description -->
                     <div class="action-card">
-                        <label class="form-label"><i class="ph ph-note-pencil"></i> Ubah Deskripsi Event</label>
-                        <textarea class="form-control" rows="4" placeholder="Masukkan deskripsi baru untuk event ini...">{{ $event->deskripsi_event }}</textarea>
-                        <button class="btn btn-primary" style="margin-top: 15px; width: 100%;">Update Deskripsi</button>
+                        <form action="{{ route('organizer.event.update-description', $event->id_event) }}" method="POST">
+                            @csrf
+                            <label class="form-label"><i class="ph ph-note-pencil"></i> Ubah Deskripsi Event</label>
+                            <textarea name="deskripsi" class="form-control" rows="4" placeholder="Masukkan deskripsi baru untuk event ini..."></textarea>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 15px; width: 100%;">Update Deskripsi</button>
+                        </form>
                     </div>
 
                     <!-- Add Ticket Quota -->
                     <div class="action-card">
-                        <label class="form-label"><i class="ph ph-plus-circle"></i> Tambah Kuota Tiket</label>
-                        <select class="form-control" style="margin-bottom: 12px;">
-                            @foreach($ticketStats as $stat)
-                                <option value="{{ $stat->id_tiket }}">{{ $stat->jenis_tiket }}</option>
-                            @endforeach
-                        </select>
-                        <input type="number" class="form-control" placeholder="Jumlah kuota tambahan">
-                        <button class="btn btn-primary" style="margin-top: 15px; width: 100%;">Tambah Kuota</button>
+                        <form action="{{ route('organizer.event.add-quota', $event->id_event) }}" method="POST">
+                            @csrf
+                            <label class="form-label"><i class="ph ph-plus-circle"></i> Tambah Kuota Tiket</label>
+                            <select name="id_tiket" class="form-control" style="margin-bottom: 12px;" required>
+                                <option value="" disabled selected>Pilih Kategori Tiket</option>
+                                @foreach($ticketStats as $stat)
+                                    <option value="{{ $stat->id_tiket }}">{{ $stat->jenis_tiket }}</option>
+                                @endforeach
+                            </select>
+                            <input type="number" name="jumlah_tambah" class="form-control" placeholder="Jumlah kuota tambahan" min="1" required>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 15px; width: 100%;">Tambah Kuota</button>
+                        </form>
                     </div>
 
                     <!-- Export Data -->
