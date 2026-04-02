@@ -32,7 +32,21 @@ class ProfileController extends Controller
             'no_telp' => 'nullable|string|max:20',
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => 'nullable|string|min:6|confirmed',
+            'photo_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        if ($request->hasFile('photo_profile')) {
+            $file = $request->file('photo_profile');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('profile_photos'), $filename);
+            
+            // Delete old photo if exists
+            if ($user->photo_profile && file_exists(public_path($user->photo_profile))) {
+                unlink(public_path($user->photo_profile));
+            }
+            
+            $user->photo_profile = 'profile_photos/' . $filename;
+        }
 
         if ($request->filled('current_password')) {
             try {

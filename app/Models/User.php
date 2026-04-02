@@ -44,6 +44,7 @@ class User extends Authenticatable
         'no_telp',
         'password',
         'role',
+        'photo_profile',
     ];
 
     /**
