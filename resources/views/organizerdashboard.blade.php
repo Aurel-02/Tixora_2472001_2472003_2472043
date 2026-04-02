@@ -436,7 +436,7 @@ or<!DOCTYPE html>
                 <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1rem; margin-right: 8px;"></i>
                 <input type="text" placeholder="Search" style="width: 100%; border: none; outline: none; background: transparent; color: var(--queen-pink); font-size: 0.95rem;" />
             </div>
-            <div class="profile" title="My Profile">U</div>
+            <a href="{{ route('profile.edit') }}" style="text-decoration: none;"><div class="profile" title="My Profile">{{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}</div></a>
         </div>
     </header>
 

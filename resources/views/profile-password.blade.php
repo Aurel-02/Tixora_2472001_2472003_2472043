@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tixora - Edit Profile</title>
+    <title>Tixora - Change Password</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --jacarta: #3A345B;
@@ -158,38 +157,16 @@
             padding-bottom: 40px;
         }
 
-        .profile-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 30px;
-            width: 100%;
-            max-width: 900px;
-            padding: 0 20px;
-        }
-
         .form-container {
             width: 100%;
+            max-width: 600px;
             background: rgba(113, 85, 122, 0.3);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(243, 200, 221, 0.15);
             border-radius: 12px;
             padding: 40px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .photo-container {
-            width: 100%;
-            background: rgba(113, 85, 122, 0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(243, 200, 221, 0.15);
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
+            margin: 0 20px;
         }
 
         .form-title {
@@ -198,45 +175,6 @@
             color: #fff;
             margin-bottom: 30px;
             text-align: center;
-        }
-
-        .photo-preview {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: var(--middle-purple);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5rem;
-            color: var(--jacarta);
-            font-weight: 700;
-            box-shadow: 0 0 15px rgba(209, 131, 169, 0.4);
-            overflow: hidden;
-        }
-
-        .photo-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .file-upload-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: transparent;
-            color: var(--queen-pink);
-            border: 1px solid var(--middle-purple);
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .file-upload-btn:hover {
-            background: var(--middle-purple);
-            color: var(--jacarta);
         }
 
         .form-group {
@@ -281,7 +219,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .btn-submit:hover {
@@ -290,13 +228,13 @@
             box-shadow: 0 4px 15px rgba(243, 200, 221, 0.4);
         }
 
-        .btn-logout {
+        .btn-cancel {
             display: block;
             width: 100%;
             padding: 12px;
             background: transparent;
-            color: #ff6b6b;
-            border: 1px solid #ff6b6b;
+            color: var(--queen-pink);
+            border: 1px solid var(--queen-pink);
             border-radius: 50px;
             font-weight: 700;
             font-size: 1.1rem;
@@ -308,21 +246,8 @@
             text-decoration: none;
         }
 
-        .btn-logout:hover {
-            background: #ff6b6b;
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-        }
-
-        .alert-success {
-            background: rgba(132, 216, 165, 0.2);
-            border: 1px solid #84d8a5;
-            color: #84d8a5;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
+        .btn-cancel:hover {
+            background: rgba(243, 200, 221, 0.1);
         }
 
         .alert-error {
@@ -353,12 +278,7 @@
                 padding: 100px 20px 40px 20px;
             }
 
-            .profile-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-container,
-            .photo-container {
+            .form-container {
                 padding: 30px 20px;
             }
         }
@@ -386,106 +306,45 @@
     </aside>
 
     <main class="main-wrapper">
-        <div class="profile-grid">
-            <div class="form-container">
-                <h1 class="form-title">Edit Profile</h1>
+        <div class="form-container">
+            <h1 class="form-title">Change Password</h1>
 
-                @if($errors->any())
-                    <div class="alert-error">
-                        <ul style="list-style-position: inside;">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+            @if($errors->any())
+                <div class="alert-error">
+                    <ul style="list-style-position: inside;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-                <form action="{{ route('profile.update') }}" method="POST">
-                    @csrf
-                    <div class="form-group">
-                        <label class="form-label">Nama Lengkap</label>
-                        <input type="text" name="nama_lengkap" class="form-input"
-                            value="{{ old('nama_lengkap', $user->nama_lengkap ?? '') }}" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-input"
-                            value="{{ old('email', $user->email ?? '') }}" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">No Telp</label>
-                        <input type="text" name="no_telp" class="form-input"
-                            value="{{ old('no_telp', $user->no_telp ?? '') }}">
-                    </div>
-
-                    <div class="form-group" style="display: flex; align-items: flex-end; gap: 15px;">
-                        <div style="flex-grow: 1;">
-                            <label class="form-label">Password</label>
-                            <input type="password" class="form-input" value="{{ $user->password }}" disabled style="background-color: rgba(58, 52, 91, 0.2); cursor: not-allowed;">
-                        </div>
-                        <a href="{{ route('profile.password.edit') }}" style="display: inline-block; padding: 12px 20px; background: var(--middle-purple); color: var(--jacarta); border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.95rem; white-space: nowrap; height: 45px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">Change Password</a>
-                    </div>
-
-                    <button type="submit" class="btn-submit">Save Changes</button>
-                </form>
-
-                <form action="{{ route('logout') }}" method="POST" style="margin-top: 15px;">
-                    @csrf
-                    <button type="submit" class="btn-logout">Logout</button>
-                </form>
-            </div>
-
-            <div class="photo-container">
-                <h1 class="form-title" style="margin-bottom: 20px;">Profile Photo</h1>
-
-                <div class="photo-preview">
-                    <span id="photoInitial">{{ substr($user->nama_lengkap ?? 'U', 0, 1) }}</span>
-                    <img id="photoImg" src="" alt="Profile" style="display: none;">
+            <form action="{{ route('profile.password.update') }}" method="POST">
+                @csrf
+                
+                <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" name="current_password" class="form-input"
+                        placeholder="Masukkan password lama" required>
                 </div>
 
-                <p style="font-size: 0.85rem; color: var(--queen-pink); opacity: 0.8; text-align: center;">Upload a new
-                    avatar. Larger images will be resized automatically.</p>
-                <p style="font-size: 0.8rem; color: var(--queen-pink); opacity: 0.6; text-align: center;">Maximum upload
-                    size is 2 MB.</p>
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" name="new_password" class="form-input" placeholder="Isi password baru" required>
+                </div>
 
-                <label for="photoUpload" class="file-upload-btn">
-                    Select New Photo
-                    <input type="file" id="photoUpload" accept="image/*" style="display: none;"
-                        onchange="previewPhoto(event)">
-                </label>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm New Password</label>
+                    <input type="password" name="new_password_confirmation" class="form-input"
+                        placeholder="Ulangi password baru" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Update Password</button>
+                <a href="{{ route('profile.edit') }}" class="btn-cancel">Cancel</a>
+            </form>
         </div>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            @if(session('success'))
-                Swal.fire({
-                    title: 'Success!',
-                    text: "{{ session('success') }}",
-                    icon: 'success',
-                    background: 'var(--jacarta)',
-                    color: 'var(--queen-pink)',
-                    confirmButtonColor: 'var(--middle-purple)'
-                });
-            @endif
-        });
-
-        function previewPhoto(event) {
-            const input = event.target;
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('photoImg').src = e.target.result;
-                    document.getElementById('photoImg').style.display = 'block';
-                    document.getElementById('photoInitial').style.display = 'none';
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
 </body>
 
 </html>

@@ -431,7 +431,7 @@
 
     <header class="topbar">
         <div class="logo">TIXORA</div>
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">U</a>
+        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">{{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}</a>
     </header>
 
     <aside class="sidebar">
