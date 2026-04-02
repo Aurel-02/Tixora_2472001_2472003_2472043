@@ -77,6 +77,8 @@
             cursor: pointer;
             box-shadow: 0 0 10px rgba(209, 131, 169, 0.4);
             transition: transform 0.3s;
+            text-transform: uppercase;
+            overflow: hidden;
         }
 
         .topbar .profile:hover {
@@ -414,7 +416,13 @@
         <div class="topbar-left">
             <a href="/dashboard" class="logo">TIXORA</a>
         </div>
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">U</a>
+        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+            @if(auth()->user()->photo_profile)
+                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            @else
+                {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
+            @endif
+        </a>
     </header>
 
     <main class="main-wrapper">
