@@ -174,10 +174,10 @@
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.35);
             border-radius: 10px;
-            padding: 35px 18px;
+            padding: 25px 18px;
             backdrop-filter: blur(6px);
             width: 95%;
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: #ffffff;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
         }
@@ -209,7 +209,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="sidebar-item">
+                    <a href="{{ route('organizer.notifications') }}" class="sidebar-item">
                         <i class="ph ph-bell sidebar-icon"></i>
                         <span class="sidebar-text">Notifications</span>
                     </a>
@@ -262,10 +262,10 @@
                         <div>
                             <label for="id_kategori" style="font-weight: 700; font-size: 1.1rem;">Kategori</label>
                             <select id="id_kategori" name="id_kategori" required style="width:100%; margin-top:8px; height:44px; background: rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.45); color:#fff; padding:11px; border-radius:10px; font-size:1.05rem;">
-                                <option value="">Pilih kategori</option>
-                                <option value="1" {{ old('id_kategori')==1 ? 'selected' : '' }}>Indonesia</option>
-                                <option value="2" {{ old('id_kategori')==2 ? 'selected' : '' }}>Western</option>
-                                <option value="3" {{ old('id_kategori')==3 ? 'selected' : '' }}>K-Pop</option>
+                                <option value="" style="color: #333;">Pilih kategori</option>
+                                <option value="1" style="color: #333;" {{ old('id_kategori')==1 ? 'selected' : '' }}>Indonesia</option>
+                                <option value="2" style="color: #333;" {{ old('id_kategori')==2 ? 'selected' : '' }}>Western</option>
+                                <option value="3" style="color: #333;" {{ old('id_kategori')==3 ? 'selected' : '' }}>K-Pop</option>
                             </select>
                         </div>
 

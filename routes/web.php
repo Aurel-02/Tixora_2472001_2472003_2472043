@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TambahEventController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\SignupController;
 
 Route::get('/', function () {
     return view('landing');
@@ -17,6 +18,10 @@ Route::get('/landing', function () {
 
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
+
+// Registration Routes
+Route::get('/signup', [SignupController::class, 'show'])->name('signup');
+Route::post('/signup', [SignupController::class, 'store'])->name('signup.post');
 Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:1']);
 Route::get('/admin/login', [AuthController::class, 'loginPage']);
 Route::post('/admin/login', [AuthController::class, 'login']);
@@ -38,7 +43,9 @@ Route::post('/organizer/events', [TambahEventController::class, 'store'])->middl
 Route::get('/organizer/event/{id}', [DashboardController::class, 'showEventOrganizer'])->middleware(['auth', 'role:2'])->name('organizer.event.detail');
 Route::post('/organizer/event/{id}/update-description', [\App\Http\Controllers\EditEventController::class, 'updateDescription'])->middleware(['auth', 'role:2'])->name('organizer.event.update-description');
 Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventController::class, 'addQuota'])->middleware(['auth', 'role:2'])->name('organizer.event.add-quota');
-
+Route::get('/organizer/notifications', function () {
+    return view('notification');
+})->middleware(['auth', 'role:2'])->name('organizer.notifications');
 
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
 Route::get('/event/{id}/select-seat', [\App\Http\Controllers\SelectSeatController::class, 'index'])->name('event.select-seat');

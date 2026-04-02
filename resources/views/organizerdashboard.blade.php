@@ -457,7 +457,7 @@ or<!DOCTYPE html>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="sidebar-item">
+                    <a href="{{ route('organizer.notifications') }}" class="sidebar-item">
                         <i class="ph ph-bell sidebar-icon"></i>
                         <span class="sidebar-text">Notifications</span>
                     </a>
