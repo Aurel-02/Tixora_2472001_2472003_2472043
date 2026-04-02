@@ -40,4 +40,37 @@ class SelectSeatController extends Controller
 
         return view('select-seat', compact('event', 'tikets', 'availableTypes'));
     }
+
+    public function checkout(Request $request, $id)
+    {
+        $role = $this->currentRole();
+        if (!$role) {
+            return redirect('/login');
+        }
+
+        $event = Event::findOrFail($id);
+        $quantities = $request->input('quantities', []); // [id_tiket => qty]
+        
+        $selectedTickets = [];
+        $totalAmount = 0;
+        
+        foreach ($quantities as $tiketId => $qty) {
+            if ($qty > 0) {
+                $tiket = DB::table('tiket')->where('id_tiket', $tiketId)->first();
+                if ($tiket) {
+                    $selectedTickets[] = [
+                        'details' => $tiket,
+                        'quantity' => (int)$qty
+                    ];
+                    $totalAmount += $tiket->harga * $qty;
+                }
+            }
+        }
+
+        if (empty($selectedTickets)) {
+            return back()->with('error', 'Please select at least one ticket.');
+        }
+
+        return view('checkout', compact('event', 'selectedTickets', 'totalAmount'));
+    }
 }

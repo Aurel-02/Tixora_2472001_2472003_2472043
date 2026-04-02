@@ -495,28 +495,32 @@
                 <div class="glass-box">
                     <h2 style="font-size: 1.2rem; margin-bottom: 20px; color: #fff;">Choose Category & Quantity</h2>
                     
-                    <div class="ticket-list" id="ticketList">
+                    <form action="{{ route('event.checkout', $event->id_event) }}" method="POST" id="checkoutForm">
+                        @csrf
+                        <div class="ticket-list" id="ticketList">
                         @foreach($tikets as $tiket)
-                        <div class="ticket-item" data-price="{{ $tiket->harga }}">
+                         <div class="ticket-item" data-price="{{ $tiket->harga }}" data-id="{{ $tiket->id_tiket }}">
                             <div class="ticket-info">
                                 <span class="ticket-name">{{ strtoupper($tiket->jenis_tiket) }}</span>
                                 <span class="ticket-price">Rp {{ number_format($tiket->harga, 0, ',', '.') }}</span>
                             </div>
                             <div class="ticket-controls">
-                                <button class="btn-qty btn-minus" disabled><i class="ph ph-minus"></i></button>
+                                <button type="button" class="btn-qty btn-minus" disabled><i class="ph ph-minus"></i></button>
                                 <span class="ticket-qty">0</span>
-                                <button class="btn-qty btn-plus"><i class="ph ph-plus"></i></button>
+                                <input type="hidden" name="quantities[{{ $tiket->id_tiket }}]" value="0" class="qty-input">
+                                <button type="button" class="btn-qty btn-plus"><i class="ph ph-plus"></i></button>
                             </div>
                         </div>
                         @endforeach
                     </div>
+                    </form>
 
                     <div class="checkout-box">
                         <div class="total-row">
                             <span class="total-label">Subtotal</span>
                             <span class="total-amount" id="totalPrice">Rp 0</span>
                         </div>
-                        <a href="javascript:void(0)" class="btn-checkout disabled" id="btnCheckout" onclick="alert('Proceeding to checkout...')">Checkout</a>
+                        <button type="submit" form="checkoutForm" class="btn-checkout disabled" id="btnCheckout">Checkout</button>
                     </div>
                 </div>
             </div>
@@ -569,6 +573,7 @@
                     if (currentQty < 5) {
                         currentQty++;
                         qtyEl.textContent = currentQty;
+                        item.querySelector('.qty-input').value = currentQty;
                         btnMinus.disabled = false;
                         updateTotal();
                     }
@@ -579,6 +584,7 @@
                     if (currentQty > 0) {
                         currentQty--;
                         qtyEl.textContent = currentQty;
+                        item.querySelector('.qty-input').value = currentQty;
                         if (currentQty === 0) {
                             btnMinus.disabled = true;
                         }
