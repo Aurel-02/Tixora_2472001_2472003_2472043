@@ -354,6 +354,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('organizer.checkin') }}" class="sidebar-item">
+                        <i class="ph ph-qr-code sidebar-icon"></i>
+                        <span class="sidebar-text">Check In</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#" class="sidebar-item">
                         <i class="ph ph-bell sidebar-icon"></i>
                         <span class="sidebar-text">Notifications</span>
@@ -375,7 +381,6 @@
 
     <main class="main-wrapper">
         <div class="content-container">
-            <!-- Alerts for Success/Error -->
             @if(session('success'))
                 <div style="background: rgba(132, 216, 165, 0.2); color: #84d8a5; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid rgba(132, 216, 165, 0.3);">
                     <i class="ph ph-check-circle" style="margin-right: 8px;"></i> {{ session('success') }}
@@ -391,8 +396,6 @@
                     </ul>
                 </div>
             @endif
-
-            <!-- Header section with Name and Poster -->
 
             <div class="event-header">
                 <h1 class="event-title">{{ $event->nama_event }}</h1>
@@ -412,7 +415,6 @@
                 </div>
             </div>
 
-            <!-- Ticket Statistics Section -->
             <div class="section-card">
                 <h2 class="section-title"><i class="ph ph-chart-bar"></i> Statistik Penjualan Tiket</h2>
                 <div style="overflow-x: auto;">
@@ -451,11 +453,10 @@
                 </div>
             </div>
 
-            <!-- Management Actions Section -->
             <div class="section-card">
                 <h2 class="section-title"><i class="ph ph-gear"></i> Fitur Aksi Manajer</h2>
                 <div class="actions-grid">
-                    <!-- Update Description -->
+
                     <div class="action-card">
                         <form action="{{ route('organizer.event.update-description', $event->id_event) }}" method="POST">
                             @csrf
@@ -465,7 +466,6 @@
                         </form>
                     </div>
 
-                    <!-- Add Ticket Quota -->
                     <div class="action-card">
                         <form action="{{ route('organizer.event.add-quota', $event->id_event) }}" method="POST">
                             @csrf
@@ -481,7 +481,6 @@
                         </form>
                     </div>
 
-                    <!-- Export Data -->
                     <div class="action-card" style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 5px;">Daftar Peserta</h3>
@@ -497,7 +496,7 @@
     </main>
 
     <script>
-        // Interactive sidebar logic is now handled via CSS :hover
+
     </script>
 </body>
 </html>
