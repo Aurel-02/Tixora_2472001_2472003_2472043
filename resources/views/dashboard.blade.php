@@ -494,10 +494,14 @@
         const listContainer = document.getElementById('eventList');
 
         function createArtistCard(artist) {
+            const posterHtml = artist.poster 
+                ? `<img src="${window.location.origin}/${artist.poster}" style="width: 100%; height: 100%; object-fit: cover;">`
+                : '<i class="ph ph-image"></i>';
+                
             return `
                 <div class="artist-card" onclick="window.location.href='/event/${artist.id}'">
                     <div class="artist-card-img">
-                        <i class="ph ph-image"></i>
+                        ${posterHtml}
                     </div>
                     <div class="artist-card-info">
                         <div class="artist-name">${artist.name}</div>
@@ -508,20 +512,25 @@
         }
 
         function createEventCard(event) {
+            const posterHtml = event.poster 
+                ? `<img src="${window.location.origin}/${event.poster}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.3; position: absolute; top:0; left:0; pointer-events:none;">`
+                : '';
+
             return `
-                <div class="event-card" onclick="window.location.href='/event/${event.id}'" style="cursor: pointer;">
-                    <div class="event-date">
+                <div class="event-card" onclick="window.location.href='/event/${event.id}'" style="cursor: pointer; position: relative; overflow: hidden;">
+                    ${posterHtml}
+                    <div class="event-date" style="position: relative; z-index: 1;">
                         <span class="month">${event.month}</span>
                         <span class="day">${event.day}</span>
                     </div>
-                    <div class="event-details">
+                    <div class="event-details" style="position: relative; z-index: 1;">
                         <div class="event-name">${event.name}</div>
                         <div class="event-location">
                             <i class="ph ph-map-pin"></i> ${event.location}
                         </div>
                     </div>
-                    <div class="event-action">
-                        <a href="#" class="btn-buy">Buy Tickets</a>
+                    <div class="event-action" style="position: relative; z-index: 1;">
+                        <a href="/event/${event.id}" class="btn-buy">Buy Tickets</a>
                     </div>
                 </div>
             `;

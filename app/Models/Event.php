@@ -22,6 +22,7 @@ class Event extends Model
         'waktu_pelaksanaan',
         'deskripsi',
         'lokasi_event',
-        'tanggal_pelaksanaan'
+        'tanggal_pelaksanaan',
+        'poster'
     ];
 }

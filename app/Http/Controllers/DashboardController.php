@@ -194,13 +194,15 @@ class DashboardController extends Controller
                         'month' => strtoupper($tanggal->format('M')),
                         'day' => $tanggal->format('d'),
                         'name' => $event->nama_event,
-                        'location' => $event->lokasi_event ?? 'Lokasi belum diset'
+                        'location' => $event->lokasi_event ?? 'Lokasi belum diset',
+                        'poster' => $event->poster
                     ];
                 } else {
                     $frontendData[$slug]['artists'][] = [
                         'id' => $event->id_event,
                         'name' => $event->nama_event,
-                        'desc' => $tanggal ? $tanggal->format('d M Y') : 'TBD'
+                        'desc' => $tanggal ? $tanggal->format('d M Y') : 'TBD',
+                        'poster' => $event->poster
                     ];
                 }
             }

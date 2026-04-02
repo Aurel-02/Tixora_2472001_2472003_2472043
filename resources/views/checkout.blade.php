@@ -293,10 +293,22 @@
                 @foreach($selectedTickets as $item)
                     <div class="ticket-box">
                         <div class="ticket-badge">{{ $item['details']->jenis_tiket }} ({{ $item['quantity'] }}x)</div>
-                        <div class="ticket-left">
-                            <div style="position: relative; z-index: 2;">
-                                <div class="ticket-event-name-large">{{ $event->nama_event }}</div>
-                                <div class="ticket-event-date-large">
+                        <div class="ticket-left" style="position: relative; overflow: hidden; background: #1a1a1a;">
+                            {{-- Poster Event --}}
+                            @if($event->poster)
+                                <div class="ticket-poster" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+                                    {{-- Blurred Backdrop --}}
+                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('{{ asset($event->poster) }}') center/cover no-repeat; filter: blur(15px) brightness(0.4); transform: scale(1.1);"></div>
+                                    {{-- Main Image Focused --}}
+                                    <img src="{{ asset($event->poster) }}" alt="Poster" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; object-position: center 20%; opacity: 0.9;">
+                                    {{-- Elegant Side Fade --}}
+                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.6), transparent 40%, transparent 60%, rgba(0,0,0,0.3)); z-index: 2;"></div>
+                                </div>
+                            @endif
+                            
+                            <div style="position: relative; z-index: 3;">
+                                <div class="ticket-event-name-large" style="text-shadow: 0 4px 10px rgba(0,0,0,0.8);">{{ $event->nama_event }}</div>
+                                <div class="ticket-event-date-large" style="text-shadow: 0 2px 5px rgba(0,0,0,0.8);">
                                     {{ \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d F Y') }}
                                 </div>
                             </div>

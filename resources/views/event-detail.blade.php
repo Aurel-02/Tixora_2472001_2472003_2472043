@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tixora - Event Detail</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         :root {
@@ -62,7 +64,7 @@
             padding: 10px;
             transition: color 0.3s;
         }
-        
+
         .menu-trigger:hover {
             color: #fff;
         }
@@ -104,7 +106,8 @@
             left: calc(var(--sidebar-width-expanded) * -1);
             width: var(--sidebar-width-expanded);
             height: 100vh;
-            background: rgba(113, 85, 122, 0.85); /* Slightly more opaque since it overlays content */
+            background: rgba(113, 85, 122, 0.85);
+            /* Slightly more opaque since it overlays content */
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-right: 1px solid rgba(243, 200, 221, 0.15);
@@ -140,7 +143,8 @@
             white-space: nowrap;
         }
 
-        .sidebar-item:hover, .sidebar-item.active {
+        .sidebar-item:hover,
+        .sidebar-item.active {
             background: rgba(209, 131, 169, 0.2);
             border-left: 3px solid var(--middle-purple);
             color: #fff;
@@ -184,7 +188,7 @@
             color: rgba(0, 0, 0, 0.3);
             font-size: 1.2rem;
             font-weight: 500;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .grid-layout {
@@ -290,22 +294,106 @@
             flex-direction: column;
             align-items: center;
             pointer-events: none;
-            width: 320px; /* Force width layout */
+            width: 320px;
+            /* Force width layout */
         }
 
         /* Map UI matching select-seat */
-        .stage-box { background: #dcdcdc; color: #000; font-weight: 800; padding: 8px 40px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; border-bottom: 4px solid #b0b0b0; border-radius: 4px; font-size: 0.8rem; width: 220px;}
-        .arena { display: flex; gap: 10px; align-items: stretch; justify-content: center; }
-        .wing { width: 35px; background: #e5b3c9; color: #000; font-weight: 700; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); border-left: 4px solid #c895ab; text-align: center; border-radius: 4px; letter-spacing: 1px; }
-        .center-blocks { display: flex; flex-direction: column; gap: 8px; align-items: center; }
-        .row-blocks { display: flex; gap: 8px; }
-        .seat-block { width: 100px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 0.7rem; color: #000; text-align: center; border-radius: 4px; }
-        .vip-block { background: #94c4e0; border-bottom: 4px solid #7ba5bf; }
-        .regular-block { background: #84d8a5; border-bottom: 4px solid #6cb288; }
-        .tribune-box { width: 100%; max-width: 320px; height: 35px; background: #84d8a5; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; color: #000; margin-top: 8px; border-bottom: 4px solid #6cb288; border-radius: 4px; letter-spacing: 1px; }
+        .stage-box {
+            background: #dcdcdc;
+            color: #000;
+            font-weight: 800;
+            padding: 8px 40px;
+            margin-bottom: 10px;
+            text-align: center;
+            letter-spacing: 2px;
+            border-bottom: 4px solid #b0b0b0;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            width: 220px;
+        }
+
+        .arena {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        .wing {
+            width: 35px;
+            background: #e5b3c9;
+            color: #000;
+            font-weight: 700;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            border-left: 4px solid #c895ab;
+            text-align: center;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .center-blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .row-blocks {
+            display: flex;
+            gap: 8px;
+        }
+
+        .seat-block {
+            width: 100px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.7rem;
+            color: #000;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .vip-block {
+            background: #94c4e0;
+            border-bottom: 4px solid #7ba5bf;
+        }
+
+        .regular-block {
+            background: #84d8a5;
+            border-bottom: 4px solid #6cb288;
+        }
+
+        .tribune-box {
+            width: 100%;
+            max-width: 320px;
+            height: 35px;
+            background: #84d8a5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: #000;
+            margin-top: 8px;
+            border-bottom: 4px solid #6cb288;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
 
         .map-placeholder-text {
-            display: none; /* Hide old text */
+            display: none;
+            /* Hide old text */
         }
 
         .right-column {
@@ -411,15 +499,18 @@
             .grid-layout {
                 grid-template-columns: 1fr;
             }
+
             .poster-placeholder {
                 height: 200px;
             }
+
             .event-name {
                 font-size: 1.8rem;
             }
         }
     </style>
 </head>
+
 <body>
 
     <header class="topbar">
@@ -429,7 +520,8 @@
         </div>
         <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
             @if(auth()->user()->photo_profile)
-                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile"
+                    style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
             @else
                 {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
             @endif
@@ -467,15 +559,29 @@
 
     <main class="main-wrapper">
         <div class="content-container">
-            <div class="poster-placeholder">
-                [ Poster Placeholder ]
+            <div class="poster-display"
+                style="width: 100%; height: 450px; border-radius: 24px; overflow: hidden; margin-bottom: 35px; border: 1px solid rgba(243, 200, 221, 0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.4); background: #1a1a1a; position: relative;">
+                @if($event->poster)
+                    {{-- Blurred Background --}}
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('{{ asset($event->poster) }}') center/cover no-repeat; filter: blur(20px) brightness(0.5); transform: scale(1.1);"></div>
+                    {{-- Main Image --}}
+                    <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}"
+                        style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; object-position: center 20%;">
+                    {{-- Overlay Gradient --}}
+                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 2;"></div>
+                @else
+                    <div class="poster-placeholder"
+                        style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--queen-pink); opacity: 0.5;">
+                        <i class="ph ph-image" style="font-size: 5rem;"></i>
+                    </div>
+                @endif
             </div>
 
             <div class="grid-layout">
                 <div class="left-column">
                     <div class="glass-box event-detail-box">
                         <div class="event-detail-title">Event Detail</div>
-                        
+
                         @php
                             $tanggal = $event->tanggal_pelaksanaan ? \Carbon\Carbon::parse($event->tanggal_pelaksanaan) : null;
                         @endphp
@@ -500,8 +606,14 @@
                                 <div class="arena">
                                     <div class="wing">FESTIVAL</div>
                                     <div class="center-blocks">
-                                        <div class="row-blocks"><div class="seat-block vip-block">VIP</div><div class="seat-block vip-block">VIP</div></div>
-                                        <div class="row-blocks"><div class="seat-block regular-block">REGULAR</div><div class="seat-block regular-block">REGULAR</div></div>
+                                        <div class="row-blocks">
+                                            <div class="seat-block vip-block">VIP</div>
+                                            <div class="seat-block vip-block">VIP</div>
+                                        </div>
+                                        <div class="row-blocks">
+                                            <div class="seat-block regular-block">REGULAR</div>
+                                            <div class="seat-block regular-block">REGULAR</div>
+                                        </div>
                                     </div>
                                     <div class="wing">FESTIVAL</div>
                                 </div>
@@ -539,7 +651,8 @@
                         </div>
 
                         <div class="btn-buy-wrapper">
-                            <a href="{{ route('event.select-seat', $event->id ?? $event->id_event) }}" class="btn-buy" style="text-align: center;">BUY TICKET</a>
+                            <a href="{{ route('event.select-seat', $event->id ?? $event->id_event) }}" class="btn-buy"
+                                style="text-align: center;">BUY TICKET</a>
                         </div>
                     </div>
                 </div>
@@ -593,7 +706,7 @@
             menuToggle.addEventListener('mouseleave', () => {
                 closeTimeout = setTimeout(() => {
                     sidebar.classList.remove('active');
-                }, 300); 
+                }, 300);
             });
 
             sidebar.addEventListener('mouseenter', () => {
@@ -606,4 +719,5 @@
         });
     </script>
 </body>
+
 </html>
