@@ -431,7 +431,13 @@
 
     <header class="topbar">
         <div class="logo">TIXORA</div>
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">{{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}</a>
+        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+            @if(auth()->user()->photo_profile)
+                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            @else
+                {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
+            @endif
+        </a>
     </header>
 
     <aside class="sidebar">

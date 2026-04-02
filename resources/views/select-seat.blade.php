@@ -77,6 +77,8 @@
             cursor: pointer;
             box-shadow: 0 0 10px rgba(209, 131, 169, 0.4);
             transition: transform 0.3s;
+            text-transform: uppercase;
+            overflow: hidden;
         }
 
         .topbar .profile:hover {
@@ -414,7 +416,13 @@
         <div class="topbar-left">
             <a href="/dashboard" class="logo">TIXORA</a>
         </div>
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">U</a>
+        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+            @if(auth()->user()->photo_profile)
+                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            @else
+                {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
+            @endif
+        </a>
     </header>
 
     <main class="main-wrapper">
@@ -487,28 +495,32 @@
                 <div class="glass-box">
                     <h2 style="font-size: 1.2rem; margin-bottom: 20px; color: #fff;">Choose Category & Quantity</h2>
                     
-                    <div class="ticket-list" id="ticketList">
+                    <form action="{{ route('event.checkout', $event->id_event) }}" method="POST" id="checkoutForm">
+                        @csrf
+                        <div class="ticket-list" id="ticketList">
                         @foreach($tikets as $tiket)
-                        <div class="ticket-item" data-price="{{ $tiket->harga }}">
+                         <div class="ticket-item" data-price="{{ $tiket->harga }}" data-id="{{ $tiket->id_tiket }}">
                             <div class="ticket-info">
                                 <span class="ticket-name">{{ strtoupper($tiket->jenis_tiket) }}</span>
                                 <span class="ticket-price">Rp {{ number_format($tiket->harga, 0, ',', '.') }}</span>
                             </div>
                             <div class="ticket-controls">
-                                <button class="btn-qty btn-minus" disabled><i class="ph ph-minus"></i></button>
+                                <button type="button" class="btn-qty btn-minus" disabled><i class="ph ph-minus"></i></button>
                                 <span class="ticket-qty">0</span>
-                                <button class="btn-qty btn-plus"><i class="ph ph-plus"></i></button>
+                                <input type="hidden" name="quantities[{{ $tiket->id_tiket }}]" value="0" class="qty-input">
+                                <button type="button" class="btn-qty btn-plus"><i class="ph ph-plus"></i></button>
                             </div>
                         </div>
                         @endforeach
                     </div>
+                    </form>
 
                     <div class="checkout-box">
                         <div class="total-row">
                             <span class="total-label">Subtotal</span>
                             <span class="total-amount" id="totalPrice">Rp 0</span>
                         </div>
-                        <a href="javascript:void(0)" class="btn-checkout disabled" id="btnCheckout" onclick="alert('Proceeding to checkout...')">Checkout</a>
+                        <button type="submit" form="checkoutForm" class="btn-checkout disabled" id="btnCheckout">Checkout</button>
                     </div>
                 </div>
             </div>
@@ -561,6 +573,7 @@
                     if (currentQty < 5) {
                         currentQty++;
                         qtyEl.textContent = currentQty;
+                        item.querySelector('.qty-input').value = currentQty;
                         btnMinus.disabled = false;
                         updateTotal();
                     }
@@ -571,6 +584,7 @@
                     if (currentQty > 0) {
                         currentQty--;
                         qtyEl.textContent = currentQty;
+                        item.querySelector('.qty-input').value = currentQty;
                         if (currentQty === 0) {
                             btnMinus.disabled = true;
                         }

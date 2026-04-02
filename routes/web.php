@@ -19,7 +19,6 @@ Route::get('/landing', function () {
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
 
-// Registration Routes
 Route::get('/signup', [SignupController::class, 'show'])->name('signup');
 Route::post('/signup', [SignupController::class, 'store'])->name('signup.post');
 Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:1']);
@@ -30,7 +29,6 @@ Route::get('/admin/logout', [AuthController::class, 'logout']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:3']);
 
-// Buyer Profile Routes
 Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->middleware(['auth', 'role:3'])->name('profile.edit');
 Route::post('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->middleware(['auth', 'role:3'])->name('profile.update');
 Route::get('/profile/change-password', [\App\Http\Controllers\ProfileController::class, 'editPassword'])->middleware(['auth', 'role:3'])->name('profile.password.edit');
@@ -53,6 +51,7 @@ Route::get('/organizer/checkin', function () {
 
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
 Route::get('/event/{id}/select-seat', [\App\Http\Controllers\SelectSeatController::class, 'index'])->name('event.select-seat');
+Route::post('/event/{id}/checkout', [\App\Http\Controllers\SelectSeatController::class, 'checkout'])->name('event.checkout');
 Route::get('/admin/events', [EventController::class, 'index']);
 Route::get('/admin/events/create', [EventController::class, 'create']);
 Route::post('/admin/events', [EventController::class, 'store']);

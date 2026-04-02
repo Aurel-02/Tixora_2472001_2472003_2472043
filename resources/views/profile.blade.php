@@ -369,7 +369,13 @@
 
     <header class="topbar">
         <a href="{{ auth()->check() && auth()->user()->id_role == 2 ? route('organizerdashboard') : '/dashboard' }}" class="logo">TIXORA</a>
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">{{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}</a>
+        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+            @if(auth()->user()->photo_profile)
+                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            @else
+                {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
+            @endif
+        </a>
     </header>
 
     <aside class="sidebar">
@@ -400,7 +406,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('profile.update') }}" method="POST">
+                <form action="{{ route('profile.update') }}" method="POST" id="profileForm" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
                         <label class="form-label">Nama Lengkap</label>
@@ -441,8 +447,13 @@
                 <h1 class="form-title" style="margin-bottom: 20px;">Profile Photo</h1>
 
                 <div class="photo-preview">
-                    <span id="photoInitial">{{ substr($user->nama_lengkap ?? 'U', 0, 1) }}</span>
-                    <img id="photoImg" src="" alt="Profile" style="display: none;">
+                    @if($user->photo_profile)
+                        <span id="photoInitial" style="display: none;">{{ substr($user->nama_lengkap ?? 'U', 0, 1) }}</span>
+                        <img id="photoImg" src="{{ asset($user->photo_profile) }}" alt="Profile">
+                    @else
+                        <span id="photoInitial">{{ substr($user->nama_lengkap ?? 'U', 0, 1) }}</span>
+                        <img id="photoImg" src="" alt="Profile" style="display: none;">
+                    @endif
                 </div>
 
                 <p style="font-size: 0.85rem; color: var(--queen-pink); opacity: 0.8; text-align: center;">Upload a new
@@ -452,7 +463,7 @@
 
                 <label for="photoUpload" class="file-upload-btn">
                     Select New Photo
-                    <input type="file" id="photoUpload" accept="image/*" style="display: none;"
+                    <input type="file" id="photoUpload" name="photo_profile" form="profileForm" accept="image/*" style="display: none;"
                         onchange="previewPhoto(event)">
                 </label>
             </div>
