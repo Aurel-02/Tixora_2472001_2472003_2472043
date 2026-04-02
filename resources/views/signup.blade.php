@@ -256,7 +256,6 @@
     <div class="signup-container">
         <a href="/" class="logo">TIXORA</a>
         
-        <!-- Step 1: Role Selection -->
         <div id="step-selection" class="step-content">
             <p class="subtitle">Join Tixora - Pick your path</p>
             
@@ -285,7 +284,6 @@
             </p>
         </div>
 
-        <!-- Step 2: Form -->
         <div id="step-form" class="step-content hidden">
             <a href="javascript:void(0)" class="back-link" onclick="goToSelection()">← Change account type</a>
             <p class="subtitle" id="role-subtitle">Set up your account</p>
@@ -343,11 +341,9 @@
             selectedRole = role;
             document.getElementById('role-input').value = role;
             
-            // Highlight selected card
             document.querySelectorAll('.role-card').forEach(card => card.classList.remove('active'));
             element.classList.add('active');
             
-            // Enable button
             document.getElementById('btn-next').disabled = false;
         }
 
@@ -365,7 +361,6 @@
                 }, 50);
             }, 400);
 
-            // Update subtitle based on role
             const subtitle = selectedRole === 'Organizer' ? 'Apply as an Organizer' : 'Join as a Concert Enthusiast';
             document.getElementById('role-subtitle').innerText = subtitle;
         }
@@ -381,7 +376,6 @@
             }, 400);
         }
 
-        // Auto-show form if there are validation errors
         @if($errors->any() || old('role'))
             selectedRole = "{{ old('role') }}";
             if (selectedRole) {

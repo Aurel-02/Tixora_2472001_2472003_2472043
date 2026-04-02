@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tixora - Notifications</title>
+    <title>Tixora - Check In</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -74,11 +74,6 @@
             box-shadow: 0 0 10px rgba(209, 131, 169, 0.4);
             transition: transform 0.3s;
             text-transform: uppercase;
-        }
-        
-        .topbar .profile:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(209, 131, 169, 0.6);
         }
 
         .sidebar {
@@ -153,6 +148,7 @@
             display: flex;
             flex-direction: column;
             padding-bottom: 50px;
+            align-items: center;
         }
 
         .section-header {
@@ -178,8 +174,8 @@
             padding: 25px 18px;
             backdrop-filter: blur(6px);
             width: 95%;
-            max-width: 1500px;
-            font-size: 2.5rem;
+            max-width: 1200px;
+            font-size: 2.2rem;
             color: #ffffff;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
             display: flex;
@@ -188,117 +184,174 @@
             gap: 15px;
         }
 
-        .notifications-container {
+        .checkin-container {
             width: 95%;
-            max-width: 1500px;
+            max-width: 1200px;
             margin: 30px auto;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 25px;
         }
 
-        .notif-card {
-            background: rgba(255, 255, 255, 0.08);
+        .checkin-sidebar {
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
-            padding: 24px;
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
+            padding: 20px;
             backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: fit-content;
+        }
+
+        .method-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(243, 200, 221, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--queen-pink);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .method-btn i {
+            font-size: 2.5rem;
+        }
+
+        .method-btn span {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .method-btn:hover {
+            background: rgba(209, 131, 169, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .method-btn.active {
+            background: var(--middle-purple);
+            color: var(--jacarta);
+            border-color: var(--middle-purple);
+            box-shadow: 0 0 20px rgba(209, 131, 169, 0.4);
+        }
+
+        .scanner-area {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
             position: relative;
-            overflow: hidden;
         }
 
-        .notif-card:hover {
-            transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .notif-card.unread::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 5px;
-            background: #a8e6cf;
-        }
-
-        .notif-icon {
-            width: 55px;
-            height: 55px;
-            border-radius: 14px;
-            background: rgba(168, 230, 207, 0.15);
-            color: #a8e6cf;
+        .scanner-box {
+            width: 350px;
+            height: 350px;
+            border: 2px dashed rgba(209, 131, 169, 0.8);
+            border-radius: 20px;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
-            flex-shrink: 0;
-            border: 1px solid rgba(168, 230, 207, 0.3);
+            overflow: hidden;
+            background: rgba(255,255,255,0.02);
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
         }
 
-        .notif-icon.new-user {
-            background: rgba(243, 200, 221, 0.15);
-            color: var(--queen-pink);
-            border-color: rgba(243, 200, 221, 0.3);
+        .scanner-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(168, 230, 207, 0.4), transparent);
+            animation: scan 2s linear infinite;
+            z-index: 10;
         }
 
-        .notif-content {
-            flex-grow: 1;
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
         }
 
-        .notif-title {
-            font-size: 1.15rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .scanner-placeholder {
+            color: rgba(243, 200, 221, 0.5);
+            font-size: 5rem;
+            z-index: 1;
         }
 
-        .notif-badge {
-            font-size: 0.7rem;
-            padding: 3px 8px;
-            border-radius: 20px;
-            background: rgba(168, 230, 207, 0.2);
-            color: #a8e6cf;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .notif-desc {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.8;
-            line-height: 1.5;
-        }
-
-        .notif-desc strong {
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .notif-time {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .empty-state {
+        .scanner-instructions {
+            margin-top: 25px;
             text-align: center;
-            padding: 60px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            border: 1px dashed rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .scanner-instructions h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .scanner-instructions p {
+            font-size: 1rem;
+            opacity: 0.8;
+            max-width: 400px;
+        }
+
+        .dummy-result {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(46, 204, 113, 0.9);
+            color: #fff;
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .dummy-result i {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: translate(-50%, -40%) scale(0.8); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @media (max-width: 900px) {
+            .checkin-container {
+                grid-template-columns: 1fr;
+            }
+            .checkin-sidebar {
+                flex-direction: row;
+            }
+            .method-btn {
+                flex: 1;
+                flex-direction: row;
+                padding: 15px;
+            }
+            .method-btn i {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -327,13 +380,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('organizer.checkin') }}" class="sidebar-item">
+                    <a href="{{ route('organizer.checkin') }}" class="sidebar-item active">
                         <i class="ph ph-qr-code sidebar-icon"></i>
                         <span class="sidebar-text">Check In</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('organizer.notifications') }}" class="sidebar-item active">
+                    <a href="{{ route('organizer.notifications') }}" class="sidebar-item">
                         <i class="ph ph-bell sidebar-icon"></i>
                         <span class="sidebar-text">Notifications</span>
                     </a>
@@ -354,74 +407,75 @@
 
     <main class="main-wrapper">
         <div class="section-header">
-            <span class="section-title"><i class="ph ph-bell-ringing"></i> Notifikasi Kamu</span>
+            <span class="section-title"><i class="ph ph-scan"></i> Check In Tiket Peonton</span>
         </div>
 
-        <div class="notifications-container">
-
-            <div class="notif-card unread">
-                <div class="notif-icon">
-                    <i class="ph ph-ticket"></i>
+        <div class="checkin-container">
+            <div class="checkin-sidebar">
+                <div class="method-btn active" id="btn-qr" onclick="switchMethod('qr')">
+                    <i class="ph ph-qr-code"></i>
+                    <span>Scan Tiket (QR/Barcode)</span>
                 </div>
-                <div class="notif-content">
-                    <div class="notif-title">
-                        Tiket Berhasil Terjual <span class="notif-badge">Baru</span>
-                    </div>
-                    <div class="notif-desc">
-                        User <strong>Budi Santoso</strong> baru saja membeli <strong>2 Tiket VIP</strong> untuk event <strong>Coldplay Live in Jakarta</strong>.
-                    </div>
-                    <div class="notif-time"><i class="ph ph-clock"></i> 5 menit yang lalu</div>
+                <div class="method-btn" id="btn-face" onclick="switchMethod('face')">
+                    <i class="ph ph-scan-smiley"></i>
+                    <span>Scan Wajah (Face Sync)</span>
                 </div>
             </div>
 
-            <div class="notif-card unread">
-                <div class="notif-icon">
-                    <i class="ph ph-ticket"></i>
+            <!-- Scanner Area -->
+            <div class="scanner-area">
+                
+                <div class="scanner-box" id="scanner-box" onclick="simulateScan()">
+                    <i class="ph ph-qr-code scanner-placeholder" id="scanner-icon"></i>
                 </div>
-                <div class="notif-content">
-                    <div class="notif-title">
-                        Tiket Berhasil Terjual <span class="notif-badge">Baru</span>
-                    </div>
-                    <div class="notif-desc">
-                        User <strong>Alina</strong> baru saja membeli <strong>1 Tiket REGULER</strong> untuk event <strong>Pestapora 2026</strong>.
-                    </div>
-                    <div class="notif-time"><i class="ph ph-clock"></i> 1 jam yang lalu</div>
-                </div>
-            </div>
 
-            <div class="notif-card">
-                <div class="notif-icon new-user">
-                    <i class="ph ph-star"></i>
+                <div class="scanner-instructions">
+                    <h3 id="inst-title">Arahkan Tiket Konser</h3>
+                    <p id="inst-desc">Pusatkan QR Code atau Barcode tiket ke dalam area kotak di atas untuk melakukan check in otomatis.</p>
                 </div>
-                <div class="notif-content">
-                    <div class="notif-title">
-                        Event Baru Disetujui!
-                    </div>
-                    <div class="notif-desc">
-                        Selamat! Event <strong>Pestapora 2026</strong> kamu telah disetujui oleh sistem dan sekarang terlihat di halaman utama.
-                    </div>
-                    <div class="notif-time"><i class="ph ph-clock"></i> Kemarin, 14:30</div>
-                </div>
-            </div>
 
-            <div class="notif-card">
-                <div class="notif-icon">
-                    <i class="ph ph-ticket"></i>
+                <!-- Notif success trigger for demonstration -->
+                <div class="dummy-result" id="dummy-success">
+                    <i class="ph ph-check-circle"></i>
+                    <h2>Check In Berhasil</h2>
+                    <p style="margin-top: 5px; opacity: 0.9;">Atas nama <strong>Alina (VIP)</strong></p>
                 </div>
-                <div class="notif-content">
-                    <div class="notif-title">
-                        Tiket Berhasil Terjual
-                    </div>
-                    <div class="notif-desc">
-                        User <strong>Dimas Aryo</strong> baru saja membeli <strong>3 Tiket VVIP</strong> untuk event <strong>Coldplay Live in Jakarta</strong>.
-                    </div>
-                    <div class="notif-time"><i class="ph ph-clock"></i> 3 hari yang lalu</div>
-                </div>
-            </div>
 
+            </div>
         </div>
 
     </main>
 
+    <script>
+        function switchMethod(method) {
+            const btnQr = document.getElementById('btn-qr');
+            const btnFace = document.getElementById('btn-face');
+            const scannerIcon = document.getElementById('scanner-icon');
+            const instTitle = document.getElementById('inst-title');
+            const instDesc = document.getElementById('inst-desc');
+
+            if (method === 'qr') {
+                btnQr.classList.add('active');
+                btnFace.classList.remove('active');
+                scannerIcon.className = 'ph ph-qr-code scanner-placeholder';
+                instTitle.innerText = 'Arahkan Tiket Konser';
+                instDesc.innerText = 'Pusatkan QR Code atau Barcode tiket ke dalam area kotak di atas untuk melakukan check in otomatis.';
+            } else {
+                btnFace.classList.add('active');
+                btnQr.classList.remove('active');
+                scannerIcon.className = 'ph ph-user-focus scanner-placeholder';
+                instTitle.innerText = 'Posisikan Wajah';
+                instDesc.innerText = 'Biarkan kamera mendeteksi wajah penonton yang telah terdaftar pada sistem biometrik Tixora.';
+            }
+        }
+
+        function simulateScan() {
+            const dummy = document.getElementById('dummy-success');
+            dummy.style.display = 'block';
+            setTimeout(() => {
+                dummy.style.display = 'none';
+            }, 3000);
+        }
+    </script>
 </body>
 </html>

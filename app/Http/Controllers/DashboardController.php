@@ -112,7 +112,6 @@ class DashboardController extends Controller
 
         $event = Event::findOrFail($id);
         
-        // Fetch tickets and their stats logic
         $tikets = \Illuminate\Support\Facades\DB::table('tiket')
             ->where('id_event', $id)
             ->get();
