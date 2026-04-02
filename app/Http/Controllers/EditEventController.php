@@ -20,7 +20,6 @@ class EditEventController extends Controller
 
         $event = Event::findOrFail($id);
         
-        // Update the description column. Adjusting to 'deskripsi' based on model.
         $event->deskripsi = $request->deskripsi;
         $event->save();
 
@@ -37,7 +36,6 @@ class EditEventController extends Controller
             'jumlah_tambah' => 'required|integer|min:1',
         ]);
 
-        // Increment the quota in the 'tiket' table
         DB::table('tiket')
             ->where('id_tiket', $request->id_tiket)
             ->where('id_event', $id)

@@ -46,6 +46,10 @@ Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventC
 Route::get('/organizer/notifications', function () {
     return view('notification');
 })->middleware(['auth', 'role:2'])->name('organizer.notifications');
+Route::get('/organizer/checkin', function () {
+    return view('checkin');
+})->middleware(['auth', 'role:2'])->name('organizer.checkin');
+
 
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
 Route::get('/event/{id}/select-seat', [\App\Http\Controllers\SelectSeatController::class, 'index'])->name('event.select-seat');
