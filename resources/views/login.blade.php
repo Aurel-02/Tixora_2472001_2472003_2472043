@@ -130,7 +130,7 @@
             transform: scale(1.02);
         }
 
-        .divider {
+        /* .divider {
             margin: 25px 0;
             display: flex;
             align-items: center;
@@ -145,7 +145,7 @@
             height: 1px;
             background: rgba(243, 200, 221, 0.2);
             margin: 0 15px;
-        }
+        } */
 
         .btn-outline {
             background: transparent;
@@ -177,6 +177,12 @@
         <div class="logo">TIXORA</div>
         <p class="subtitle">Log in to Your Concert Experience</p>
         
+        @if(session('success'))
+            <div style="background: rgba(46, 204, 113, 0.15); border: 1px solid rgba(46, 204, 113, 0.4); color: #a8e6cf; padding: 12px 15px; border-radius: 12px; margin-bottom: 25px; text-align: center; font-size: 0.9rem; font-weight: 500;">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('login.post') }}">
             @csrf
             <div class="form-group">
@@ -196,10 +202,7 @@
             
             <button type="submit" class="btn btn-primary">Login</button>
         </form>
-        
-        <div class="divider">or</div>
-        
-        <a href="#signup" class="btn btn-outline">Sign Up for Tixora</a>
+    
         
     </div>
 

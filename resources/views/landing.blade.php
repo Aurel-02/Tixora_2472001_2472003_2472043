@@ -75,6 +75,42 @@
             transform: scale(1.05);
         }
 
+        .navbar .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .navbar .btn-signup {
+            color: var(--queen-pink);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(243, 200, 221, 0.2);
+        }
+
+        .navbar .btn-signup:hover {
+            background: rgba(243, 200, 221, 0.1);
+            border-color: var(--queen-pink);
+            color: #fff;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 30px;
+            background: rgba(58, 52, 91, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(113, 85, 122, 0.4);
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
         .hero {
             text-align: center;
             padding: 50px 20px 20px;
@@ -266,7 +302,10 @@
     <!-- navbar -->
     <nav class="navbar">
         <a href="/" class="logo">Tixora</a>
-        <a href="/login" class="btn-login">Login</a>
+        <div class="nav-links">
+            <a href="/signup" class="btn-signup">Sign Up</a>
+            <a href="/login" class="btn-login">Login</a>
+        </div>
     </nav>
 
     <!-- Header Text -->
@@ -305,9 +344,10 @@
         </div>
     </main>
 
-<!-- footer -->
+    <!-- footer -->
     <footer class="footer">
-        <div class="footer-title">TIXORA</div>
+        
+        <div class="footer-title" style="margin-top: 20px;">TIXORA</div>
         <div class="footer-links">
             <a href="#">Privacy Policy</a>
             <span class="divider">|</span>
