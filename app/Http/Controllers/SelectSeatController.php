@@ -11,8 +11,8 @@ class SelectSeatController extends Controller
 {
     private function currentRole()
     {
-        if (Auth::check()) { 
-            return strtolower(trim(Auth::user()->role)); 
+        if (Auth::check()) {
+            return strtolower(trim(Auth::user()->role));
         }
 
         $adminSession = session('login_admin');
@@ -32,7 +32,7 @@ class SelectSeatController extends Controller
 
         $event = Event::findOrFail($id);
         $tikets = DB::table('tiket')->where('id_event', $id)->get();
-        
+
         $availableTypes = [];
         foreach ($tikets as $t) {
             $availableTypes[] = strtoupper(trim($t->jenis_tiket));
@@ -50,17 +50,17 @@ class SelectSeatController extends Controller
 
         $event = Event::findOrFail($id);
         $quantities = $request->input('quantities', []); // [id_tiket => qty]
-        
+
         $selectedTickets = [];
         $totalAmount = 0;
-        
+
         foreach ($quantities as $tiketId => $qty) {
             if ($qty > 0) {
                 $tiket = DB::table('tiket')->where('id_tiket', $tiketId)->first();
                 if ($tiket) {
                     $selectedTickets[] = [
                         'details' => $tiket,
-                        'quantity' => (int)$qty
+                        'quantity' => (int) $qty
                     ];
                     $totalAmount += $tiket->harga * $qty;
                 }
@@ -82,19 +82,33 @@ class SelectSeatController extends Controller
         }
 
         $paymentMethod = $request->input('payment_method');
-        $tickets = $request->input('tickets', []); 
+        $tickets = $request->input('tickets', []);
+        $userId = Auth::id();
 
         DB::beginTransaction();
         try {
+            // 1. Create Transaction Header
+            // sp_buat_pesanan(p_id_user, p_metode_pembayaran, OUT p_id_transaksi)
+            DB::statement('CALL sp_buat_pesanan(?, ?, @id_baru)', [$userId, $paymentMethod]);
+            $res = DB::selectOne('SELECT @id_baru as id');
+            $newOrderId = $res ? $res->id : null;
+
+            if (!$newOrderId) {
+                throw new \Exception('Failed to generate transaction ID.');
+            }
+
+            // 2. Add Transaction Items
+            // sp_tambah_item(p_id_transaksi, p_id_tiket, p_qty)
             foreach ($tickets as $id => $qty) {
                 if ($qty > 0) {
-                    DB::statement('CALL sp_checkout_ticket(?, ?)', [$id, $qty]);
+                    DB::statement('CALL sp_tambah_item(?, ?, ?)', [$newOrderId, $id, $qty]);
                 }
             }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Checkout failed: ' . $e->getMessage());
+            // Redirect to dashboard with error to avoid MethodNotAllowed on back()
+            return redirect('/dashboard')->with('error', 'Checkout failed: ' . $e->getMessage());
         }
 
         return redirect('/dashboard')->with('success', 'Payment successful using ' . strtoupper($paymentMethod) . '! Your tickets will be sent to your email.');
