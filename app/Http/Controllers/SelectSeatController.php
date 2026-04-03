@@ -31,6 +31,16 @@ class SelectSeatController extends Controller
         }
 
         $event = Event::findOrFail($id);
+
+        $tanggal = $event->tanggal_pelaksanaan ? \Illuminate\Support\Carbon::parse($event->tanggal_pelaksanaan) : null;
+        $now = \Illuminate\Support\Carbon::now();
+        $threeMonthsLater = $now->copy()->addMonths(3);
+        $isUpcoming = $tanggal && $tanggal->isAfter($threeMonthsLater);
+
+        if ($isUpcoming) {
+            return redirect()->route('event.detail', $id)->with('error', 'Tickets for this upcoming event are not available yet.');
+        }
+
         $tikets = DB::table('tiket')->where('id_event', $id)->get();
 
         $availableTypes = [];
@@ -49,11 +59,21 @@ class SelectSeatController extends Controller
         }
 
         $event = Event::findOrFail($id);
-        $quantities = $request->input('quantities', []); // [id_tiket => qty]
 
+        $tanggal = $event->tanggal_pelaksanaan ? \Illuminate\Support\Carbon::parse($event->tanggal_pelaksanaan) : null;
+        $now = \Illuminate\Support\Carbon::now();
+        $threeMonthsLater = $now->copy()->addMonths(3);
+        $isUpcoming = $tanggal && $tanggal->isAfter($threeMonthsLater);
+
+        if ($isUpcoming) {
+            return redirect()->route('event.detail', $id)->with('error', 'Tickets for this upcoming event are not available yet.');
+        }
+
+        $quantities = $request->input('quantities', []); // [id_tiket => qty]
+        
         $selectedTickets = [];
         $totalAmount = 0;
-
+        
         foreach ($quantities as $tiketId => $qty) {
             if ($qty > 0) {
                 $tiket = DB::table('tiket')->where('id_tiket', $tiketId)->first();

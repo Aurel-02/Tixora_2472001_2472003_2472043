@@ -554,13 +554,8 @@
         }
 
         function createEventCard(event) {
-            const posterHtml = event.poster 
-                ? `<img src="${window.location.origin}/${event.poster}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.3; position: absolute; top:0; left:0; pointer-events:none;">`
-                : '';
-
             return `
                 <div class="event-card" onclick="window.location.href='/event/${event.id}'" style="cursor: pointer; position: relative; overflow: hidden;">
-                    ${posterHtml}
                     <div class="event-date" style="position: relative; z-index: 1;">
                         <span class="month">${event.month}</span>
                         <span class="day">${event.day}</span>
@@ -570,9 +565,6 @@
                         <div class="event-location">
                             <i class="ph ph-map-pin"></i> ${event.location}
                         </div>
-                    </div>
-                    <div class="event-action" style="position: relative; z-index: 1;">
-                        <a href="/event/${event.id}" class="btn-buy">Buy Tickets</a>
                     </div>
                 </div>
             `;

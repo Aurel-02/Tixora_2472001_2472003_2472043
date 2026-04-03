@@ -642,10 +642,22 @@
                             </div>
                         </div>
 
-                         <div class="btn-buy-wrapper">
-                             <a href="{{ route('event.select-seat', $event->id ?? $event->id_event) }}" class="btn-buy"
-                                 style="text-align: center;">BUY TICKET</a>
-                         </div>
+                        @php
+                            $now = \Carbon\Carbon::now();
+                            $threeMonthsLater = $now->copy()->addMonths(3);
+                            $isUpcoming = $tanggal && $tanggal->isAfter($threeMonthsLater);
+                        @endphp
+
+                        <div class="btn-buy-wrapper">
+                            @if (!$isUpcoming)
+                                <a href="{{ route('event.select-seat', $event->id ?? $event->id_event) }}" class="btn-buy"
+                                    style="text-align: center;">BUY TICKET</a>
+                            @else
+                                <button class="btn-buy"
+                                    style="text-align: center; background: rgba(58, 52, 91, 0.8); color: #fff; border-color: rgba(243, 200, 221, 0.4); width: 100%; cursor: default; pointer-events: none; opacity: 0.9;"
+                                    disabled>COMING SOON</button>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
