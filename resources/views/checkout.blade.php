@@ -649,6 +649,9 @@
                 <form action="{{ route('checkout.process') }}" method="POST" id="finalForm">
                     @csrf
                     <input type="hidden" name="payment_method" id="finalPaymentMethod">
+                    @foreach($selectedTickets as $item)
+                        <input type="hidden" name="tickets[{{ $item['details']->id_tiket }}]" value="{{ $item['quantity'] }}">
+                    @endforeach
                     <button type="submit" class="btn-confirm-payment" style="margin-top: 30px;">
                         RETURN TO DASHBOARD
                     </button>
@@ -693,7 +696,6 @@
                 document.getElementById(stepId).classList.add('active');
             };
 
-            // Selection Logic
             cards.forEach(card => {
                 card.addEventListener('click', () => {
                     cards.forEach(c => c.classList.remove('selected'));
@@ -703,11 +705,9 @@
                 });
             });
 
-            // Step 1 -> Step 2
             goToDetailsBtn.addEventListener('click', () => {
                 switchStep('stepDetails');
                 
-                // Hide all and show selected
                 document.getElementById('phonePaymentInfo').style.display = 'none';
                 document.getElementById('bankPaymentInfo').style.display = 'none';
                 document.getElementById('qrisPaymentInfo').style.display = 'none';
@@ -725,17 +725,15 @@
                 startPaymentTimer();
             });
 
-            // Step 2 -> Step 3
             donePaymentBtn.addEventListener('click', () => {
                 switchStep('stepSuccess');
                 if(timerInterval) clearInterval(timerInterval);
                 document.getElementById('finalPaymentMethod').value = selectedMethod;
             });
 
-            // Payment Timer Countdown
             function startPaymentTimer() {
                 if(timerInterval) clearInterval(timerInterval);
-                let timeLeft = 30 * 60; // 30 minutes as requested
+                let timeLeft = 30 * 60; 
                 const display = document.getElementById('paymentTimerDisplay');
                 
                 timerInterval = setInterval(() => {

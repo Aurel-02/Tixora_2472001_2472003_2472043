@@ -82,6 +82,20 @@ class SelectSeatController extends Controller
         }
 
         $paymentMethod = $request->input('payment_method');
+        $tickets = $request->input('tickets', []); 
+
+        DB::beginTransaction();
+        try {
+            foreach ($tickets as $id => $qty) {
+                if ($qty > 0) {
+                    DB::statement('CALL sp_checkout_ticket(?, ?)', [$id, $qty]);
+                }
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Checkout failed: ' . $e->getMessage());
+        }
 
         return redirect('/dashboard')->with('success', 'Payment successful using ' . strtoupper($paymentMethod) . '! Your tickets will be sent to your email.');
     }

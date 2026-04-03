@@ -138,9 +138,10 @@ class DashboardController extends Controller
                 'sisa' => $available,
             ];
 
-            $totalTickets += $t->kuota;
-            $ticketsSold += $sold;
-        }
+        $totalQuery = \Illuminate\Support\Facades\DB::selectOne("SELECT hitung_total_tiket(?) as total", [$id]);
+        $totalTickets = $totalQuery ? (int)$totalQuery->total : 0;
+        $ticketsSold += $sold;
+    }
 
         $ticketsAvailable = $totalTickets - $ticketsSold;
         if ($ticketsAvailable < 0) $ticketsAvailable = 0;
