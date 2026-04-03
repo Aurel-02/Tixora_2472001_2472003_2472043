@@ -425,9 +425,51 @@
             .event-card { flex-direction: column; text-align: center; gap: 15px; min-width: 280px; width: 100%; flex: 0 0 100%; }
             .event-details { margin: 0; }
         }
+
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(58, 52, 91, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--middle-purple);
+            border-radius: 12px;
+            padding: 15px 25px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateX(120%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .notification-toast.active {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            color: #4BB543;
+        }
+
+        .notification-content {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
+
+    @if(session('success'))
+        <div class="notification-toast" id="successToast">
+            <i class="ph ph-check-circle notification-icon"></i>
+            <div class="notification-content">
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
 
     <header class="topbar">
         <div class="logo">TIXORA</div>
@@ -576,6 +618,17 @@
 
         window.onload = () => {
             renderCategory('indonesia', document.querySelector('.tab-btn.active'));
+            
+            const toast = document.getElementById('successToast');
+            if (toast) {
+                setTimeout(() => {
+                    toast.classList.add('active');
+                }, 100);
+                
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 5100);
+            }
         };
 
         let isDown = false;

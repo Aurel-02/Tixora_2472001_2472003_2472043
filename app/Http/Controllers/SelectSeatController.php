@@ -73,4 +73,16 @@ class SelectSeatController extends Controller
 
         return view('checkout', compact('event', 'selectedTickets', 'totalAmount'));
     }
+
+    public function processPayment(Request $request)
+    {
+        $role = $this->currentRole();
+        if (!$role) {
+            return redirect('/login');
+        }
+
+        $paymentMethod = $request->input('payment_method');
+
+        return redirect('/dashboard')->with('success', 'Payment successful using ' . strtoupper($paymentMethod) . '! Your tickets will be sent to your email.');
+    }
 }

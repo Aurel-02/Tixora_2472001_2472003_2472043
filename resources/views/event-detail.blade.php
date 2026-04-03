@@ -107,7 +107,6 @@
             width: var(--sidebar-width-expanded);
             height: 100vh;
             background: rgba(113, 85, 122, 0.85);
-            /* Slightly more opaque since it overlays content */
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-right: 1px solid rgba(243, 200, 221, 0.15);
@@ -295,10 +294,8 @@
             align-items: center;
             pointer-events: none;
             width: 320px;
-            /* Force width layout */
         }
 
-        /* Map UI matching select-seat */
         .stage-box {
             background: #dcdcdc;
             color: #000;
@@ -399,7 +396,6 @@
         .right-column {
             display: flex;
             flex-direction: column;
-            /* Match heights approximately or just flex */
             height: 100%;
         }
 
@@ -488,6 +484,7 @@
             max-width: 200px;
         }
 
+
         .btn-buy:hover {
             background: var(--middle-purple);
             color: var(--jacarta);
@@ -495,19 +492,19 @@
             transform: translateY(-2px);
         }
 
-        @media (max-width: 900px) {
-            .grid-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .poster-placeholder {
-                height: 200px;
-            }
-
-            .event-name {
-                font-size: 1.8rem;
-            }
-        }
+         @media (max-width: 900px) {
+             .grid-layout {
+                 grid-template-columns: 1fr;
+             }
+ 
+             .poster-placeholder {
+                 height: 200px;
+             }
+ 
+             .event-name {
+                 font-size: 1.8rem;
+             }
+         }
     </style>
 </head>
 
@@ -560,15 +557,10 @@
     <main class="main-wrapper">
         <div class="content-container">
             <div class="poster-display"
-                style="width: 100%; height: 450px; border-radius: 24px; overflow: hidden; margin-bottom: 35px; border: 1px solid rgba(243, 200, 221, 0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.4); background: #1a1a1a; position: relative;">
+                style="width: 100%; height: 450px; border-radius: 24px; overflow: hidden; margin-bottom: 35px; border: 1px solid rgba(243, 200, 221, 0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
                 @if($event->poster)
-                    {{-- Blurred Background --}}
-                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('{{ asset($event->poster) }}') center/cover no-repeat; filter: blur(20px) brightness(0.5); transform: scale(1.1);"></div>
-                    {{-- Main Image --}}
                     <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}"
-                        style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; object-position: center 20%;">
-                    {{-- Overlay Gradient --}}
-                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 2;"></div>
+                        style="width: 100%; height: 100%; object-fit: cover;">
                 @else
                     <div class="poster-placeholder"
                         style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--queen-pink); opacity: 0.5;">
@@ -650,15 +642,16 @@
                             </div>
                         </div>
 
-                        <div class="btn-buy-wrapper">
-                            <a href="{{ route('event.select-seat', $event->id ?? $event->id_event) }}" class="btn-buy"
-                                style="text-align: center;">BUY TICKET</a>
-                        </div>
+                         <div class="btn-buy-wrapper">
+                             <a href="{{ route('event.select-seat', $event->id ?? $event->id_event) }}" class="btn-buy"
+                                 style="text-align: center;">BUY TICKET</a>
+                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
 
     <script>
         const eventDateStr = @json($tanggal ? $tanggal->toIso8601String() : null);
@@ -713,10 +706,10 @@
                 clearTimeout(closeTimeout);
             });
 
-            sidebar.addEventListener('mouseleave', () => {
-                sidebar.classList.remove('active');
-            });
-        });
+             sidebar.addEventListener('mouseleave', () => {
+                 sidebar.classList.remove('active');
+             });
+         });
     </script>
 </body>
 

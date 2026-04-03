@@ -105,7 +105,6 @@
             margin-bottom: 40px;
         }
 
-        /* Ticket Design */
         .ticket-box {
             display: flex;
             background: #fff;
@@ -206,7 +205,6 @@
             color: #333;
         }
 
-        /* Order Summary */
         .order-summary {
             background: rgba(113, 85, 122, 0.3);
             backdrop-filter: blur(10px);
@@ -258,6 +256,222 @@
             box-shadow: 0 6px 20px rgba(243, 200, 221, 0.5);
         }
 
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .payment-modal {
+            background: rgba(58, 52, 91, 0.95);
+            border: 1px solid rgba(243, 200, 221, 0.2);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            transform: translateY(30px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.active .payment-modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--queen-pink);
+            opacity: 0.8;
+        }
+
+        .payment-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .payment-option-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(243, 200, 221, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-option-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--middle-purple);
+            transform: translateY(-5px);
+        }
+
+        .payment-option-card.selected {
+            background: rgba(209, 131, 169, 0.15);
+            border-color: var(--middle-purple);
+            box-shadow: 0 0 15px rgba(209, 131, 169, 0.3);
+        }
+
+        .payment-icon {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .payment-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .icon-dana { color: #0087FF; }
+        .icon-gopay { color: #00AED6; }
+        .icon-bank { color: #8A5CF5; }
+        .icon-qris { color: #FFB800; }
+
+        .btn-confirm-payment {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--middle-purple), var(--old-lavender));
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .btn-confirm-payment:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .btn-confirm-payment:not(:disabled):hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(209, 131, 169, 0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: var(--queen-pink);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .payment-details-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(243, 200, 221, 0.1);
+        }
+
+        .payment-detail-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--middle-purple);
+            margin: 15px 0;
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
+
+        .payment-timer {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ff4d4d;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #fff;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .qr-placeholder img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .success-animation {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            color: #4BB543;
+            margin-bottom: 20px;
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
         @media (max-width: 700px) {
             .ticket-box {
                 flex-direction: column;
@@ -268,6 +482,12 @@
             .ticket-left {
                 border-bottom: 2px dashed rgba(0,0,0,0.1);
                 min-width: unset;
+            }
+            .payment-modal {
+                padding: 30px 20px;
+                border-radius: 24px 24px 0 0;
+                position: absolute;
+                bottom: 0;
             }
         }
     </style>
@@ -293,37 +513,29 @@
                 @foreach($selectedTickets as $item)
                     <div class="ticket-box">
                         <div class="ticket-badge">{{ $item['details']->jenis_tiket }} ({{ $item['quantity'] }}x)</div>
-                        <div class="ticket-left" style="position: relative; overflow: hidden; background: #1a1a1a;">
-                            {{-- Poster Event --}}
-                            @if($event->poster)
-                                <div class="ticket-poster" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
-                                    {{-- Blurred Backdrop --}}
-                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('{{ asset($event->poster) }}') center/cover no-repeat; filter: blur(15px) brightness(0.4); transform: scale(1.1);"></div>
-                                    {{-- Main Image Focused --}}
-                                    <img src="{{ asset($event->poster) }}" alt="Poster" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; object-position: center 20%; opacity: 0.9;">
-                                    {{-- Elegant Side Fade --}}
-                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.6), transparent 40%, transparent 60%, rgba(0,0,0,0.3)); z-index: 2;"></div>
-                                </div>
+                        <div class="ticket-left" style="position: relative; overflow: hidden; background: #000;">
+                            @if($event && $event->poster)
+                                <img src="{{ asset($event->poster) }}" alt="Poster" 
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
                             @endif
-                            
-                            <div style="position: relative; z-index: 3;">
-                                <div class="ticket-event-name-large" style="text-shadow: 0 4px 10px rgba(0,0,0,0.8);">{{ $event->nama_event }}</div>
+                            <div style="position: relative; z-index: 2;">
+                                <div class="ticket-event-name-large" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8);">{{ $event->nama_event ?? 'Event Name' }}</div>
                                 <div class="ticket-event-date-large" style="text-shadow: 0 2px 5px rgba(0,0,0,0.8);">
-                                    {{ \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d F Y') }}
+                                    {{ isset($event->tanggal_pelaksanaan) ? \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d F Y') : 'Date TBD' }}
                                 </div>
                             </div>
                         </div>
                         <div class="ticket-right">
                             <div>
-                                <div class="ticket-detail-title">{{ $event->nama_event }}</div>
+                                <div class="ticket-detail-title">{{ $event->nama_event ?? 'Event Name' }}</div>
                                 <div class="ticket-info-grid">
                                     <div class="info-item">
                                         <label>Date</label>
-                                        <span>{{ \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d M Y') }}</span>
+                                        <span>{{ isset($event->tanggal_pelaksanaan) ? \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d M Y') : 'TBD' }}</span>
                                     </div>
                                     <div class="info-item">
                                         <label>Venue</label>
-                                        <span>{{ $event->lokasi_event }}</span>
+                                        <span>{{ $event->lokasi_event ?? 'Venue TBD' }}</span>
                                     </div>
                                     <div class="info-item">
                                         <label>Category</label>
@@ -354,9 +566,194 @@
                 </div>
             </div>
 
-            <a href="#" class="btn-payment">Select Payment Method</a>
+            <button id="openPaymentModal" class="btn-payment">Select Payment Method</button>
         </div>
     </main>
+
+    <div class="modal-overlay" id="paymentOverlay">
+        <div class="payment-modal">
+            <i class="ph ph-x close-modal" id="closePaymentModal"></i>
+            
+            <div id="stepSelection" class="step-content active">
+                <div class="modal-header">
+                    <h2 class="modal-title">Payment Method</h2>
+                    <p class="modal-subtitle">Choose your preferred payment way</p>
+                </div>
+                
+                <div class="payment-options">
+                    <div class="payment-option-card" data-method="dana">
+                        <i class="ph ph-wallet payment-icon icon-dana"></i>
+                        <span class="payment-name">DANA</span>
+                    </div>
+                    <div class="payment-option-card" data-method="gopay">
+                        <i class="ph ph-wallet payment-icon icon-gopay"></i>
+                        <span class="payment-name">GoPay</span>
+                    </div>
+                    <div class="payment-option-card" data-method="bank">
+                        <i class="ph ph-bank payment-icon icon-bank"></i>
+                        <span class="payment-name">Bank Transfer</span>
+                    </div>
+                    <div class="payment-option-card" data-method="qris">
+                        <i class="ph ph-qr-code payment-icon icon-qris"></i>
+                        <span class="payment-name">QRIS</span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-confirm-payment" id="goToDetailsBtn" disabled>
+                    Proceed to Payment
+                </button>
+            </div>
+
+            <div id="stepDetails" class="step-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="detailTitle">Payment Details</h2>
+                    <p class="modal-subtitle">Complete your transaction before timeout</p>
+                </div>
+
+                <div class="payment-details-container">
+                    <div class="payment-timer">
+                        <i class="ph ph-timer"></i>
+                        <span id="paymentTimerDisplay">23 : 59 : 59</span>
+                    </div>
+                    
+                    <div id="phonePaymentInfo" style="display: none;">
+                        <p style="font-size: 0.9rem; color: var(--queen-pink); opacity: 0.8;">Transfer to Phone Number:</p>
+                        <div class="payment-detail-value">0812 - 3456 - 7890</div>
+                    </div>
+
+                    <div id="bankPaymentInfo" style="display: none;">
+                        <p style="font-size: 0.9rem; color: var(--queen-pink); opacity: 0.8;">Virtual Account Number (BCA):</p>
+                        <div class="payment-detail-value">8077 0812 3456 7890</div>
+                    </div>
+
+                    <div id="qrisPaymentInfo" style="display: none;">
+                        <div class="qr-placeholder" style="background: #fff; padding: 15px; border-radius: 8px;">
+                            <img src="{{ asset('payment/qris_simple.png') }}" alt="QRIS Dummy" style="width: 100%; height: auto;">
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--queen-pink); opacity: 0.7;">Scan this barcode to pay</p>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-confirm-payment" id="donePaymentBtn">
+                    DONE
+                </button>
+            </div>
+
+            <div id="stepSuccess" class="step-content">
+                <div class="success-animation">
+                    <i class="ph ph-check-circle success-icon"></i>
+                    <h2 class="modal-title" style="margin-bottom: 10px;">Payment Successful!</h2>
+                    <p class="modal-subtitle">Your tickets will be sent to your email shortly.</p>
+                </div>
+                
+                <form action="{{ route('checkout.process') }}" method="POST" id="finalForm">
+                    @csrf
+                    <input type="hidden" name="payment_method" id="finalPaymentMethod">
+                    <button type="submit" class="btn-confirm-payment" style="margin-top: 30px;">
+                        RETURN TO DASHBOARD
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const openBtn = document.getElementById('openPaymentModal');
+            const closeBtn = document.getElementById('closePaymentModal');
+            const overlay = document.getElementById('paymentOverlay');
+            const cards = document.querySelectorAll('.payment-option-card');
+            const goToDetailsBtn = document.getElementById('goToDetailsBtn');
+            const donePaymentBtn = document.getElementById('donePaymentBtn');
+            const detailTitle = document.getElementById('detailTitle');
+            
+            let selectedMethod = '';
+            let timerInterval;
+
+            // Modal Controls
+            openBtn.addEventListener('click', () => {
+                overlay.classList.add('active');
+            });
+
+            const closeModal = () => {
+                overlay.classList.remove('active');
+                if(timerInterval) clearInterval(timerInterval);
+                // Reset to step 1
+                switchStep('stepSelection');
+            };
+
+            closeBtn.addEventListener('click', closeModal);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeModal();
+            });
+
+            const switchStep = (stepId) => {
+                document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+                document.getElementById(stepId).classList.add('active');
+            };
+
+            // Selection Logic
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    cards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedMethod = card.getAttribute('data-method');
+                    goToDetailsBtn.disabled = false;
+                });
+            });
+
+            // Step 1 -> Step 2
+            goToDetailsBtn.addEventListener('click', () => {
+                switchStep('stepDetails');
+                
+                // Hide all and show selected
+                document.getElementById('phonePaymentInfo').style.display = 'none';
+                document.getElementById('bankPaymentInfo').style.display = 'none';
+                document.getElementById('qrisPaymentInfo').style.display = 'none';
+                
+                detailTitle.innerHTML = `Pay with ${selectedMethod.toUpperCase()}`;
+                
+                if (selectedMethod === 'dana' || selectedMethod === 'gopay') {
+                    document.getElementById('phonePaymentInfo').style.display = 'block';
+                } else if (selectedMethod === 'bank') {
+                    document.getElementById('bankPaymentInfo').style.display = 'block';
+                } else if (selectedMethod === 'qris') {
+                    document.getElementById('qrisPaymentInfo').style.display = 'block';
+                }
+                
+                startPaymentTimer();
+            });
+
+            // Step 2 -> Step 3
+            donePaymentBtn.addEventListener('click', () => {
+                switchStep('stepSuccess');
+                if(timerInterval) clearInterval(timerInterval);
+                document.getElementById('finalPaymentMethod').value = selectedMethod;
+            });
+
+            // Payment Timer Countdown
+            function startPaymentTimer() {
+                if(timerInterval) clearInterval(timerInterval);
+                let timeLeft = 30 * 60; // 30 minutes as requested
+                const display = document.getElementById('paymentTimerDisplay');
+                
+                timerInterval = setInterval(() => {
+                    const m = Math.floor(timeLeft / 60);
+                    const s = timeLeft % 60;
+                    
+                    const pad = (num) => String(num).padStart(2, '0');
+                    display.innerText = `${pad(m)} : ${pad(s)}`;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        display.innerText = "EXPIRED";
+                    }
+                    timeLeft--;
+                }, 1000);
+            }
+        });
+    </script>
 
 </body>
 </html>

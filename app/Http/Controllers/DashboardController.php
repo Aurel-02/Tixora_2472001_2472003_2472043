@@ -84,7 +84,8 @@ class DashboardController extends Controller
 
         $event = Event::findOrFail($id);
         
-        $totalTickets = \Illuminate\Support\Facades\DB::table('tiket')->where('id_event', $id)->sum('kuota') ?? 0;
+        $totalQuery = \Illuminate\Support\Facades\DB::selectOne("SELECT hitung_total_tiket(?) as total", [$id]);
+        $totalTickets = $totalQuery ? (int)$totalQuery->total : 0;
         
         $soldQuery = \Illuminate\Support\Facades\DB::selectOne("SELECT hitung_tiket_terjual(?) as sold", [$id]);
         $ticketsSold = $soldQuery ? (int)$soldQuery->sold : 0;
