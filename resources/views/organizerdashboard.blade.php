@@ -552,21 +552,41 @@ or<!DOCTYPE html>
 
         function renderCategory(category, btnElement) {
             currentCategory = category;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            if (btnElement) btnElement.classList.add('active');
-
             applySearchFilter();
         }
 
         function applySearchFilter() {
             const query = (searchInput.value || '').trim().toLowerCase();
-            let events = getCurrentCategoryEvents();
+            let events = [];
 
             if (query) {
+                const allCategories = ['indonesia', 'western', 'kpop'];
+                allCategories.forEach(cat => {
+                    events = events.concat(data[cat] || []);
+                });
+                
+                // Unique events
+                events = Array.from(new Map(events.map(item => [item.id_event || item.id, item])).values());
+
                 events = events.filter(event => {
                     const name = (event.nama_event || '').toLowerCase();
                     const location = (event.lokasi_event || '').toLowerCase();
                     return name.includes(query) || location.includes(query);
+                });
+                
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.opacity = '0.5';
+                });
+            } else {
+                events = getCurrentCategoryEvents();
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.style.opacity = '';
+                    btn.classList.remove('active');
+                    const btnCat = btn.getAttribute('onclick')?.match(/'([^']+)'/);
+                    if (btnCat && btnCat[1] === currentCategory) {
+                        btn.classList.add('active');
+                    }
                 });
             }
 

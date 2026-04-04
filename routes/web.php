@@ -29,6 +29,14 @@ Route::get('/admin/logout', [AuthController::class, 'logout']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:3']);
 
+Route::get('/my-tickets', function () {
+    return view('my-tickets');
+})->middleware(['auth', 'role:3'])->name('my-tickets');
+
+Route::get('/notifications', function () {
+    return view('buyer-notification');
+})->middleware(['auth', 'role:3'])->name('buyer.notification');
+
 Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->middleware(['auth', 'role:3'])->name('profile.edit');
 Route::post('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->middleware(['auth', 'role:3'])->name('profile.update');
 Route::get('/profile/change-password', [\App\Http\Controllers\ProfileController::class, 'editPassword'])->middleware(['auth', 'role:3'])->name('profile.password.edit');

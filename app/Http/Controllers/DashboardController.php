@@ -84,21 +84,23 @@ class DashboardController extends Controller
 
         $event = Event::findOrFail($id);
         
-        $totalQuery = \Illuminate\Support\Facades\DB::selectOne("SELECT hitung_total_tiket(?) as total", [$id]);
-        $totalTickets = $totalQuery ? (int)$totalQuery->total : 0;
+        $totalTickets = (int)\Illuminate\Support\Facades\DB::table('tiket')->where('id_event', $id)->sum('kuota');
         
-        $soldQuery = \Illuminate\Support\Facades\DB::selectOne("SELECT hitung_tiket_terjual(?) as sold", [$id]);
-        $ticketsSold = $soldQuery ? (int)$soldQuery->sold : 0;
-        
+        $ticketsSold = (int)\Illuminate\Support\Facades\DB::table('detail_transaksi')
+            ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
+            ->where('tiket.id_event', $id)
+            ->sum('detail_transaksi.jumlah_beli');
+            
         $tikets = \Illuminate\Support\Facades\DB::table('tiket')->where('id_event', $id)->get();
         $ticketsAvailable = 0;
         foreach ($tikets as $t) {
-            $sisaQuery = \Illuminate\Support\Facades\DB::selectOne("SELECT cek_sisa_tiket(?) as sisa", [$t->id_tiket]);
-            $ticketsAvailable += $sisaQuery ? (int)$sisaQuery->sisa : 0;
-        }
-
-        if ($ticketsAvailable < 0) {
-            $ticketsAvailable = 0;
+            $soldForType = \Illuminate\Support\Facades\DB::table('detail_transaksi')
+                ->where('id_tiket', $t->id_tiket)
+                ->sum('jumlah_beli') ?? 0;
+            $sisa = (int)$t->kuota - (int)$soldForType;
+            if ($sisa > 0) {
+                $ticketsAvailable += $sisa;
+            }
         }
 
         return view('event-detail', compact('event', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
@@ -138,8 +140,7 @@ class DashboardController extends Controller
                 'sisa' => $available,
             ];
 
-        $totalQuery = \Illuminate\Support\Facades\DB::selectOne("SELECT hitung_total_tiket(?) as total", [$id]);
-        $totalTickets = $totalQuery ? (int)$totalQuery->total : 0;
+        $totalTickets += (int)$t->kuota;
         $ticketsSold += $sold;
     }
 

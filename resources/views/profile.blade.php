@@ -369,24 +369,29 @@
 
     <header class="topbar">
         <a href="{{ auth()->check() && auth()->user()->id_role == 2 ? route('organizerdashboard') : '/dashboard' }}" class="logo">TIXORA</a>
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
-            @if(auth()->user()->photo_profile)
-                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-            @else
-                {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
-            @endif
-        </a>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="search-box" style="display: flex; align-items: center; border: 1px solid rgba(243, 200, 221, 0.4); border-radius: 50px; background: rgba(58, 52, 91, 0.4); padding: 8px 18px; min-width: 250px; transition: all 0.3s ease;">
+                <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1.1rem; margin-right: 10px;"></i>
+                <input type="text" id="globalSearch" placeholder="Search events..." style="width: 100%; border: none; outline: none; background: transparent; color: #fff; font-size: 0.95rem; font-family: 'Outfit', sans-serif;" />
+            </div>
+            <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+                @if(auth()->user()->photo_profile)
+                    <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                @else
+                    {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
+                @endif
+            </a>
+        </div>
     </header>
 
     <aside class="sidebar">
         <ul class="sidebar-menu">
             <li><a href="/dashboard" class="sidebar-item"><i class="ph ph-house sidebar-icon"></i><span
                         class="sidebar-text">Home</span></a></li>
-            <li><a href="#" class="sidebar-item"><i class="ph ph-magnifying-glass sidebar-icon"></i><span
-                        class="sidebar-text">Search</span></a></li>
-            <li><a href="#" class="sidebar-item"><i class="ph ph-ticket sidebar-icon"></i><span class="sidebar-text">My
+
+            <li><a href="{{ route('my-tickets') }}" class="sidebar-item"><i class="ph ph-ticket sidebar-icon"></i><span class="sidebar-text">My
                         Tickets</span></a></li>
-            <li><a href="#" class="sidebar-item"><i class="ph ph-bell sidebar-icon"></i><span
+            <li><a href="{{ route('buyer.notification') }}" class="sidebar-item"><i class="ph ph-bell sidebar-icon"></i><span
                         class="sidebar-text">Notifications</span></a></li>
         </ul>
     </aside>
@@ -471,6 +476,13 @@
     </main>
 
     <script>
+        document.getElementById('globalSearch')?.addEventListener('keyup', function(e) {
+            if(e.key === 'Enter') {
+                const isOrg = {{ auth()->check() && auth()->user()->id_role == 2 ? 'true' : 'false' }};
+                window.location.href = isOrg ? '/organizerdashboard' : '/dashboard';
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             @if(session('success'))
                 Swal.fire({

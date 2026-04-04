@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tixora - Change Password</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
+    <title>Tixora - Notifications</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         :root {
@@ -43,6 +41,7 @@
             height: var(--topbar-height);
             background: rgba(58, 52, 91, 0.6);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(243, 200, 221, 0.1);
             display: flex;
             justify-content: space-between;
@@ -58,7 +57,6 @@
             color: var(--queen-pink);
             text-shadow: 0 0 10px rgba(243, 200, 221, 0.5);
             text-transform: uppercase;
-            text-decoration: none;
         }
 
         .topbar .profile {
@@ -91,6 +89,7 @@
             height: 100vh;
             background: rgba(113, 85, 122, 0.4);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-right: 1px solid rgba(243, 200, 221, 0.15);
             z-index: 1000;
             transition: width 0.3s ease, box-shadow 0.3s ease;
@@ -125,7 +124,7 @@
             white-space: nowrap;
         }
 
-        .sidebar-item:hover {
+        .sidebar-item:hover, .sidebar-item.active {
             background: rgba(209, 131, 169, 0.2);
             border-left: 3px solid var(--middle-purple);
         }
@@ -149,146 +148,96 @@
 
         .main-wrapper {
             margin-left: var(--sidebar-width-collapsed);
-            padding-top: calc(var(--topbar-height) + 40px);
-            min-height: 100vh;
+            padding-top: var(--topbar-height);
+            min-height: calc(100vh - var(--topbar-height));
             display: flex;
             flex-direction: column;
+            padding-bottom: 50px;
+        }
+
+        .section-header {
+            margin: calc(var(--topbar-height) - 10px) auto 0;
+            width: 100%;
+            max-width: 100%;
+            padding: 10px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
             align-items: center;
-            padding-bottom: 40px;
-        }
-
-        .form-container {
-            width: 100%;
-            max-width: 600px;
-            background: rgba(113, 85, 122, 0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(243, 200, 221, 0.15);
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            margin: 0 20px;
-        }
-
-        .form-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 30px;
+            justify-content: center;
             text-align: center;
+            position: relative;
+            z-index: 800;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
+        .section-header .section-title {
+            background: rgba(243, 200, 221, 0.15); 
+            border: 2px dashed rgba(243, 200, 221, 0.5); 
+            border-radius: 20px; 
+            padding: 20px 30px;
+            backdrop-filter: blur(8px);
+            width: 90%;
+            max-width: 1000px;
+            font-size: 2.2rem;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(243, 200, 221, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
 
-        .form-label {
-            display: block;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--queen-pink);
-            margin-bottom: 8px;
+        .notifications-container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
         }
 
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(243, 200, 221, 0.2);
-            background: rgba(58, 52, 91, 0.4);
-            color: #fff;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--middle-purple);
-        }
-
-        .btn-submit {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: var(--middle-purple);
-            color: var(--jacarta);
-            border: none;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            margin-top: 30px;
-        }
-
-        .btn-submit:hover {
-            background: var(--queen-pink);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(243, 200, 221, 0.4);
-        }
-
-        .btn-cancel {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            color: var(--queen-pink);
-            border: 1px solid var(--queen-pink);
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            margin-top: 15px;
+        .empty-state {
             text-align: center;
-            text-decoration: none;
+            padding: 70px 20px;
+            background: rgba(243, 200, 221, 0.08); 
+            border-radius: 30px; 
+            border: 2px dashed rgba(243, 200, 221, 0.4);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1), inset 0 0 20px rgba(243, 200, 221, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-cancel:hover {
-            background: rgba(243, 200, 221, 0.1);
+        .empty-icon {
+            font-size: 5rem;
+            color: rgba(243, 200, 221, 0.8);
+            margin-bottom: 15px;
+            display: inline-block;
         }
 
-        .alert-error {
-            background: rgba(255, 107, 107, 0.2);
-            border: 1px solid #ff6b6b;
-            color: #ff6b6b;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
+
 
         @media (max-width: 768px) {
             .sidebar {
                 width: 0;
                 border: none;
             }
-
             .sidebar:hover {
                 width: var(--sidebar-width-expanded);
             }
-
             .topbar {
                 left: 0;
             }
-
             .main-wrapper {
                 margin-left: 0;
-                padding: 100px 20px 40px 20px;
-            }
-
-            .form-container {
-                padding: 30px 20px;
             }
         }
     </style>
 </head>
-
 <body>
 
     <header class="topbar">
-        <a href="{{ auth()->check() && auth()->user()->id_role == 2 ? route('organizerdashboard') : '/dashboard' }}" class="logo">TIXORA</a>
+        <div class="logo">TIXORA</div>
         <div style="display: flex; align-items: center; gap: 15px;">
             <div class="search-box" style="display: flex; align-items: center; border: 1px solid rgba(243, 200, 221, 0.4); border-radius: 50px; background: rgba(58, 52, 91, 0.4); padding: 8px 18px; min-width: 250px; transition: all 0.3s ease;">
                 <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1.1rem; margin-right: 10px;"></i>
@@ -306,64 +255,48 @@
 
     <aside class="sidebar">
         <ul class="sidebar-menu">
-            <li><a href="/dashboard" class="sidebar-item"><i class="ph ph-house sidebar-icon"></i><span
-                        class="sidebar-text">Home</span></a></li>
-
-            <li><a href="{{ route('my-tickets') }}" class="sidebar-item"><i class="ph ph-ticket sidebar-icon"></i><span class="sidebar-text">My
-                        Tickets</span></a></li>
-            <li><a href="{{ route('buyer.notification') }}" class="sidebar-item"><i class="ph ph-bell sidebar-icon"></i><span
-                        class="sidebar-text">Notifications</span></a></li>
+            <li>
+                <a href="{{ url('/dashboard') }}" class="sidebar-item">
+                    <i class="ph ph-house sidebar-icon"></i>
+                    <span class="sidebar-text">Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('my-tickets') }}" class="sidebar-item">
+                    <i class="ph ph-ticket sidebar-icon"></i>
+                    <span class="sidebar-text">My Tickets</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('buyer.notification') }}" class="sidebar-item active">
+                    <i class="ph ph-bell sidebar-icon"></i>
+                    <span class="sidebar-text">Notifications</span>
+                </a>
+            </li>
         </ul>
     </aside>
 
     <main class="main-wrapper">
-        <div class="form-container">
-            <h1 class="form-title">Change Password</h1>
-
-            @if($errors->any())
-                <div class="alert-error">
-                    <ul style="list-style-position: inside;">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form action="{{ route('profile.password.update') }}" method="POST">
-                @csrf
-                
-                <div class="form-group">
-                    <label class="form-label">Current Password</label>
-                    <input type="password" name="current_password" class="form-input"
-                        placeholder="Masukkan password lama" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">New Password</label>
-                    <input type="password" name="new_password" class="form-input" placeholder="Isi password baru" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Confirm New Password</label>
-                    <input type="password" name="new_password_confirmation" class="form-input"
-                        placeholder="Ulangi password baru" required>
-                </div>
-
-                <button type="submit" class="btn-submit">Update Password</button>
-                <a href="{{ route('profile.edit') }}" class="btn-cancel">Cancel</a>
-            </form>
+        <div class="section-header">
+            <span class="section-title"><i class="ph ph-envelope-open" style="color: var(--queen-pink);"></i> Notifications</span>
         </div>
+
+        <div class="notifications-container">
+            <div class="empty-state">
+                <i class="ph ph-mailbox empty-icon"></i>
+                <div style="font-size: 1.5rem; color: #fff; font-weight: 700; letter-spacing: 1px;">Oops! Your inbox is empty</div>
+                <div style="color: var(--queen-pink); opacity: 0.9; margin-top: 8px; font-weight: 300;">All updates about your upcoming events and tickets will appear right here.</div>
+            </div>
+        </div>
+
     </main>
 
     <script>
         document.getElementById('globalSearch')?.addEventListener('keyup', function(e) {
             if(e.key === 'Enter') {
-                const isOrg = {{ auth()->check() && auth()->user()->id_role == 2 ? 'true' : 'false' }};
-                window.location.href = isOrg ? '/organizerdashboard' : '/dashboard';
+                window.location.href = '/dashboard';
             }
         });
     </script>
 </body>
-
 </html>

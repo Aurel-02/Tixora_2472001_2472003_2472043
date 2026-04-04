@@ -473,37 +473,38 @@
 
     <header class="topbar">
         <div class="logo">TIXORA</div>
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
-            @if(auth()->user()->photo_profile)
-                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-            @else
-                {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
-            @endif
-        </a>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="search-box" style="display: flex; align-items: center; border: 1px solid rgba(243, 200, 221, 0.4); border-radius: 50px; background: rgba(58, 52, 91, 0.4); padding: 8px 18px; min-width: 250px; transition: all 0.3s ease;">
+                <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1.1rem; margin-right: 10px;"></i>
+                <input type="text" id="globalSearch" placeholder="Search events..." style="width: 100%; border: none; outline: none; background: transparent; color: #fff; font-size: 0.95rem; font-family: 'Outfit', sans-serif;" />
+            </div>
+            <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+                @if(auth()->user()->photo_profile)
+                    <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                @else
+                    {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
+                @endif
+            </a>
+        </div>
     </header>
 
     <aside class="sidebar">
         <ul class="sidebar-menu">
             <li>
-                <a href="#" class="sidebar-item active">
+                <a href="{{ url('/dashboard') }}" class="sidebar-item active">
                     <i class="ph ph-house sidebar-icon"></i>
                     <span class="sidebar-text">Home</span>
                 </a>
             </li>
+
             <li>
-                <a href="#" class="sidebar-item">
-                    <i class="ph ph-magnifying-glass sidebar-icon"></i>
-                    <span class="sidebar-text">Search</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="sidebar-item">
+                <a href="{{ route('my-tickets') }}" class="sidebar-item">
                     <i class="ph ph-ticket sidebar-icon"></i>
                     <span class="sidebar-text">My Tickets</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="sidebar-item">
+                <a href="{{ route('buyer.notification') }}" class="sidebar-item">
                     <i class="ph ph-bell sidebar-icon"></i>
                     <span class="sidebar-text">Notifications</span>
                 </a>
@@ -570,28 +571,70 @@
             `;
         }
 
+        let currentCategory = 'indonesia';
+
         function renderCategory(category, btnElement) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            if(btnElement) {
-                btnElement.classList.add('active');
+            currentCategory = category;
+            applySearch();
+        }
+
+        function applySearch() {
+            const query = (document.getElementById('globalSearch').value || '').trim().toLowerCase();
+            
+            let filteredArtists = [];
+            let filteredEvents = [];
+
+            if (query) {
+                const allCategories = ['indonesia', 'western', 'kpop'];
+                let allArtists = [];
+                let allEvents = [];
+                
+                allCategories.forEach(cat => {
+                    if(data[cat]) {
+                        allArtists = allArtists.concat(data[cat].artists || []);
+                        allEvents = allEvents.concat(data[cat].events || []);
+                    }
+                });
+
+                const uniqueArtists = Array.from(new Map(allArtists.map(item => [item.id, item])).values());
+                const uniqueEvents = Array.from(new Map(allEvents.map(item => [item.id, item])).values());
+
+                filteredArtists = uniqueArtists.filter(a => a.name.toLowerCase().includes(query) || (a.desc && a.desc.toLowerCase().includes(query)));
+                filteredEvents = uniqueEvents.filter(e => e.name.toLowerCase().includes(query) || e.location.toLowerCase().includes(query));
+                
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.opacity = '0.5';
+                });
+            } else {
+                const categoryData = data[currentCategory] || { artists: [], events: [] };
+                filteredArtists = categoryData.artists || [];
+                filteredEvents = categoryData.events || [];
+                
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.style.opacity = '';
+                    btn.classList.remove('active');
+                    const btnCat = btn.getAttribute('onclick')?.match(/'([^']+)'/);
+                    if (btnCat && btnCat[1] === currentCategory) {
+                        btn.classList.add('active');
+                    }
+                });
             }
 
-            const categoryData = data[category] || { artists: [], events: [] };
-            
             let artistsHtml = '';
-            categoryData.artists.forEach(artist => {
+            filteredArtists.forEach(artist => {
                 artistsHtml += createArtistCard(artist);
             });
-            if (categoryData.artists.length === 0) {
-                artistsHtml = '<p style="color:var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">Tidak ada event terkait dalam 3 bulan ke depan.</p>';
+            if (filteredArtists.length === 0) {
+                artistsHtml = '<p style="color:var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">Tidak ada event terkait yang ditemukan.</p>';
             }
 
             let eventsHtml = '';
-            categoryData.events.forEach(event => {
+            filteredEvents.forEach(event => {
                 eventsHtml += createEventCard(event);
             });
-            if (categoryData.events.length === 0) {
-                eventsHtml = '<p style="color:var(--queen-pink); padding: 20px;">Tidak ada event lebih dari 3 bulan.</p>';
+            if (filteredEvents.length === 0) {
+                eventsHtml = '<p style="color:var(--queen-pink); padding: 20px;">Tidak ada event yang ditemukan.</p>';
             }
 
             gridContainer.style.opacity = '0';
@@ -607,6 +650,8 @@
                 listContainer.style.opacity = '1';
             }, 200);
         }
+
+        document.getElementById('globalSearch').addEventListener('input', applySearch);
 
         window.onload = () => {
             renderCategory('indonesia', document.querySelector('.tab-btn.active'));
