@@ -29,9 +29,7 @@ Route::get('/admin/logout', [AuthController::class, 'logout']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:3']);
 
-Route::get('/my-tickets', function () {
-    return view('my-tickets');
-})->middleware(['auth', 'role:3'])->name('my-tickets');
+Route::get('/my-tickets', [\App\Http\Controllers\MyTicketController::class, 'index'])->middleware(['auth', 'role:3'])->name('my-tickets');
 
 Route::get('/notifications', function () {
     return view('buyer-notification');

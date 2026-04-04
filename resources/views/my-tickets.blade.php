@@ -279,7 +279,154 @@
             box-shadow: 0 6px 20px rgba(243, 200, 221, 0.4);
         }
 
+        .tickets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .ticket-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(243, 200, 221, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            gap: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(243, 200, 221, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .ticket-poster {
+            width: 160px;
+            height: 160px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .ticket-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ticket-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .event-name {
+            font-size: 1.5rem;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .ticket-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .ticket-status.lunas { background: rgba(168, 230, 207, 0.2); color: #a8e6cf; }
+        .ticket-status.pending { background: rgba(255, 211, 182, 0.2); color: #ffd3b6; }
+        .ticket-status.batal { background: rgba(255, 139, 148, 0.2); color: #ff8b94; }
+
+        .ticket-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--queen-pink);
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .ticket-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(243, 200, 221, 0.2);
+        }
+
+        .ticket-type {
+            font-size: 1.1rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .type-label {
+            color: var(--queen-pink);
+            opacity: 0.8;
+            font-size: 0.9rem;
+            margin-right: 5px;
+        }
+
+        .ticket-qty {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .btn-qr {
+            background: rgba(209, 131, 169, 0.2);
+            border: 1px solid var(--middle-purple);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-qr:hover {
+            background: var(--middle-purple);
+            color: var(--jacarta);
+        }
+
         @media (max-width: 768px) {
+            .ticket-card { flex-direction: column; align-items: center; text-align: center; }
+            .ticket-header { flex-direction: column; align-items: center; gap: 10px; }
+            .ticket-poster { width: 100%; height: 200px; }
+            .ticket-bottom { flex-direction: column; gap: 15px; }
             .sidebar {
                 width: 0;
                 border: none;
@@ -360,12 +507,43 @@
         </div>
 
         <div id="history" class="ticket-content active">
-            <div class="empty-state">
-                <i class="ph ph-ticket empty-icon"></i>
-                <div class="empty-title">No ticket history yet</div>
-                <div class="empty-desc">You haven't purchased any tickets yet. Explore our upcoming events and grab yours now!</div>
-                <a href="{{ url('/dashboard') }}" class="btn-browse">Browse Events</a>
-            </div>
+            @if(isset($tickets) && $tickets->count() > 0)
+                <div class="tickets-list">
+                    @foreach($tickets as $ticket)
+                        <div class="ticket-card">
+                            <div class="ticket-poster">
+                                <img src="{{ asset($ticket->poster) }}" alt="{{ $ticket->nama_event }}" onerror="this.src='{{ asset('images/event_placeholder.jpg') }}'">
+                            </div>
+                            <div class="ticket-details">
+                                <div class="ticket-header">
+                                    <h3 class="event-name">{{ $ticket->nama_event }}</h3>
+                                    <span class="ticket-status {{ strtolower($ticket->status_transaksi) }}">{{ $ticket->status_transaksi }}</span>
+                                </div>
+                                <div class="ticket-info">
+                                    <div class="info-item"><i class="ph ph-calendar-blank"></i> {{ \Illuminate\Support\Carbon::parse($ticket->tanggal_pelaksanaan)->format('d M Y') }}</div>
+                                    <div class="info-item"><i class="ph ph-map-pin"></i> {{ $ticket->lokasi_event }}</div>
+                                </div>
+                                <div class="ticket-bottom">
+                                    <div class="ticket-type">
+                                        <span><span class="type-label">Type:</span> <strong>{{ $ticket->jenis_tiket }}</strong></span>
+                                        <span class="ticket-qty">x{{ $ticket->jumlah_beli }}</span>
+                                    </div>
+                                    @if($ticket->status_transaksi == 'lunas')
+                                    <button class="btn-qr"><i class="ph ph-qr-code"></i> Tampilkan QR</button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="empty-state">
+                    <i class="ph ph-ticket empty-icon"></i>
+                    <div class="empty-title">No ticket history yet</div>
+                    <div class="empty-desc">You haven't purchased any tickets yet. Explore our upcoming events and grab yours now!</div>
+                    <a href="{{ url('/dashboard') }}" class="btn-browse">Browse Events</a>
+                </div>
+            @endif
         </div>
 
         <div id="waiting-list" class="ticket-content">
