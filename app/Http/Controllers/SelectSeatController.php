@@ -102,35 +102,70 @@ class SelectSeatController extends Controller
         }
 
         $paymentMethod = $request->input('payment_method');
-        $tickets = $request->input('tickets', []);
+        $tickets = $request->input('tickets', []); // [id_tiket => qty]
         $userId = Auth::id();
+
+        if (empty($tickets)) {
+            return redirect('/dashboard')->with('error', 'No tickets selected.');
+        }
 
         DB::beginTransaction();
         try {
-            // 1. Create Transaction Header
-            // sp_buat_pesanan(p_id_user, p_metode_pembayaran, OUT p_id_transaksi)
-            DB::statement('CALL sp_buat_pesanan(?, ?, @id_baru)', [$userId, $paymentMethod]);
-            $res = DB::selectOne('SELECT @id_baru as id');
+            $firstTicketId = key($tickets);
+            $ticketData = DB::table('tiket')->where('id_tiket', $firstTicketId)->first();
+            if (!$ticketData) {
+                throw new \Exception('Invalid ticket selection.');
+            }
+            $idEvent = $ticketData->id_event;
+
+            $totalAmount = 0;
+            foreach ($tickets as $id => $qty) {
+                if ($qty > 0) {
+                    $t = DB::table('tiket')->where('id_tiket', $id)->first();
+                    if ($t) {
+                        $totalAmount += $t->harga * $qty;
+                    }
+                }
+            }
+
+            $res = DB::selectOne('SELECT sp_buat_pesanan(?, ?, ?, ?) AS id', [
+                $userId, 
+                $idEvent, 
+                $paymentMethod, 
+                $totalAmount
+            ]);
             $newOrderId = $res ? $res->id : null;
 
             if (!$newOrderId) {
                 throw new \Exception('Failed to generate transaction ID.');
             }
 
-            // 2. Add Transaction Items
-            // sp_tambah_item(p_id_transaksi, p_id_tiket, p_qty)
+            $hasWaiting = false;
             foreach ($tickets as $id => $qty) {
                 if ($qty > 0) {
                     DB::statement('CALL sp_tambah_item(?, ?, ?)', [$newOrderId, $id, $qty]);
+                    
+                    $detail = DB::table('detail_transaksi')
+                        ->where('id_transaksi', $newOrderId)
+                        ->where('id_tiket', $id)
+                        ->first();
+                    if ($detail && $detail->status_item == 'waiting') {
+                        $hasWaiting = true;
+                    }
                 }
             }
             DB::commit();
+
+            $message = $hasWaiting 
+                ? 'Order placed! Some tickets are in the Waiting List.' 
+                : 'Payment successful using ' . strtoupper($paymentMethod) . '!';
+            
+            return redirect()->route('my-tickets')->with('success', $message);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            // Redirect to dashboard with error to avoid MethodNotAllowed on back()
+            \Illuminate\Support\Facades\Log::error('Checkout failed: ' . $e->getMessage());
             return redirect('/dashboard')->with('error', 'Checkout failed: ' . $e->getMessage());
         }
-
-        return redirect('/dashboard')->with('success', 'Payment successful using ' . strtoupper($paymentMethod) . '! Your tickets will be sent to your email.');
     }
 }

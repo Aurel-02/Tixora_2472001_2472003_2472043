@@ -26,6 +26,8 @@ class MyTicketController extends Controller
                 'tiket.jenis_tiket',
                 'detail_transaksi.jumlah_beli',
                 'detail_transaksi.kode_QR',
+                'detail_transaksi.status_item',
+                'detail_transaksi.id_detail',
                 'transaksi.status_transaksi',
                 'transaksi.tanggal_transaksi',
                 'transaksi.id_transaksi'
@@ -33,5 +35,37 @@ class MyTicketController extends Controller
             ->get();
 
         return view('my-tickets', compact('tickets'));
+    }
+
+    public function cancel($id)
+    {
+        $userId = Auth::id();
+
+        $detail = DB::table('detail_transaksi')
+            ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+            ->where('detail_transaksi.id_detail', $id)
+            ->where('transaksi.id_user', $userId)
+            ->select('detail_transaksi.*', 'transaksi.id_transaksi')
+            ->first();
+
+        if (!$detail) {
+            return back()->with('error', 'Ticket not found or unauthorized.');
+        }
+
+        DB::beginTransaction();
+        try {
+            DB::table('detail_transaksi')
+                ->where('id_detail', $id)
+                ->update(['status_item' => 'cancel']);
+            DB::table('transaksi')
+                ->where('id_transaksi', $detail->id_transaksi)
+                ->update(['status_transaksi' => 'batal']);
+
+            DB::commit();
+            return back()->with('success', 'Ticket canceled successfully. It has been moved to the Canceled tab.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to cancel ticket: ' . $e->getMessage());
+        }
     }
 }

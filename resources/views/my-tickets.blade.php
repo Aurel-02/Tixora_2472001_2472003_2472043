@@ -403,25 +403,6 @@
             font-weight: 600;
         }
 
-        .btn-qr {
-            background: rgba(209, 131, 169, 0.2);
-            border: 1px solid var(--middle-purple);
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-qr:hover {
-            background: var(--middle-purple);
-            color: var(--jacarta);
-        }
-
         @media (max-width: 768px) {
             .ticket-card { flex-direction: column; align-items: center; text-align: center; }
             .ticket-header { flex-direction: column; align-items: center; gap: 10px; }
@@ -449,6 +430,146 @@
                 flex: 1;
                 text-align: center;
             }
+        }
+
+        .btn-cancel {
+            background: rgba(255, 139, 148, 0.1);
+            border: 1px solid #ff8b94;
+            color: #ff8b94;
+            padding: 8px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-cancel:hover {
+            background: #ff8b94;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(255, 139, 148, 0.4);
+        }
+
+        .alert {
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: rgba(168, 230, 207, 0.2);
+            color: #a8e6cf;
+            border: 1px solid rgba(168, 230, 207, 0.4);
+        }
+
+        .alert-error {
+            background: rgba(255, 139, 148, 0.2);
+            color: #ff8b94;
+            border: 1px solid rgba(255, 139, 148, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #4B1535, #3A345B);
+            border: 1px solid rgba(243, 200, 221, 0.2);
+            width: 90%;
+            max-width: 450px;
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            color: #ff8b94;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .modal-desc {
+            font-size: 1.1rem;
+            color: var(--queen-pink);
+            margin-bottom: 30px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-keep {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(243, 200, 221, 0.4);
+            color: #fff;
+        }
+
+        .btn-keep:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-confirm {
+            background: #ff8b94;
+            border: none;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 139, 148, 0.3);
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 139, 148, 0.5);
         }
     </style>
 </head>
@@ -501,15 +622,38 @@
             <p class="page-desc">Manage your purchased tickets and waiting list status</p>
         </div>
 
+        <div style="padding: 0 40px;">
+            @if(session('success'))
+                <div class="alert alert-success">
+                    <i class="ph ph-check-circle" style="font-size: 1.4rem;"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-error">
+                    <i class="ph ph-warning-circle" style="font-size: 1.4rem;"></i>
+                    {{ session('error') }}
+                </div>
+            @endif
+        </div>
+
         <div class="ticket-tabs">
             <button class="ticket-tab active" onclick="switchTab('history')">History</button>
             <button class="ticket-tab" onclick="switchTab('waiting-list')">Waiting List</button>
+            <button class="ticket-tab" onclick="switchTab('canceled')">Canceled</button>
         </div>
 
         <div id="history" class="ticket-content active">
-            @if(isset($tickets) && $tickets->count() > 0)
+            @php 
+                $historyTickets = $tickets->filter(function($t) {
+                    return in_array(strtolower($t->status_transaksi), ['lunas', 'pending']) && strtolower($t->status_item) != 'waiting';
+                });
+            @endphp
+
+            @if($historyTickets->count() > 0)
                 <div class="tickets-list">
-                    @foreach($tickets as $ticket)
+                    @foreach($historyTickets as $ticket)
                         <div class="ticket-card">
                             <div class="ticket-poster">
                                 <img src="{{ asset($ticket->poster) }}" alt="{{ $ticket->nama_event }}" onerror="this.src='{{ asset('images/event_placeholder.jpg') }}'">
@@ -517,7 +661,6 @@
                             <div class="ticket-details">
                                 <div class="ticket-header">
                                     <h3 class="event-name">{{ $ticket->nama_event }}</h3>
-                                    <span class="ticket-status {{ strtolower($ticket->status_transaksi) }}">{{ $ticket->status_transaksi }}</span>
                                 </div>
                                 <div class="ticket-info">
                                     <div class="info-item"><i class="ph ph-calendar-blank"></i> {{ \Illuminate\Support\Carbon::parse($ticket->tanggal_pelaksanaan)->format('d M Y') }}</div>
@@ -528,9 +671,10 @@
                                         <span><span class="type-label">Type:</span> <strong>{{ $ticket->jenis_tiket }}</strong></span>
                                         <span class="ticket-qty">x{{ $ticket->jumlah_beli }}</span>
                                     </div>
-                                    @if($ticket->status_transaksi == 'lunas')
-                                    <button class="btn-qr"><i class="ph ph-qr-code"></i> Tampilkan QR</button>
-                                    @endif
+                                    <button type="button" class="btn-cancel" onclick="showCancelModal('{{ $ticket->id_detail }}')">Cancel Ticket</button>
+                                    <form id="cancel-form-{{ $ticket->id_detail }}" action="{{ route('my-tickets.cancel', $ticket->id_detail) }}" method="POST" style="display: none;">
+                                        @csrf
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -547,14 +691,101 @@
         </div>
 
         <div id="waiting-list" class="ticket-content">
-            <div class="empty-state">
-                <i class="ph ph-hourglass-medium empty-icon"></i>
-                <div class="empty-title">Your waiting list is empty</div>
-                <div class="empty-desc">You are not currently in any waiting list. If tickets for an event open up, they will appear here.</div>
-                <a href="{{ url('/dashboard') }}" class="btn-browse">Discover More</a>
-            </div>
+            @php 
+                $waitingTickets = $tickets->filter(function($t) {
+                    return strtolower($t->status_item) == 'waiting' && strtolower($t->status_transaksi) != 'batal';
+                });
+            @endphp
+
+            @if($waitingTickets->count() > 0)
+                <div class="tickets-list">
+                    @foreach($waitingTickets as $ticket)
+                        <div class="ticket-card">
+                            <div class="ticket-poster">
+                                <img src="{{ asset($ticket->poster) }}" alt="{{ $ticket->nama_event }}" onerror="this.src='{{ asset('images/event_placeholder.jpg') }}'">
+                            </div>
+                            <div class="ticket-details">
+                                <div class="ticket-header">
+                                    <h3 class="event-name">{{ $ticket->nama_event }}</h3>
+                                </div>
+                                <div class="ticket-info">
+                                    <div class="info-item"><i class="ph ph-calendar-blank"></i> {{ \Illuminate\Support\Carbon::parse($ticket->tanggal_pelaksanaan)->format('d M Y') }}</div>
+                                    <div class="info-item"><i class="ph ph-map-pin"></i> {{ $ticket->lokasi_event }}</div>
+                                </div>
+                                <div class="ticket-bottom">
+                                    <div class="ticket-type">
+                                        <span><span class="type-label">Type:</span> <strong>{{ $ticket->jenis_tiket }}</strong></span>
+                                        <span class="ticket-qty">x{{ $ticket->jumlah_beli }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="empty-state">
+                    <i class="ph ph-hourglass-medium empty-icon"></i>
+                    <div class="empty-title">Your waiting list is empty</div>
+                    <div class="empty-desc">You are not currently in any waiting list. If tickets for an event open up, they will appear here.</div>
+                    <a href="{{ url('/dashboard') }}" class="btn-browse">Discover More</a>
+                </div>
+            @endif
+        </div>
+
+        <div id="canceled" class="ticket-content">
+            @php 
+                $canceledTickets = $tickets->filter(function($t) {
+                    return strtolower($t->status_transaksi) == 'batal';
+                });
+            @endphp
+
+            @if($canceledTickets->count() > 0)
+                <div class="tickets-list">
+                    @foreach($canceledTickets as $ticket)
+                        <div class="ticket-card">
+                            <div class="ticket-poster">
+                                <img src="{{ asset($ticket->poster) }}" alt="{{ $ticket->nama_event }}" onerror="this.src='{{ asset('images/event_placeholder.jpg') }}'">
+                            </div>
+                            <div class="ticket-details">
+                                <div class="ticket-header">
+                                    <h3 class="event-name">{{ $ticket->nama_event }}</h3>
+                                </div>
+                                <div class="ticket-info">
+                                    <div class="info-item"><i class="ph ph-calendar-blank"></i> {{ \Illuminate\Support\Carbon::parse($ticket->tanggal_pelaksanaan)->format('d M Y') }}</div>
+                                    <div class="info-item"><i class="ph ph-map-pin"></i> {{ $ticket->lokasi_event }}</div>
+                                </div>
+                                <div class="ticket-bottom">
+                                    <div class="ticket-type">
+                                        <span><span class="type-label">Type:</span> <strong>{{ $ticket->jenis_tiket }}</strong></span>
+                                        <span class="ticket-qty">x{{ $ticket->jumlah_beli }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="empty-state">
+                    <i class="ph ph-prohibit empty-icon"></i>
+                    <div class="empty-title">No canceled tickets</div>
+                    <div class="empty-desc">You don't have any canceled tickets in your history.</div>
+                </div>
+            @endif
         </div>
     </main>
+
+    <!-- Cancellation Modal -->
+    <div id="cancelModal" class="modal-overlay">
+        <div class="modal-content">
+            <i class="ph ph-warning-circle modal-icon"></i>
+            <h2 class="modal-title">Cancel Ticket?</h2>
+            <p class="modal-desc">Are you sure you want to cancel this ticket? This action will process waiting lists and move the ticket to your canceled history.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal btn-keep" onclick="closeCancelModal()">No, Keep it</button>
+                <button type="button" class="btn-modal btn-confirm" id="confirmCancelBtn">Yes, Cancel Ticket</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.getElementById('globalSearch')?.addEventListener('keyup', function(e) {
@@ -572,6 +803,34 @@
                 content.classList.remove('active');
             });
             document.getElementById(tabId).classList.add('active');
+        }
+
+        let currentTicketId = null;
+
+        function showCancelModal(id) {
+            currentTicketId = id;
+            const modal = document.getElementById('cancelModal');
+            modal.classList.add('active');
+        }
+
+        function closeCancelModal() {
+            const modal = document.getElementById('cancelModal');
+            modal.classList.remove('active');
+            currentTicketId = null;
+        }
+
+        document.getElementById('confirmCancelBtn').addEventListener('click', function() {
+            if (currentTicketId) {
+                document.getElementById('cancel-form-' + currentTicketId).submit();
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('cancelModal');
+            if (event.target == modal) {
+                closeCancelModal();
+            }
         }
     </script>
 </body>

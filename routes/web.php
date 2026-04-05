@@ -7,6 +7,7 @@ use App\Http\Controllers\TambahEventController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\SignupController;
+use App\Http\Controllers\CheckoutController;
 
 Route::get('/', function () {
     return view('landing');
@@ -30,6 +31,7 @@ Route::get('/admin/logout', [AuthController::class, 'logout']);
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:3']);
 
 Route::get('/my-tickets', [\App\Http\Controllers\MyTicketController::class, 'index'])->middleware(['auth', 'role:3'])->name('my-tickets');
+Route::post('/my-tickets/cancel/{id}', [\App\Http\Controllers\MyTicketController::class, 'cancel'])->middleware(['auth', 'role:3'])->name('my-tickets.cancel');
 
 Route::get('/notifications', function () {
     return view('buyer-notification');
@@ -58,7 +60,7 @@ Route::get('/organizer/checkin', function () {
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
 Route::get('/event/{id}/select-seat', [\App\Http\Controllers\SelectSeatController::class, 'index'])->name('event.select-seat');
 Route::post('/event/{id}/checkout', [\App\Http\Controllers\SelectSeatController::class, 'checkout'])->name('event.checkout');
-Route::post('/checkout/process', [\App\Http\Controllers\SelectSeatController::class, 'processPayment'])->name('checkout.process');
+Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
 Route::get('/admin/events', [EventController::class, 'index']);
 Route::get('/admin/events/create', [EventController::class, 'create']);
 Route::post('/admin/events', [EventController::class, 'store']);
