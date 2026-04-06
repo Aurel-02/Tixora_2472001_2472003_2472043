@@ -450,9 +450,15 @@ or<!DOCTYPE html>
         <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
             <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
                 <li>
-                    <a href="#" class="sidebar-item active">
+                    <a href="{{ url('/organizerdashboard') }}" class="sidebar-item active">
                         <i class="ph ph-house sidebar-icon"></i>
                         <span class="sidebar-text">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('organizer.statistik') }}" class="sidebar-item">
+                        <i class="ph ph-chart-bar sidebar-icon"></i>
+                        <span class="sidebar-text">Statistik Penjualan</span>
                     </a>
                 </li>
 

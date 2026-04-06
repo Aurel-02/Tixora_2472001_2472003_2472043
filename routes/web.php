@@ -47,6 +47,7 @@ Route::get('/organizer/events/create', [TambahEventController::class, 'create'])
 Route::get('/organizer/events', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
 Route::post('/organizer/events', [TambahEventController::class, 'store'])->middleware(['auth', 'role:2'])->name('organizer.events.store');
 Route::get('/organizer/event/{id}', [DashboardController::class, 'showEventOrganizer'])->middleware(['auth', 'role:2'])->name('organizer.event.detail');
+Route::get('/organizer/statistik', [\App\Http\Controllers\StatistikController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.statistik');
 Route::post('/organizer/event/{id}/update-description', [\App\Http\Controllers\EditEventController::class, 'updateDescription'])->middleware(['auth', 'role:2'])->name('organizer.event.update-description');
 Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventController::class, 'addQuota'])->middleware(['auth', 'role:2'])->name('organizer.event.add-quota');
 Route::get('/organizer/notifications', [\App\Http\Controllers\NotifikasiController::class, 'organizer'])->middleware(['auth', 'role:2'])->name('organizer.notifications');

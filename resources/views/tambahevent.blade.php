@@ -209,6 +209,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('organizer.statistik') }}" class="sidebar-item">
+                        <i class="ph ph-chart-bar sidebar-icon"></i>
+                        <span class="sidebar-text">Statistik Penjualan</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#" class="sidebar-item active">
                         <i class="ph ph-plus-circle sidebar-icon"></i>
                         <span class="sidebar-text">Tambah Event</span>
