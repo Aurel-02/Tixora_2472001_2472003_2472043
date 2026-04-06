@@ -536,9 +536,10 @@ or<!DOCTYPE html>
             `;
         }
 
-        function renderEvents(events) {
+        function renderEvents(events, isSearch = false) {
             if (!events.length) {
-                gridContainer.innerHTML = '<p style="color: var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">Belum ada event sesuai pencarian.</p>';
+                const message = isSearch ? 'Belum ada event yang sesuai dengan pencarian' : 'Belum ada event terdaftar';
+                gridContainer.innerHTML = `<p style="color: var(--queen-pink); padding: 20px; width: 100%; grid-column: 1 / -1; text-align: center;">${message}</p>`;
                 return;
             }
 
@@ -578,6 +579,8 @@ or<!DOCTYPE html>
                     btn.classList.remove('active');
                     btn.style.opacity = '0.5';
                 });
+                
+                renderEvents(events, true);
             } else {
                 events = getCurrentCategoryEvents();
                 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -588,9 +591,9 @@ or<!DOCTYPE html>
                         btn.classList.add('active');
                     }
                 });
+                
+                renderEvents(events, false);
             }
-
-            renderEvents(events);
         }
 
         searchInput.addEventListener('input', applySearchFilter);
