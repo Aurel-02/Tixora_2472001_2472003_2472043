@@ -6,6 +6,7 @@
     <title>Tixora - Event Detail Organizer</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --jacarta: #3A345B;
@@ -180,20 +181,106 @@
 
         .poster-placeholder {
             width: 100%;
-            max-height: 500px;
+            max-height: 600px;
             aspect-ratio: 16/9;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(243, 200, 221, 0.1);
-            border-radius: 20px;
-            margin: 0 auto 50px;
+            border-radius: 24px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: rgba(243, 200, 221, 0.3);
             font-size: 1.5rem;
             font-weight: 500;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
             overflow: hidden;
+            margin: 0 auto 50px;
+        }
+
+        .poster-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Countdown Styles */
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .countdown-item {
+            background: rgba(113, 85, 122, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(209, 131, 169, 0.2);
+            border-radius: 15px;
+            min-width: 90px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .countdown-value {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--queen-pink);
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .countdown-label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.6;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(243, 200, 221, 0.1);
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(243, 200, 221, 0.05);
+        }
+
+        .summary-label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            opacity: 0.7;
+        }
+
+        .summary-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        .management-section {
+            width: 100%;
         }
 
         .section-card {
@@ -325,9 +412,17 @@
             background: rgba(209, 131, 169, 0.1);
         }
 
+        @media (max-width: 1100px) {
+            .poster-placeholder { max-height: 400px; }
+        }
+
         @media (max-width: 900px) {
             .actions-grid { grid-template-columns: 1fr; }
             .content-container { padding: 0 20px; }
+            .stats-summary { grid-template-columns: 1fr; }
+            .countdown-container { gap: 10px; }
+            .countdown-item { min-width: 70px; padding: 10px; }
+            .countdown-value { font-size: 1.4rem; }
         }
     </style>
 </head>
@@ -351,6 +446,12 @@
                     <a href="{{ url('/organizerdashboard') }}" class="sidebar-item">
                         <i class="ph ph-house sidebar-icon"></i>
                         <span class="sidebar-text">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('organizer.statistik') }}" class="sidebar-item">
+                        <i class="ph ph-chart-bar sidebar-icon"></i>
+                        <span class="sidebar-text">Statistik Penjualan</span>
                     </a>
                 </li>
                 <li>
@@ -406,95 +507,79 @@
             <div class="event-header">
                 <h1 class="event-title">{{ $event->nama_event }}</h1>
                 
-                <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; color: var(--queen-pink); font-size: 1.1rem; opacity: 0.9;">
+                <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; color: var(--queen-pink); font-size: 1.1rem; opacity: 0.9;">
                     <span><i class="ph ph-calendar" style="margin-right: 8px; color: var(--middle-purple);"></i> {{ $event->tanggal_pelaksanaan ? \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d F Y') : 'Date TBD' }}</span>
                     <span><i class="ph ph-clock" style="margin-right: 8px; color: var(--middle-purple);"></i> {{ $event->waktu_pelaksanaan ? \Carbon\Carbon::parse($event->waktu_pelaksanaan)->format('H:i') : 'Time TBD' }} WIB</span>
                     <span><i class="ph ph-map-pin" style="margin-right: 8px; color: var(--middle-purple);"></i> {{ $event->lokasi_event ?? 'Lokasi belum ditentukan' }}</span>
                 </div>
 
+                <div class="countdown-container" id="countdown" data-target="{{ $event->tanggal_pelaksanaan }} {{ $event->waktu_pelaksanaan }}">
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="days">00</span>
+                        <span class="countdown-label">Days</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="hours">00</span>
+                        <span class="countdown-label">Hours</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="minutes">00</span>
+                        <span class="countdown-label">Minutes</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="seconds">00</span>
+                        <span class="countdown-label">Seconds</span>
+                    </div>
+                </div>
+
                 <div class="poster-placeholder">
-                    @if($event->gambar_event)
-                        <img src="{{ $event->gambar_event }}" alt="{{ $event->nama_event }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    @if($event->poster)
+                        <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}">
                     @else
                         <span><i class="ph ph-image" style="font-size: 3rem; display: block; margin-bottom: 10px; opacity: 0.5;"></i> [ Poster Placeholder ]</span>
                     @endif
                 </div>
             </div>
 
-            <div class="section-card">
-                <h2 class="section-title"><i class="ph ph-chart-bar"></i> Statistik Penjualan Tiket</h2>
-                <div style="overflow-x: auto;">
-                    <table class="stats-table">
-                        <thead>
-                            <tr>
-                                <th>Kategori</th>
-                                <th>Harga</th>
-                                <th>Total Kuota</th>
-                                <th>Terjual</th>
-                                <th>Sisa</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($ticketStats as $stat)
-                            <tr>
-                                <td style="font-weight: 600; color: #fff;">{{ $stat->jenis_tiket }}</td>
-                                <td>Rp {{ number_format($stat->harga, 0, ',', '.') }}</td>
-                                <td>{{ number_format($stat->kuota) }}</td>
-                                <td style="color: #84d8a5;">{{ number_format($stat->terjual) }}</td>
-                                <td style="color: var(--middle-purple);">{{ number_format($stat->sisa) }}</td>
-                                <td>
-                                    @if($stat->sisa <= 0)
-                                        <span class="badge" style="background: rgba(239, 83, 80, 0.2); color: #ef5350;">SOLD OUT</span>
-                                    @elseif($stat->sisa < 10)
-                                        <span class="badge" style="background: rgba(255, 167, 38, 0.2); color: #ffa726;">LOW STOCK</span>
-                                    @else
-                                        <span class="badge" style="background: rgba(132, 216, 165, 0.2); color: #84d8a5;">AVAILABLE</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
 
-            <div class="section-card">
-                <h2 class="section-title"><i class="ph ph-gear"></i> Fitur Aksi Manajer</h2>
-                <div class="actions-grid">
+            <div class="management-section">
+                <div class="section-card">
+                    <h2 class="section-title"><i class="ph ph-gear"></i> Dashboard kelola event</h2>
+                    <div class="actions-grid">
 
-                    <div class="action-card">
-                        <form action="{{ route('organizer.event.update-description', $event->id_event) }}" method="POST">
-                            @csrf
-                            <label class="form-label"><i class="ph ph-note-pencil"></i> Ubah Deskripsi Event</label>
-                            <textarea name="deskripsi" class="form-control" rows="4" placeholder="Masukkan deskripsi baru untuk event ini..."></textarea>
-                            <button type="submit" class="btn btn-primary" style="margin-top: 15px; width: 100%;">Update Deskripsi</button>
-                        </form>
-                    </div>
-
-                    <div class="action-card">
-                        <form action="{{ route('organizer.event.add-quota', $event->id_event) }}" method="POST">
-                            @csrf
-                            <label class="form-label"><i class="ph ph-plus-circle"></i> Tambah Kuota Tiket</label>
-                            <select name="id_tiket" class="form-control" style="margin-bottom: 12px;" required>
-                                <option value="" disabled selected>Pilih Kategori Tiket</option>
-                                @foreach($ticketStats as $stat)
-                                    <option value="{{ $stat->id_tiket }}">{{ $stat->jenis_tiket }}</option>
-                                @endforeach
-                            </select>
-                            <input type="number" name="jumlah_tambah" class="form-control" placeholder="Jumlah kuota tambahan" min="1" required>
-                            <button type="submit" class="btn btn-primary" style="margin-top: 15px; width: 100%;">Tambah Kuota</button>
-                        </form>
-                    </div>
-
-                    <div class="action-card" style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 5px;">Daftar Peserta</h3>
-                            <p style="font-size: 0.85rem; opacity: 0.7;">Download seluruh data pembeli tiket untuk event ini (CSV/Excel).</p>
+                        <div class="action-card">
+                            <form action="{{ route('organizer.event.update-description', $event->id_event) }}" method="POST">
+                                @csrf
+                                <label class="form-label"><i class="ph ph-note-pencil"></i> Ubah Deskripsi Event</label>
+                                <textarea name="deskripsi" class="form-control" rows="4" placeholder="Masukkan deskripsi baru untuk event ini...">{{ $event->deskripsi }}</textarea>
+                                <button type="submit" class="btn btn-primary" style="margin-top: 15px; width: 100%;">Update Deskripsi</button>
+                            </form>
                         </div>
-                        <button class="btn btn-outline" style="border-radius: 50px; padding: 10px 30px;">
-                            <i class="ph ph-download-simple"></i> Ekspor Data Peserta
-                        </button>
+
+                        <div class="action-card">
+                            <form action="{{ route('organizer.event.add-quota', $event->id_event) }}" method="POST">
+                                @csrf
+                                <label class="form-label"><i class="ph ph-plus-circle"></i> Tambah Kuota Tiket</label>
+                                <select name="id_tiket" class="form-control" style="margin-bottom: 12px;" required>
+                                    <option value="" disabled selected>Pilih Kategori Tiket</option>
+                                    @foreach($ticketStats as $stat)
+                                        <option value="{{ $stat->id_tiket }}">{{ $stat->jenis_tiket }}</option>
+                                    @endforeach
+                                </select>
+                                <input type="number" name="jumlah_tambah" class="form-control" placeholder="Jumlah kuota tambahan" min="1" required>
+                                <button type="submit" class="btn btn-primary" style="margin-top: 15px; width: 100%;">Tambah Kuota</button>
+                            </form>
+                        </div>
+
+                        <div class="action-card" style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 5px;">Daftar Peserta</h3>
+                                <p style="font-size: 0.85rem; opacity: 0.7;">Download seluruh data pembeli tiket untuk event ini (CSV/Excel).</p>
+                            </div>
+                            <button class="btn btn-outline" style="border-radius: 50px; padding: 10px 30px;">
+                                <i class="ph ph-download-simple"></i> Ekspor Data Peserta
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -502,7 +587,33 @@
     </main>
 
     <script>
+        // Countdown Timer
+        function updateCountdown() {
+            const targetStr = document.getElementById('countdown').getAttribute('data-target');
+            const targetDate = new Date(targetStr).getTime();
+            
+            setInterval(() => {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+                
+                if (distance < 0) {
+                    document.getElementById('countdown').innerHTML = "<h3 style='color: var(--middle-purple);'>EVENT HAS STARTED</h3>";
+                    return;
+                }
+                
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                document.getElementById('days').innerText = days.toString().padStart(2, '0');
+                document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+            }, 1000);
+        }
 
+        updateCountdown();
     </script>
 </body>
 </html>

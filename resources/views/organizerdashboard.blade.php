@@ -450,9 +450,15 @@ or<!DOCTYPE html>
         <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
             <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
                 <li>
-                    <a href="#" class="sidebar-item active">
+                    <a href="{{ url('/organizerdashboard') }}" class="sidebar-item active">
                         <i class="ph ph-house sidebar-icon"></i>
                         <span class="sidebar-text">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('organizer.statistik') }}" class="sidebar-item">
+                        <i class="ph ph-chart-bar sidebar-icon"></i>
+                        <span class="sidebar-text">Statistik Penjualan</span>
                     </a>
                 </li>
 
@@ -522,7 +528,7 @@ or<!DOCTYPE html>
         }
 
         function createEventCard(event) {
-            const imageUrl = event.gambar_event || event.image_url || event.banner || event.image || null;
+            const imageUrl = event.poster || event.gambar_event || event.image_url || event.banner || event.image || null;
             const eventDate = event.tanggal_pelaksanaan ? formatDate(event.tanggal_pelaksanaan) : '-';
             const eventId = event.id_event || event.id;
 
@@ -572,7 +578,6 @@ or<!DOCTYPE html>
                     events = events.concat(data[cat] || []);
                 });
                 
-                // Unique events
                 events = Array.from(new Map(events.map(item => [item.id_event || item.id, item])).values());
 
                 events = events.filter(event => {

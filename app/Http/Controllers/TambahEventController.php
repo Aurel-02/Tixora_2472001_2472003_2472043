@@ -38,6 +38,7 @@ class TambahEventController extends Controller
             'tanggal_pelaksanaan' => 'required|date',
             'lokasi_event' => 'required|string|max:255',
             'deskripsi' => 'required|string',
+            'poster' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'tickets' => 'nullable|array',
             'tickets.*.jenis_tiket' => 'nullable|in:REGULER,VIP,VVIP',
             'tickets.*.harga' => 'nullable|numeric|min:0',
@@ -45,6 +46,15 @@ class TambahEventController extends Controller
         ]);
 
         $adminId = session('login_admin.id');
+
+        // Handle file upload
+        $posterPath = null;
+        if ($request->hasFile('poster')) {
+            $file = $request->file('poster');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('posters'), $fileName);
+            $posterPath = 'posters/' . $fileName;
+        }
 
         $ticketData = $request->input('tickets', []);
         $formattedTickets = [];
@@ -82,6 +92,18 @@ class TambahEventController extends Controller
                 $adminId,
                 $ticketsJson
             ]);
+
+            // Update poster path after creation
+            if ($posterPath) {
+                $lastEvent = Event::where('id_user', $adminId)
+                    ->where('nama_event', $validated['nama_event'])
+                    ->orderBy('id_event', 'desc')
+                    ->first();
+                
+                if ($lastEvent) {
+                    $lastEvent->update(['poster' => $posterPath]);
+                }
+            }
 
             return redirect()->route('organizerdashboard')->with('success', 'Event berhasil disimpan');
         } catch (\Illuminate\Database\QueryException $e) {
