@@ -368,7 +368,7 @@
 <body>
 
     <header class="topbar">
-        <a href="{{ auth()->check() && auth()->user()->id_role == 2 ? route('organizerdashboard') : '/dashboard' }}" class="logo">TIXORA</a>
+        <a href="{{ auth()->check() && auth()->user()->role == 'Organizer' ? route('organizerdashboard') : (auth()->check() && auth()->user()->role == 'Admin' ? '/admin/dashboard' : '/dashboard') }}" class="logo">TIXORA</a>
         <div style="display: flex; align-items: center; gap: 15px;">
             <div class="search-box" style="display: flex; align-items: center; border: 1px solid rgba(243, 200, 221, 0.4); border-radius: 50px; background: rgba(58, 52, 91, 0.4); padding: 8px 18px; min-width: 250px; transition: all 0.3s ease;">
                 <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1.1rem; margin-right: 10px;"></i>
@@ -385,15 +385,72 @@
     </header>
 
     <aside class="sidebar">
-        <ul class="sidebar-menu">
-            <li><a href="/dashboard" class="sidebar-item"><i class="ph ph-house sidebar-icon"></i><span
-                        class="sidebar-text">Home</span></a></li>
+        <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
+            <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
+                @if(auth()->check() && auth()->user()->role == 'Organizer')
+                    <li>
+                        <a href="{{ route('organizerdashboard') }}" class="sidebar-item">
+                            <i class="ph ph-house sidebar-icon"></i>
+                            <span class="sidebar-text">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('organizer.events.create') }}" class="sidebar-item">
+                            <i class="ph ph-plus-circle sidebar-icon"></i>
+                            <span class="sidebar-text">Tambah Event</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('organizer.checkin') }}" class="sidebar-item">
+                            <i class="ph ph-qr-code sidebar-icon"></i>
+                            <span class="sidebar-text">Check In</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('organizer.notifications') }}" class="sidebar-item">
+                            <i class="ph ph-bell sidebar-icon"></i>
+                            <span class="sidebar-text">Notifications</span>
+                        </a>
+                    </li>
+                @elseif(auth()->check() && auth()->user()->role == 'Admin')
+                    <li>
+                        <a href="/admin/dashboard" class="sidebar-item">
+                            <i class="ph ph-house sidebar-icon"></i>
+                            <span class="sidebar-text">Home</span>
+                        </a>
+                    </li>
+                @else
+                    <li>
+                        <a href="/dashboard" class="sidebar-item">
+                            <i class="ph ph-house sidebar-icon"></i>
+                            <span class="sidebar-text">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('my-tickets') }}" class="sidebar-item">
+                            <i class="ph ph-ticket sidebar-icon"></i>
+                            <span class="sidebar-text">My Tickets</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('buyer.notification') }}" class="sidebar-item">
+                            <i class="ph ph-bell sidebar-icon"></i>
+                            <span class="sidebar-text">Notifications</span>
+                        </a>
+                    </li>
+                @endif
+            </ul>
 
-            <li><a href="{{ route('my-tickets') }}" class="sidebar-item"><i class="ph ph-ticket sidebar-icon"></i><span class="sidebar-text">My
-                        Tickets</span></a></li>
-            <li><a href="{{ route('buyer.notification') }}" class="sidebar-item"><i class="ph ph-bell sidebar-icon"></i><span
-                        class="sidebar-text">Notifications</span></a></li>
-        </ul>
+            <div style="padding: 10px 0;">
+                <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
+                    @csrf
+                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; padding: 15px 22px; cursor: pointer;">
+                        <i class="ph ph-sign-out sidebar-icon"></i>
+                        <span class="sidebar-text">Logout</span>
+                    </button>
+                </form>
+            </div>
+        </div>
     </aside>
 
     <main class="main-wrapper">
@@ -441,11 +498,6 @@
 
                     <button type="submit" class="btn-submit">Save Changes</button>
                 </form>
-
-                <form action="{{ route('logout') }}" method="POST" style="margin-top: 15px;">
-                    @csrf
-                    <button type="submit" class="btn-logout">Logout</button>
-                </form>
             </div>
 
             <div class="photo-container">
@@ -478,8 +530,14 @@
     <script>
         document.getElementById('globalSearch')?.addEventListener('keyup', function(e) {
             if(e.key === 'Enter') {
-                const isOrg = {{ auth()->check() && auth()->user()->id_role == 2 ? 'true' : 'false' }};
-                window.location.href = isOrg ? '/organizerdashboard' : '/dashboard';
+                const role = "{{ auth()->check() ? auth()->user()->role : '' }}";
+                if (role === 'Organizer') {
+                    window.location.href = '/organizerdashboard';
+                } else if (role === 'Admin') {
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    window.location.href = '/dashboard';
+                }
             }
         });
 

@@ -307,7 +307,13 @@
     <header class="topbar">
         <div class="logo">TIXORA</div>
         <div style="display: flex; align-items: center; gap: 12px;">
-            <div class="profile" title="My Profile">U</div>
+        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+            @if(auth()->check() && auth()->user()->photo_profile)
+                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            @else
+                {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
+            @endif
+        </a>
         </div>
     </header>
 
@@ -359,65 +365,27 @@
 
         <div class="notifications-container">
 
-            <div class="notif-card unread">
-                <div class="notif-icon">
-                    <i class="ph ph-ticket"></i>
+            @forelse($notifications as $notif)
+            <div class="notif-card {{ $notif->unread_class }}">
+                <div class="notif-icon {{ $notif->icon_class }}">
+                    {!! $notif->icon !!}
                 </div>
                 <div class="notif-content">
                     <div class="notif-title">
-                        Tiket Berhasil Terjual <span class="notif-badge">Baru</span>
+                        {!! $notif->title !!}
                     </div>
                     <div class="notif-desc">
-                        User <strong>Budi Santoso</strong> baru saja membeli <strong>2 Tiket VIP</strong> untuk event <strong>Coldplay Live in Jakarta</strong>.
+                        {!! $notif->desc !!}
                     </div>
-                    <div class="notif-time"><i class="ph ph-clock"></i> 5 menit yang lalu</div>
+                    <div class="notif-time"><i class="ph ph-clock"></i> {{ $notif->time }}</div>
                 </div>
             </div>
-
-            <div class="notif-card unread">
-                <div class="notif-icon">
-                    <i class="ph ph-ticket"></i>
-                </div>
-                <div class="notif-content">
-                    <div class="notif-title">
-                        Tiket Berhasil Terjual <span class="notif-badge">Baru</span>
-                    </div>
-                    <div class="notif-desc">
-                        User <strong>Alina</strong> baru saja membeli <strong>1 Tiket REGULER</strong> untuk event <strong>Pestapora 2026</strong>.
-                    </div>
-                    <div class="notif-time"><i class="ph ph-clock"></i> 1 jam yang lalu</div>
-                </div>
+            @empty
+            <div class="empty-state">
+                <i class="ph ph-bell-slash" style="font-size: 3rem; color: rgba(255,255,255,0.3); margin-bottom: 15px;"></i>
+                <p style="color: rgba(255,255,255,0.6); font-size: 1.1rem;">Belum ada notifikasi.</p>
             </div>
-
-            <div class="notif-card">
-                <div class="notif-icon new-user">
-                    <i class="ph ph-star"></i>
-                </div>
-                <div class="notif-content">
-                    <div class="notif-title">
-                        Event Baru Disetujui!
-                    </div>
-                    <div class="notif-desc">
-                        Selamat! Event <strong>Pestapora 2026</strong> kamu telah disetujui oleh sistem dan sekarang terlihat di halaman utama.
-                    </div>
-                    <div class="notif-time"><i class="ph ph-clock"></i> Kemarin, 14:30</div>
-                </div>
-            </div>
-
-            <div class="notif-card">
-                <div class="notif-icon">
-                    <i class="ph ph-ticket"></i>
-                </div>
-                <div class="notif-content">
-                    <div class="notif-title">
-                        Tiket Berhasil Terjual
-                    </div>
-                    <div class="notif-desc">
-                        User <strong>Dimas Aryo</strong> baru saja membeli <strong>3 Tiket VVIP</strong> untuk event <strong>Coldplay Live in Jakarta</strong>.
-                    </div>
-                    <div class="notif-time"><i class="ph ph-clock"></i> 3 hari yang lalu</div>
-                </div>
-            </div>
+            @endforelse
 
         </div>
 

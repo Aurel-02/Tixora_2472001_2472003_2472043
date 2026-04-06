@@ -22,7 +22,7 @@ Route::post('/login', [LoginController::class, 'authenticate'])->name('login.pos
 
 Route::get('/signup', [SignupController::class, 'show'])->name('signup');
 Route::post('/signup', [SignupController::class, 'store'])->name('signup.post');
-Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:1']);
+Route::get('/admin/dashboard', [DashboardController::class, 'adminDashboard']);
 Route::get('/admin/login', [AuthController::class, 'loginPage']);
 Route::post('/admin/login', [AuthController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -37,10 +37,10 @@ Route::get('/notifications', function () {
     return view('buyer-notification');
 })->middleware(['auth', 'role:3'])->name('buyer.notification');
 
-Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->middleware(['auth', 'role:3'])->name('profile.edit');
-Route::post('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->middleware(['auth', 'role:3'])->name('profile.update');
-Route::get('/profile/change-password', [\App\Http\Controllers\ProfileController::class, 'editPassword'])->middleware(['auth', 'role:3'])->name('profile.password.edit');
-Route::post('/profile/change-password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->middleware(['auth', 'role:3'])->name('profile.password.update');
+Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
+Route::post('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->middleware(['auth'])->name('profile.update');
+Route::get('/profile/change-password', [\App\Http\Controllers\ProfileController::class, 'editPassword'])->middleware(['auth'])->name('profile.password.edit');
+Route::post('/profile/change-password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->middleware(['auth'])->name('profile.password.update');
 Route::get('/organizerdashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2'])->name('organizerdashboard');
 Route::get('/organizer/dashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
 Route::get('/organizer/events/create', [TambahEventController::class, 'create'])->middleware(['auth', 'role:2'])->name('organizer.events.create');
@@ -49,9 +49,7 @@ Route::post('/organizer/events', [TambahEventController::class, 'store'])->middl
 Route::get('/organizer/event/{id}', [DashboardController::class, 'showEventOrganizer'])->middleware(['auth', 'role:2'])->name('organizer.event.detail');
 Route::post('/organizer/event/{id}/update-description', [\App\Http\Controllers\EditEventController::class, 'updateDescription'])->middleware(['auth', 'role:2'])->name('organizer.event.update-description');
 Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventController::class, 'addQuota'])->middleware(['auth', 'role:2'])->name('organizer.event.add-quota');
-Route::get('/organizer/notifications', function () {
-    return view('notification');
-})->middleware(['auth', 'role:2'])->name('organizer.notifications');
+Route::get('/organizer/notifications', [\App\Http\Controllers\NotifikasiController::class, 'organizer'])->middleware(['auth', 'role:2'])->name('organizer.notifications');
 Route::get('/organizer/checkin', function () {
     return view('checkin');
 })->middleware(['auth', 'role:2'])->name('organizer.checkin');

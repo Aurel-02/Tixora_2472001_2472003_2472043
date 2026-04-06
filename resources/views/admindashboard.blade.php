@@ -436,13 +436,7 @@ or<!DOCTYPE html>
                 <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1rem; margin-right: 8px;"></i>
                 <input type="text" placeholder="Search" style="width: 100%; border: none; outline: none; background: transparent; color: var(--queen-pink); font-size: 0.95rem;" />
             </div>
-            <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
-                @if(auth()->check() && auth()->user()->photo_profile)
-                    <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                @else
-                    {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
-                @endif
-            </a>
+            <a href="{{ route('profile.edit') }}" style="text-decoration: none;"><div class="profile" title="My Profile">{{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}</div></a>
         </div>
     </header>
 
@@ -456,24 +450,7 @@ or<!DOCTYPE html>
                     </a>
                 </li>
 
-                <li>
-                    <a href="{{ route('organizer.events.create') }}" class="sidebar-item">
-                        <i class="ph ph-plus-circle sidebar-icon"></i>
-                        <span class="sidebar-text">Tambah Event</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('organizer.checkin') }}" class="sidebar-item">
-                        <i class="ph ph-qr-code sidebar-icon"></i>
-                        <span class="sidebar-text">Check In</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('organizer.notifications') }}" class="sidebar-item">
-                        <i class="ph ph-bell sidebar-icon"></i>
-                        <span class="sidebar-text">Notifications</span>
-                    </a>
-                </li>
+
             </ul>
 
             <div style="padding: 10px 0;">
@@ -490,7 +467,7 @@ or<!DOCTYPE html>
 
     <main class="main-wrapper">
         <div class="section-header" style="margin-top: 10px;">
-            Organizer Dashboard
+            Admin Dashboard
         </div>
 
         <div class="category-tabs">
@@ -501,9 +478,6 @@ or<!DOCTYPE html>
 
         <div class="artist-grid" id="artistGrid">
 
-        </div>
-
-        <div class="event-list" id="eventList">
         </div>
     </main>
 
@@ -527,7 +501,7 @@ or<!DOCTYPE html>
             const eventId = event.id_event || event.id;
 
             return `
-                <a href="/organizer/event/${eventId}" style="text-decoration: none; display: block; color: inherit;">
+                <a href="/event/${eventId}" style="text-decoration: none; display: block; color: inherit;">
                     <div class="artist-card">
                         <div class="artist-card-img">
                             ${imageUrl ? `<img src="${imageUrl}" alt="${event.nama_event}" style="width: 100%; height: 100%; object-fit: cover;" />` : '<i class="ph ph-ticket"></i>'}
