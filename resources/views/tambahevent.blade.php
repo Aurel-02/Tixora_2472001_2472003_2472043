@@ -327,7 +327,7 @@
                 <div style="display: flex; flex-direction: column; gap: 18px; justify-content: flex-start;">
                     <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
                         <h3 style="font-size: 1.1rem; margin-bottom: 0;">Poster Event</h3>
-                        <input id="foto_event" type="file" accept="image/*" style="width: 100%; color: #fff;" />
+                        <input id="foto_event" name="poster" type="file" accept="image/*" style="width: 100%; color: #fff;" />
                         <div id="foto-preview" style="width: 100%; height: 150px; border: 1px dashed rgba(255,255,255,0.45); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7);">Preview foto</div>
                     </div>
                     <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">

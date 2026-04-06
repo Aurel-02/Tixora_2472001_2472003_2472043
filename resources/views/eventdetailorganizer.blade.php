@@ -413,8 +413,8 @@
                 </div>
 
                 <div class="poster-placeholder">
-                    @if($event->gambar_event)
-                        <img src="{{ $event->gambar_event }}" alt="{{ $event->nama_event }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    @if($event->poster)
+                        <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}" style="width: 100%; height: 100%; object-fit: cover;">
                     @else
                         <span><i class="ph ph-image" style="font-size: 3rem; display: block; margin-bottom: 10px; opacity: 0.5;"></i> [ Poster Placeholder ]</span>
                     @endif
