@@ -645,11 +645,7 @@
         </div>
 
         <div id="history" class="ticket-content active">
-            @php 
-                $historyTickets = $tickets->filter(function($t) {
-                    return in_array(strtolower($t->status_transaksi), ['lunas', 'pending']) && strtolower($t->status_item) != 'waiting';
-                });
-            @endphp
+
 
             @if($historyTickets->count() > 0)
                 <div class="tickets-list">
@@ -691,11 +687,7 @@
         </div>
 
         <div id="waiting-list" class="ticket-content">
-            @php 
-                $waitingTickets = $tickets->filter(function($t) {
-                    return strtolower($t->status_item) == 'waiting' && strtolower($t->status_transaksi) != 'batal';
-                });
-            @endphp
+
 
             @if($waitingTickets->count() > 0)
                 <div class="tickets-list">
@@ -733,11 +725,7 @@
         </div>
 
         <div id="canceled" class="ticket-content">
-            @php 
-                $canceledTickets = $tickets->filter(function($t) {
-                    return strtolower($t->status_transaksi) == 'batal';
-                });
-            @endphp
+
 
             @if($canceledTickets->count() > 0)
                 <div class="tickets-list">

@@ -34,7 +34,19 @@ class MyTicketController extends Controller
             )
             ->get();
 
-        return view('my-tickets', compact('tickets'));
+        $historyTickets = $tickets->filter(function($t) {
+            return strtolower(trim($t->status_item)) === 'berhasil';
+        });
+
+        $waitingTickets = $tickets->filter(function($t) {
+            return in_array(strtolower(trim($t->status_item)), ['pending', 'waiting']);
+        });
+
+        $canceledTickets = $tickets->filter(function($t) {
+            return in_array(strtolower(trim($t->status_item)), ['batal', 'cancel']);
+        });
+
+        return view('my-tickets', compact('historyTickets', 'waitingTickets', 'canceledTickets'));
     }
 
     public function cancel($id)

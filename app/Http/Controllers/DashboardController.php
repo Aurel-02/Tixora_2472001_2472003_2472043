@@ -86,17 +86,14 @@ class DashboardController extends Controller
         
         $totalTickets = (int)\Illuminate\Support\Facades\DB::table('tiket')->where('id_event', $id)->sum('kuota');
         
-        $ticketsSold = (int)\Illuminate\Support\Facades\DB::table('detail_transaksi')
-            ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
-            ->where('tiket.id_event', $id)
-            ->sum('detail_transaksi.jumlah_beli');
-            
         $tikets = \Illuminate\Support\Facades\DB::table('tiket')->where('id_event', $id)->get();
+        $ticketsSold = 0;
+        foreach ($tikets as $t) {
+            $ticketsSold += (int)collect(DB::select("SELECT hitung_tiket_terjual(?) as sold", [$t->id_tiket]))->first()->sold;
+        }
         $ticketsAvailable = 0;
         foreach ($tikets as $t) {
-            $soldForType = \Illuminate\Support\Facades\DB::table('detail_transaksi')
-                ->where('id_tiket', $t->id_tiket)
-                ->sum('jumlah_beli') ?? 0;
+            $soldForType = (int)collect(DB::select("SELECT hitung_tiket_terjual(?) as sold", [$t->id_tiket]))->first()->sold;
             $sisa = (int)$t->kuota - (int)$soldForType;
             if ($sisa > 0) {
                 $ticketsAvailable += $sisa;
@@ -124,9 +121,7 @@ class DashboardController extends Controller
         $ticketsSold = 0;
 
         foreach ($tikets as $t) {
-            $sold = \Illuminate\Support\Facades\DB::table('detail_transaksi')
-                ->where('id_tiket', $t->id_tiket)
-                ->sum('jumlah_beli') ?? 0;
+            $sold = (int)collect(DB::select("SELECT hitung_tiket_terjual(?) as sold", [$t->id_tiket]))->first()->sold;
                 
             $available = (int)$t->kuota - (int)$sold;
             if ($available < 0) $available = 0;
