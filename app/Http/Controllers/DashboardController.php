@@ -35,6 +35,36 @@ class DashboardController extends Controller
         return view('dashboard', compact('frontendData'));
     }
 
+    public function adminDashboard()
+    {
+        $role = $this->currentRole();
+
+        if ($role !== '1' && $role !== 'admin') {
+            return redirect('/login');
+        }
+
+        $events = Event::all();
+
+        $kategoriMap = [
+            1 => 'indonesia',
+            2 => 'western',
+            3 => 'kpop',
+        ];
+
+        $eventsByCategory = [
+            'indonesia' => [],
+            'western' => [],
+            'kpop' => [],
+        ];
+
+        foreach ($events as $event) {
+            $catKey = $kategoriMap[$event->id_kategori] ?? 'indonesia';
+            $eventsByCategory[$catKey][] = $event;
+        }
+
+        return view('admindashboard', compact('eventsByCategory'));
+    }
+
     public function organizer()
     {
         $role = $this->currentRole();

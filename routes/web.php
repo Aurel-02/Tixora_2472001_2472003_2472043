@@ -22,7 +22,7 @@ Route::post('/login', [LoginController::class, 'authenticate'])->name('login.pos
 
 Route::get('/signup', [SignupController::class, 'show'])->name('signup');
 Route::post('/signup', [SignupController::class, 'store'])->name('signup.post');
-Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'role:1']);
+Route::get('/admin/dashboard', [DashboardController::class, 'adminDashboard']);
 Route::get('/admin/login', [AuthController::class, 'loginPage']);
 Route::post('/admin/login', [AuthController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
