@@ -57,9 +57,10 @@ class MyTicketController extends Controller
         $detail = DB::table('detail_transaksi')
             ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
             ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket') 
+            ->join('event', 'tiket.id_event', '=', 'event.id_event')
             ->where('detail_transaksi.id_detail', $id)
             ->where('transaksi.id_user', $userId)
-            ->select('detail_transaksi.*', 'transaksi.id_transaksi', 'tiket.id_event')
+            ->select('detail_transaksi.*', 'transaksi.id_transaksi', 'tiket.id_event', 'event.nama_event')
             ->first();
 
         if (!$detail) {
@@ -81,11 +82,32 @@ class MyTicketController extends Controller
             // Parameter sesuai SP: (p_id_event, p_id_tiket)
             // Lakukan looping sebanyak tiket yang dicancel agar antrean diproses tepat sesuai jumlah
             for ($i = 0; $i < $detail->jumlah_beli; $i++) {
+                // Cek siapa di antrean pertama sebelum SP mengubah tabel
+                $antrian = DB::table('antrian')->where('id_tiket', $detail->id_tiket)->orderBy('waktu_antri', 'asc')->first();
+                if ($antrian) {
+                    DB::table('notifikasi')->insert([
+                        'id_user' => $antrian->id_user,
+                        'pesan' => "Selamat! Tiket event {$detail->nama_event} berhasil didapatkan dari waiting list.",
+                        'is_read' => 0,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
                 DB::statement("CALL sp_ProsesAntreanDetail(?, ?)", [
                     $detail->id_event, 
                     $detail->id_tiket
                 ]);
             }
+
+            // Notifikasi untuk yang membatalkan
+            DB::table('notifikasi')->insert([
+                'id_user' => $userId,
+                'pesan' => "Pembelian tiket event {$detail->nama_event} berhasil dibatalkan",
+                'is_read' => 0,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
             DB::commit();
             return back()->with('success', 'Tiket berhasil dibatalkan dan antrean otomatis diproses!');

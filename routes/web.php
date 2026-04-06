@@ -33,9 +33,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 Route::get('/my-tickets', [\App\Http\Controllers\MyTicketController::class, 'index'])->middleware(['auth', 'role:3'])->name('my-tickets');
 Route::post('/my-tickets/cancel/{id}', [\App\Http\Controllers\MyTicketController::class, 'cancel'])->middleware(['auth', 'role:3'])->name('my-tickets.cancel');
 
-Route::get('/notifications', function () {
-    return view('buyer-notification');
-})->middleware(['auth', 'role:3'])->name('buyer.notification');
+Route::get('/notifications', [\App\Http\Controllers\BuyerNotificationController::class, 'index'])->middleware(['auth', 'role:3'])->name('buyer.notification');
 
 Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
 Route::post('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->middleware(['auth'])->name('profile.update');

@@ -33,6 +33,13 @@ class CheckoutController extends Controller
             if ($qty <= 0) continue;
 
             try {
+                $tiketInfo = DB::table('tiket')
+                    ->join('event', 'tiket.id_event', '=', 'event.id_event')
+                    ->where('tiket.id_tiket', $ticketId)
+                    ->select('event.nama_event')
+                    ->first();
+                $eventName = $tiketInfo ? $tiketInfo->nama_event : 'Event';
+
                 $res = DB::select('CALL sp_checkout_ticket(?, ?, ?, ?)', [
                     $userId,
                     $ticketId,
@@ -45,11 +52,25 @@ class CheckoutController extends Controller
                     $message = $res[0]->pesan ?? 'Unknown error occurred.';
                     
                     if ($status === 'SUCCESS') {
+                        DB::table('notifikasi')->insert([
+                            'id_user' => $userId,
+                            'pesan' => "Pembelian tiket event $eventName berhasil",
+                            'is_read' => 0,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
                         $results[] = [
                             'ticket_id' => $ticketId,
                             'message' => $message
                         ];
                     } else if ($status === 'WAITING') {
+                        DB::table('notifikasi')->insert([
+                            'id_user' => $userId,
+                            'pesan' => "Anda masuk waiting list untuk tiket event $eventName",
+                            'is_read' => 0,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
                         $results[] = [
                             'ticket_id' => $ticketId,
                             'message' => $message // Pesan "Anda masuk daftar tunggu"

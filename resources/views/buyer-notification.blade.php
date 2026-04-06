@@ -236,6 +236,14 @@
 </head>
 <body>
 
+@php
+    $unreadNotifCount = 0;
+    if(auth()->check()) {
+        $unreadNotifCount = \Illuminate\Support\Facades\DB::table('notifikasi')->where('id_user', auth()->id())->where('is_read', 0)->count();
+    }
+@endphp
+
+
     <header class="topbar">
         <div class="logo">TIXORA</div>
         <div style="display: flex; align-items: center; gap: 15px;">
@@ -268,10 +276,14 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('buyer.notification') }}" class="sidebar-item active">
+                <a href="{{ route('buyer.notification') }}" class="sidebar-item" style="position: relative;" active">
                     <i class="ph ph-bell sidebar-icon"></i>
                     <span class="sidebar-text">Notifications</span>
-                </a>
+                
+        @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+            <span style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: #E74C3C; color: white; border-radius: 50%; width: 22px; height: 22px; display:flex; align-items:center; justify-content:center; font-size: 0.75rem; font-weight: bold; box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);">{{ $unreadNotifCount }}</span>
+        @endif
+</a>
             </li>
         </ul>
     </aside>
@@ -282,11 +294,26 @@
         </div>
 
         <div class="notifications-container">
-            <div class="empty-state">
-                <i class="ph ph-mailbox empty-icon"></i>
-                <div style="font-size: 1.5rem; color: #fff; font-weight: 700; letter-spacing: 1px;">Oops! Your inbox is empty</div>
-                <div style="color: var(--queen-pink); opacity: 0.9; margin-top: 8px; font-weight: 300;">All updates about your upcoming events and tickets will appear right here.</div>
-            </div>
+            @if(isset($notifications) && $notifications->count() > 0)
+                @foreach($notifications as $notif)
+                    <div style="background: rgba(243, 200, 221, 0.08); border-radius: 15px; padding: 20px; border-left: 4px solid {{ strpos(strtolower($notif->pesan), 'berhasil dibatalkan') !== false ? '#E74C3C' : 'var(--middle-purple)' }}; display: flex; align-items: flex-start; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative;">
+                        @if(!$notif->is_read)
+                            <div style="position: absolute; top: 15px; right: 20px; width: 10px; height: 10px; background: #E74C3C; border-radius: 50%; box-shadow: 0 0 8px rgba(231, 76, 60, 0.8);"></div>
+                        @endif
+                        <i class="ph {{ strpos(strtolower($notif->pesan), 'batal') !== false ? 'ph-x-circle' : 'ph-check-circle' }}" style="font-size: 2rem; color: {{ strpos(strtolower($notif->pesan), 'batal') !== false ? '#E74C3C' : '#84d8a5' }};"></i>
+                        <div>
+                            <div style="font-size: 1.1rem; color: #fff; font-weight: 500; margin-bottom: 5px;">{{ $notif->pesan }}</div>
+                            <div style="font-size: 0.85rem; color: var(--queen-pink); opacity: 0.7;">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</div>
+                        </div>
+                    </div>
+                @endforeach
+            @else
+                <div class="empty-state">
+                    <i class="ph ph-mailbox empty-icon"></i>
+                    <div style="font-size: 1.5rem; color: #fff; font-weight: 700; letter-spacing: 1px;">Oops! Your inbox is empty</div>
+                    <div style="color: var(--queen-pink); opacity: 0.9; margin-top: 8px; font-weight: 300;">All updates about your upcoming events and tickets will appear right here.</div>
+                </div>
+            @endif
         </div>
 
     </main>

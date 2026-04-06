@@ -287,6 +287,14 @@
 
 <body>
 
+@php
+    $unreadNotifCount = 0;
+    if(auth()->check()) {
+        $unreadNotifCount = \Illuminate\Support\Facades\DB::table('notifikasi')->where('id_user', auth()->id())->where('is_read', 0)->count();
+    }
+@endphp
+
+
     <header class="topbar">
         <a href="{{ auth()->check() && auth()->user()->role == 'Organizer' ? route('organizerdashboard') : (auth()->check() && auth()->user()->role == 'Admin' ? '/admin/dashboard' : '/dashboard') }}" class="logo">TIXORA</a>
         <div style="display: flex; align-items: center; gap: 15px;">
@@ -353,10 +361,14 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('buyer.notification') }}" class="sidebar-item">
+                        <a href="{{ route('buyer.notification') }}" class="sidebar-item" style="position: relative;"">
                             <i class="ph ph-bell sidebar-icon"></i>
                             <span class="sidebar-text">Notifications</span>
-                        </a>
+                        
+        @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+            <span style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: #E74C3C; color: white; border-radius: 50%; width: 22px; height: 22px; display:flex; align-items:center; justify-content:center; font-size: 0.75rem; font-weight: bold; box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);">{{ $unreadNotifCount }}</span>
+        @endif
+</a>
                     </li>
                 @endif
             </ul>
