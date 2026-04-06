@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketMail;
 
 class CheckoutController extends Controller
 {
@@ -40,11 +43,16 @@ class CheckoutController extends Controller
                     ->first();
                 $eventName = $tiketInfo ? $tiketInfo->nama_event : 'Event';
 
-                $res = DB::select('CALL sp_checkout_ticket(?, ?, ?, ?)', [
+                // 1. Buat kode unik di Laravel
+                $randomCode = 'TIX-' . strtoupper(Str::random(10));
+
+                // 2. Kirim 5 parameter (tambah $randomCode di akhir)
+                $res = DB::select('CALL sp_checkout_ticket(?, ?, ?, ?, ?)', [
                     $userId,
                     $ticketId,
                     (int)$qty,
-                    $paymentMethod
+                    $paymentMethod,
+                    $randomCode // Parameter ke-5
                 ]);
 
                 if (!empty($res)) {
@@ -52,6 +60,11 @@ class CheckoutController extends Controller
                     $message = $res[0]->pesan ?? 'Unknown error occurred.';
                     
                     if ($status === 'SUCCESS') {
+                        // Di sini kamu bisa panggil fungsi kirim email pakai $randomCode
+                        if(Auth::user()->email) {
+                            Mail::to(Auth::user()->email)->send(new TicketMail($randomCode, $eventName));
+                        }
+
                         DB::table('notifikasi')->insert([
                             'id_user' => $userId,
                             'pesan' => "Pembelian tiket event $eventName berhasil",
