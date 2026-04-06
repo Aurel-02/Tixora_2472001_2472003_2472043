@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tixora - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         :root {
             --jacarta: #3A345B;
@@ -130,23 +131,6 @@
             transform: scale(1.02);
         }
 
-        /* .divider {
-            margin: 25px 0;
-            display: flex;
-            align-items: center;
-            color: rgba(243, 200, 221, 0.6);
-            font-size: 0.9rem;
-        }
-        
-        .divider::before, 
-        .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: rgba(243, 200, 221, 0.2);
-            margin: 0 15px;
-        } */
-
         .btn-outline {
             background: transparent;
             border: 1px dashed rgba(243, 200, 221, 0.4);
@@ -160,7 +144,34 @@
             color: var(--queen-pink);
             background: rgba(243, 200, 221, 0.05);
         }
-        
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            color: var(--queen-pink);
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
+        }
+
+        .form-control.with-toggle {
+            padding-right: 45px;
+        }
+    
         @media (max-width: 480px) {
             .login-container {
                 padding: 35px 25px;
@@ -192,7 +203,13 @@
             
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="password" class="form-control with-toggle" placeholder="••••••••" required>
+                    <div class="password-toggle" id="togglePassword">
+                        <i class="ph ph-eye-slash" id="eyeIcon"></i>
+                    </div>
+                </div>
+
                 @if($errors->has('loginError'))
                     <div style="color: #ffb3b3; font-size: 0.85rem; margin-top: 8px; text-align: left; padding-left: 5px;">
                         {{ $errors->first('loginError') }}
@@ -202,9 +219,25 @@
             
             <button type="submit" class="btn btn-primary">Login</button>
         </form>
-    
         
     </div>
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        const eyeIcon = document.querySelector('#eyeIcon');
 
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            if (type === 'password') {
+                eyeIcon.classList.remove('ph-eye');
+                eyeIcon.classList.add('ph-eye-slash');
+            } else {
+                eyeIcon.classList.remove('ph-eye-slash');
+                eyeIcon.classList.add('ph-eye');
+            }
+        });
+    </script>
 </body>
 </html>
