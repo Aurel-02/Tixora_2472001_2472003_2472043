@@ -497,7 +497,8 @@
     </header>
 
     <aside class="sidebar">
-        <ul class="sidebar-menu">
+        <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
+            <ul class="sidebar-menu" style="flex-grow: 1;">
             <li>
                 <a href="{{ url('/dashboard') }}" class="sidebar-item active">
                     <i class="ph ph-house sidebar-icon"></i>
@@ -522,6 +523,17 @@
 </a>
             </li>
         </ul>
+
+        <div style="padding: 10px 0;">
+            <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
+                @csrf
+                <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; padding: 15px 22px; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="ph ph-sign-out sidebar-icon"></i>
+                    <span class="sidebar-text">Logout</span>
+                </button>
+            </form>
+        </div>
+        </div>
     </aside>
 
     <main class="main-wrapper">
