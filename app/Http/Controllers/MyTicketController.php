@@ -53,31 +53,45 @@ class MyTicketController extends Controller
     {
         $userId = Auth::id();
 
+        // 1. Ambil detail tiket, pastikan join ke tabel 'tiket' untuk dapat 'id_event'
         $detail = DB::table('detail_transaksi')
             ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+            ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket') 
             ->where('detail_transaksi.id_detail', $id)
             ->where('transaksi.id_user', $userId)
-            ->select('detail_transaksi.*', 'transaksi.id_transaksi')
+            ->select('detail_transaksi.*', 'transaksi.id_transaksi', 'tiket.id_event')
             ->first();
 
         if (!$detail) {
-            return back()->with('error', 'Ticket not found or unauthorized.');
+            return back()->with('error', 'Tiket tidak ditemukan.');
         }
 
         DB::beginTransaction();
         try {
+            // 2. Update status tiket yang dibatalkan
             DB::table('detail_transaksi')
                 ->where('id_detail', $id)
                 ->update(['status_item' => 'cancel']);
+
             DB::table('transaksi')
                 ->where('id_transaksi', $detail->id_transaksi)
                 ->update(['status_transaksi' => 'batal']);
 
+            // 3. PANGGIL SP PROSES ANTREAN (Penting!)
+            // Parameter sesuai SP: (p_id_event, p_id_tiket)
+            // Lakukan looping sebanyak tiket yang dicancel agar antrean diproses tepat sesuai jumlah
+            for ($i = 0; $i < $detail->jumlah_beli; $i++) {
+                DB::statement("CALL sp_ProsesAntreanDetail(?, ?)", [
+                    $detail->id_event, 
+                    $detail->id_tiket
+                ]);
+            }
+
             DB::commit();
-            return back()->with('success', 'Ticket canceled successfully. It has been moved to the Canceled tab.');
+            return back()->with('success', 'Tiket berhasil dibatalkan dan antrean otomatis diproses!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to cancel ticket: ' . $e->getMessage());
+            return back()->with('error', 'Gagal membatalkan tiket: ' . $e->getMessage());
         }
     }
 }

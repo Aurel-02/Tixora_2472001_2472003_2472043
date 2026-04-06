@@ -27,13 +27,12 @@ class CheckoutController extends Controller
         }
 
         $results = [];
-        $hasWaiting = false;
+        $errors = [];
 
-        DB::beginTransaction();
-        try {
-            foreach ($tickets as $ticketId => $qty) {
-                if ($qty <= 0) continue;
+        foreach ($tickets as $ticketId => $qty) {
+            if ($qty <= 0) continue;
 
+            try {
                 $res = DB::select('CALL sp_checkout_ticket(?, ?, ?, ?)', [
                     $userId,
                     $ticketId,
@@ -42,36 +41,41 @@ class CheckoutController extends Controller
                 ]);
 
                 if (!empty($res)) {
-                    $status = $res[0]->status ?? 'ERROR';
+                    $status = $res[0]->status ?? 'FAILED';
                     $message = $res[0]->pesan ?? 'Unknown error occurred.';
                     
-                    if ($status === 'WAITING') {
-                        $hasWaiting = true;
+                    if ($status === 'SUCCESS') {
+                        $results[] = [
+                            'ticket_id' => $ticketId,
+                            'message' => $message
+                        ];
+                    } else if ($status === 'WAITING') {
+                        $results[] = [
+                            'ticket_id' => $ticketId,
+                            'message' => $message // Pesan "Anda masuk daftar tunggu"
+                        ];
+                    } else {
+                        $errors[] = "Ticket ID $ticketId: $message";
                     }
-                    
-                    $results[] = [
-                        'status' => $status,
-                        'message' => $message
-                    ];
                 }
+            } catch (\Exception $e) {
+                Log::error('Individual Ticket Checkout Error: ' . $e->getMessage(), [
+                    'user_id' => $userId,
+                    'ticket_id' => $ticketId,
+                    'qty' => $qty
+                ]);
+                $errors[] = "Failed to process ticket ID $ticketId.";
             }
-
-            DB::commit();
-
-            if ($hasWaiting) {
-                return redirect()->route('my-tickets')->with('success', 'Checkout processed! Some tickets are in the Waiting List.');
-            }
-
-            return redirect()->route('my-tickets')->with('success', 'Checkout successful! Your tickets are ready.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Checkout Process Error: ' . $e->getMessage(), [
-                'user_id' => $userId,
-                'tickets' => $tickets,
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect('/dashboard')->with('error', 'Failed to process checkout: ' . $e->getMessage());
         }
+
+        if (!empty($errors)) {
+            $errorMsg = implode(' | ', $errors);
+            if (empty($results)) {
+                return redirect('/dashboard')->with('error', $errorMsg);
+            }
+            return redirect()->route('my-tickets')->with('warning', 'Some tickets failed: ' . $errorMsg);
+        }
+
+        return redirect()->route('my-tickets')->with('success', 'Checkout successful! Your tickets are ready.');
     }
 }
