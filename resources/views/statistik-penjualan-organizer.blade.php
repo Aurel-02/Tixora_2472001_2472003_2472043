@@ -482,6 +482,13 @@
 
             </div>
 
+            <div class="section-card">
+                <h2 class="section-title"><i class="ph ph-presentation-chart"></i> Performa Penjualan Per Event</h2>
+                <div class="chart-container" style="max-width: 100%; height: 450px;">
+                    <canvas id="overallStackedChart"></canvas>
+                </div>
+            </div>
+
             <div class="overall-stats-grid">
                 <div class="stat-card" style="grid-column: span 2; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 40px;">
                     <div style="flex: 1;">
@@ -495,11 +502,10 @@
                             <i class="ph ph-info"></i> Mencakup {{ number_format($overallTotal) }} total kuota kolektif
                         </p>
                     </div>
-                    <div style="width: 220px; height: 220px; position: relative; flex-shrink: 0; background: rgba(255,255,255,0.02); border-radius: 50%; padding: 10px; border: 1px solid rgba(243, 200, 221, 0.05);">
-                        <canvas id="aggregateDoughnut"></canvas>
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
-                            <span style="display: block; font-size: 1.8rem; font-weight: 700; color: #fff; line-height: 1;">{{ $overallTotal > 0 ? round(($overallSold / $overallTotal) * 100, 1) : 0 }}%</span>
-                            <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--queen-pink); font-weight: 600;">UTILITY</span>
+                    <div style="text-align: right; display: flex; flex-direction: column; gap: 10px;">
+                         <div style="background: rgba(209, 131, 169, 0.1); border: 1px solid rgba(209, 131, 169, 0.3); padding: 20px 30px; border-radius: 20px; text-align: center; backdrop-filter: blur(5px);">
+                            <span style="display: block; font-size: 2.2rem; font-weight: 800; color: var(--middle-purple); line-height: 1.2;">{{ $overallTotal > 0 ? round(($overallSold / $overallTotal) * 100, 1) : 0 }}%</span>
+                            <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.9; font-weight: 600; color: var(--queen-pink);">UTILITY</span>
                         </div>
                     </div>
                 </div>
@@ -511,14 +517,6 @@
                 </div>
             </div>
 
-            @if(!$selectedEvent)
-            <div class="section-card">
-                <h2 class="section-title"><i class="ph ph-presentation-chart"></i> Performa Penjualan Per Event</h2>
-                <div class="chart-container" style="max-width: 100%; height: 450px;">
-                    <canvas id="overallStackedChart"></canvas>
-                </div>
-            </div>
-            @endif
 
             <div class="section-card">
                 <h2 class="section-title"><i class="ph ph-calendar-check"></i> Pilih Event</h2>
@@ -615,33 +613,9 @@
     </main>
 
     <script>
-        const aggCtx = document.getElementById('aggregateDoughnut').getContext('2d');
-        new Chart(aggCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Terjual', 'Sisa'],
-                datasets: [{
-                    data: [{{ $overallSold }}, {{ $overallTotal - $overallSold }}],
-                    backgroundColor: ['#D183A9', 'rgba(255, 255, 255, 0.05)'],
-                    borderWidth: 0,
-                    cutout: '80%'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
-                }
-            }
-        });
-
-        @if(!$selectedEvent)
         const overallData = @json($eventChartData);
         const overallCtx = document.getElementById('overallStackedChart').getContext('2d');
         
-        // Find all unique category labels across all events
         const allCategories = [];
         overallData.forEach(event => {
             event.categories.forEach(cat => {
@@ -651,13 +625,12 @@
             });
         });
 
-        // Map colors for categories
         const colors = [
-            'rgba(209, 131, 169, 0.8)', // Purple
-            'rgba(243, 200, 221, 0.8)', // Queen Pink
-            'rgba(113, 85, 122, 0.8)', // Old Lavender
-            'rgba(58, 52, 91, 0.8)',   // Jacarta
-            'rgba(168, 230, 207, 0.8)', // Mint
+            'rgba(209, 131, 169, 0.8)', 
+            'rgba(243, 200, 221, 0.8)', 
+            'rgba(113, 85, 122, 0.8)', 
+            'rgba(58, 52, 91, 0.8)',   
+            'rgba(168, 230, 207, 0.8)', 
         ];
 
         const datasets = allCategories.map((catLabel, index) => {
@@ -750,7 +723,6 @@
                 }
             }]
         });
-        @endif
 
         @if($selectedEvent)
         const ctx = document.getElementById('ticketChart').getContext('2d');

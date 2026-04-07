@@ -234,7 +234,49 @@ class DashboardController extends Controller
                 }
             }
         }
-
         return $frontendData;
     }
+
+    public function showAdminEventDetail($id)
+    {
+        $role = $this->currentRole();
+        if ($role !== '1' && $role !== 'admin') {
+            return redirect('/login');
+        }
+
+        $event = Event::findOrFail($id);
+        
+        $tikets = \Illuminate\Support\Facades\DB::table('tiket')
+            ->where('id_event', $id)
+            ->get();
+            
+        $ticketStats = [];
+        $totalTickets = 0;
+        $ticketsSold = 0;
+
+        foreach ($tikets as $t) {
+            $sold = (int)collect(\Illuminate\Support\Facades\DB::select("SELECT hitung_tiket_terjual(?) as sold", [$t->id_tiket]))->first()->sold;
+                
+            $available = (int)$t->kuota - (int)$sold;
+            if ($available < 0) $available = 0;
+
+            $ticketStats[] = (object)[
+                'id_tiket' => $t->id_tiket,
+                'jenis_tiket' => $t->jenis_tiket,
+                'harga' => $t->harga,
+                'kuota' => $t->kuota,
+                'terjual' => $sold,
+                'sisa' => $available,
+            ];
+
+            $totalTickets += (int)$t->kuota;
+            $ticketsSold += $sold;
+        }
+
+        $ticketsAvailable = $totalTickets - $ticketsSold;
+        if ($ticketsAvailable < 0) $ticketsAvailable = 0;
+
+        return view('admin-detailevent', compact('event', 'ticketStats', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
+    }
 }
+

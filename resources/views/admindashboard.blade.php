@@ -444,9 +444,15 @@ or<!DOCTYPE html>
         <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
             <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
                 <li>
-                    <a href="#" class="sidebar-item active">
+                    <a href="{{ url('/admin/dashboard') }}" class="sidebar-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
                         <i class="ph ph-house sidebar-icon"></i>
                         <span class="sidebar-text">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.revenue') }}" class="sidebar-item {{ Request::is('admin/revenue') ? 'active' : '' }}">
+                        <i class="ph ph-currency-dollar sidebar-icon"></i>
+                        <span class="sidebar-text">Revenue</span>
                     </a>
                 </li>
 
@@ -482,6 +488,7 @@ or<!DOCTYPE html>
     </main>
 
     <script>
+        const STORAGE_URL = "{{ asset('') }}";
         const data = @json($eventsByCategory ?? ['indonesia' => [], 'western' => [], 'kpop' => []]);
 
         const gridContainer = document.getElementById('artistGrid');
@@ -496,12 +503,17 @@ or<!DOCTYPE html>
         }
 
         function createEventCard(event) {
-            const imageUrl = event.gambar_event || event.image_url || event.banner || event.image || null;
+            let imageUrl = event.poster || event.gambar_event || event.image_url || event.banner || event.image || null;
+            
+            if (imageUrl && !imageUrl.startsWith('http')) {
+                imageUrl = STORAGE_URL + imageUrl;
+            }
+            
             const eventDate = event.tanggal_pelaksanaan ? formatDate(event.tanggal_pelaksanaan) : '-';
             const eventId = event.id_event || event.id;
 
             return `
-                <a href="/event/${eventId}" style="text-decoration: none; display: block; color: inherit;">
+                <a href="/admin/event/${eventId}" style="text-decoration: none; display: block; color: inherit;">
                     <div class="artist-card">
                         <div class="artist-card-img">
                             ${imageUrl ? `<img src="${imageUrl}" alt="${event.nama_event}" style="width: 100%; height: 100%; object-fit: cover;" />` : '<i class="ph ph-ticket"></i>'}
