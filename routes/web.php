@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\SignupController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FaceScanController;
 
 Route::get('/', function () {
     return view('landing');
@@ -58,6 +59,8 @@ Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('even
 Route::get('/event/{id}/select-seat', [\App\Http\Controllers\SelectSeatController::class, 'index'])->name('event.select-seat');
 Route::post('/event/{id}/checkout', [\App\Http\Controllers\SelectSeatController::class, 'checkout'])->name('event.checkout');
 Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+Route::get('/checkout/face-scan', [FaceScanController::class, 'index'])->name('face-scan.index');
+Route::post('/checkout/face-scan/upload', [FaceScanController::class, 'upload'])->name('face-scan.upload');
 Route::get('/admin/events', [EventController::class, 'index']);
 Route::get('/admin/events/create', [EventController::class, 'create']);
 Route::post('/admin/events', [EventController::class, 'store']);
