@@ -191,15 +191,17 @@
         }
 
         .event-hero-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 60px 40px 40px;
-            background: linear-gradient(transparent, rgba(58, 52, 91, 0.95));
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            display: none;
+        }
+
+        .event-main-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 25px;
+            text-shadow: 0 0 20px rgba(243, 200, 221, 0.2);
+            letter-spacing: -1px;
+            text-align: center;
         }
 
         .hero-title-group h1 {
@@ -223,74 +225,65 @@
 
         .detail-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 40px;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
         }
 
         .section-card {
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(243, 200, 221, 0.12);
-            border-radius: 24px;
-            padding: 35px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(243, 200, 221, 0.1);
+            border-radius: 20px;
+            padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 600;
             color: #fff;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            letter-spacing: -0.5px;
+            gap: 12px;
         }
 
         .section-title i {
             color: var(--middle-purple);
-            font-size: 1.8rem;
         }
 
         .info-item {
             display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 16px;
-            border: 1px solid rgba(243, 200, 221, 0.05);
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .info-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(209, 131, 169, 0.2);
-            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            background: rgba(209, 131, 169, 0.15);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             color: var(--middle-purple);
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(209, 131, 169, 0.1);
         }
 
         .info-text h4 {
-            font-size: 0.8rem;
-            opacity: 0.5;
+            font-size: 0.9rem;
+            opacity: 0.6;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             margin-bottom: 4px;
-            font-weight: 600;
         }
 
         .info-text p {
-            font-size: 1.15rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 500;
             color: #fff;
         }
 
@@ -301,17 +294,11 @@
         }
 
         .stat-mini-card {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 20px;
-            padding: 25px;
-            text-align: center;
-            border: 1px solid rgba(243, 200, 221, 0.08);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-mini-card:hover {
-            transform: translateY(-5px);
             background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(243, 200, 221, 0.05);
         }
 
         .stat-value {
@@ -364,11 +351,47 @@
         .status-warning { background: rgba(255, 167, 38, 0.15); color: #ffa726; }
         .status-danger { background: rgba(239, 83, 80, 0.15); color: #ef5350; }
 
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-edit {
+            background: var(--middle-purple);
+            color: var(--jacarta);
+        }
+
+        .btn-edit:hover { background: var(--queen-pink); transform: scale(1.02); }
+
+        .btn-delete {
+            background: transparent;
+            color: #ef5350;
+            border: 1px solid #ef5350;
+        }
+
+        .btn-delete:hover { background: rgba(239, 83, 80, 0.1); transform: scale(1.02); }
+
         @media (max-width: 900px) {
             .detail-grid { grid-template-columns: 1fr; }
-            .event-hero { height: 320px; }
-            .hero-title-group h1 { font-size: 2.22rem; }
-            .content-container { padding: 0 20px; }
+            .event-hero { height: 300px; }
+            .hero-title-group h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -376,9 +399,12 @@
 
     <header class="topbar">
         <div class="logo">TIXORA</div>
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
-            {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
-        </a>
+            <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+                @php
+                    $displayName = session('login_admin.name') ?? (auth()->check() ? auth()->user()->nama_lengkap : 'Admin');
+                @endphp
+                {{ strtoupper(substr($displayName, 0, 1)) }}
+            </a>
     </header>
 
     <aside class="sidebar">
@@ -403,6 +429,8 @@
     <main class="main-wrapper">
         <div class="content-container">
 
+            <h1 class="event-main-title">{{ $event->nama_event }}</h1>
+
             <div class="event-hero">
                 @if($event->poster)
                     <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}">
@@ -411,22 +439,17 @@
                         <i class="ph ph-image" style="font-size: 5rem; opacity: 0.2;"></i>
                     </div>
                 @endif
-                <div class="event-hero-overlay">
-                    <div class="hero-title-group">
-                        <h1>{{ $event->nama_event }}</h1>
-                    </div>
-                </div>
             </div>
 
             <div class="detail-grid">
                 <div class="detail-left">
                     <div class="section-card">
-                        <h2 class="section-title"><i class="ph ph-info"></i> Event Information</h2>
+                        <h2 class="section-title"><i class="ph ph-info"></i> Event Details</h2>
                         
                         <div class="info-item">
                             <div class="info-icon"><i class="ph ph-calendar"></i></div>
                             <div class="info-text">
-                                <h4>Tanggal Pelaksanaan</h4>
+                                <h4>Tanggal</h4>
                                 <p>{{ $event->tanggal_pelaksanaan ? \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d F Y') : 'TBD' }}</p>
                             </div>
                         </div>
@@ -439,7 +462,7 @@
                             </div>
                         </div>
 
-                        <div class="info-item">
+                        <div class="info-item" style="margin-bottom: 0;">
                             <div class="info-icon"><i class="ph ph-tag"></i></div>
                             <div class="info-text">
                                 <h4>Kategori</h4>
@@ -449,23 +472,50 @@
                     </div>
 
                     <div class="section-card">
+                        <h2 class="section-title"><i class="ph ph-chart-pie-slice"></i> Sales Summary</h2>
+                        <div class="stats-summary" style="grid-template-columns: 1fr; gap: 15px;">
+                            <div class="stat-mini-card">
+                                <span class="stat-value">{{ number_format($totalTickets) }}</span>
+                                <span class="stat-label">Total Quota</span>
+                            </div>
+                            <div class="stat-mini-card">
+                                <span class="stat-value" style="color: #84d8a5;">{{ number_format($ticketsSold) }}</span>
+                                <span class="stat-label">Tickets Sold</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 25px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px solid rgba(243, 200, 221, 0.05);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <span class="card-label" style="font-size: 0.8rem; font-weight: 700; color: var(--middle-purple);">Sales Progress</span>
+                                <span style="font-size: 1rem; font-weight: 800; color: #fff;">
+                                    {{ $totalTickets > 0 ? round(($ticketsSold / $totalTickets) * 100, 1) : 0 }}%
+                                </span>
+                            </div>
+                            <div style="width: 100%; height: 10px; background: rgba(0,0,0,0.2); border-radius: 20px; overflow: hidden; border: 1px solid rgba(243, 200, 221, 0.05);">
+                                <div style="width: {{ $totalTickets > 0 ? ($ticketsSold / $totalTickets) * 100 : 0 }}%; height: 100%; background: linear-gradient(90deg, var(--middle-purple), var(--queen-pink)); box-shadow: 0 0 10px rgba(209, 131, 169, 0.2); border-radius: 20px; transition: width 1s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-right">
+                    <div class="section-card" style="height: calc(100% - 30px);">
                         <h2 class="section-title"><i class="ph ph-ticket"></i> Ticket Breakdown</h2>
                         <table class="ticket-table">
                             <thead>
                                 <tr>
                                     <th>Category</th>
                                     <th>Price</th>
-                                    <th>Sold</th>
-                                    <th>Remaining</th>
+                                    <th style="text-align: center;">Sold</th>
+                                    <th style="text-align: right;">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($ticketStats as $stat)
                                 <tr>
                                     <td class="ticket-name">{{ $stat->jenis_tiket }}</td>
-                                    <td>Rp {{ number_format($stat->harga, 0, ',', '.') }}</td>
-                                    <td>{{ number_format($stat->terjual) }}</td>
-                                    <td>
+                                    <td style="color: rgba(243, 200, 221, 0.8);">Rp {{ number_format($stat->harga, 0, ',', '.') }}</td>
+                                    <td style="text-align: center; font-weight: 700;">{{ number_format($stat->terjual) }}</td>
+                                    <td style="text-align: right;">
                                         @if($stat->sisa <= 0)
                                             <span class="ticket-status status-danger">SOLD OUT</span>
                                         @elseif($stat->sisa < 10)
@@ -479,32 +529,6 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-                <div class="detail-right">
-                    <div class="section-card">
-                        <h2 class="section-title"><i class="ph ph-chart-pie-slice"></i> Sales Summary</h2>
-                        <div class="stats-summary">
-                            <div class="stat-mini-card">
-                                <span class="stat-value">{{ number_format($totalTickets) }}</span>
-                                <span class="stat-label">Total Quota</span>
-                            </div>
-                            <div class="stat-mini-card">
-                                <span class="stat-value" style="color: #84d8a5;">{{ number_format($ticketsSold) }}</span>
-                                <span class="stat-label">Tickets Sold</span>
-                            </div>
-                        </div>
-                        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(243, 200, 221, 0.1);">
-                            <span class="card-label" style="display: block; margin-bottom: 10px; font-size: 0.8rem; text-align: center;">Sales Progress</span>
-                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
-                                <div style="width: {{ $totalTickets > 0 ? ($ticketsSold / $totalTickets) * 100 : 0 }}%; height: 100%; background: var(--middle-purple); box-shadow: 0 0 10px var(--middle-purple);"></div>
-                            </div>
-                            <span style="display: block; margin-top: 8px; font-size: 0.9rem; text-align: right; font-weight: 600;">
-                                {{ $totalTickets > 0 ? round(($ticketsSold / $totalTickets) * 100, 1) : 0 }}%
-                            </span>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>

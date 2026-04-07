@@ -325,8 +325,11 @@
     <header class="topbar">
         <div class="logo">TIXORA</div>
         <div style="display: flex; align-items: center; gap: 12px;">
-            <a href="{{ route('profile.edit') }}" style="text-decoration: none;">
-                <div class="profile" title="My Profile">{{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}</div>
+            <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
+                @php
+                    $displayName = session('login_admin.name') ?? (auth()->check() ? auth()->user()->nama_lengkap : 'Admin');
+                @endphp
+                {{ strtoupper(substr($displayName, 0, 1)) }}
             </a>
         </div>
     </header>

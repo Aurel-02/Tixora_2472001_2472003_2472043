@@ -436,7 +436,12 @@ or<!DOCTYPE html>
                 <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1rem; margin-right: 8px;"></i>
                 <input type="text" placeholder="Search" style="width: 100%; border: none; outline: none; background: transparent; color: var(--queen-pink); font-size: 0.95rem;" />
             </div>
-            <a href="{{ route('profile.edit') }}" style="text-decoration: none;"><div class="profile" title="My Profile">{{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}</div></a>
+            <a href="{{ route('profile.edit') }}" style="text-decoration: none;">
+                @php
+                    $displayName = session('login_admin.name') ?? (auth()->check() ? auth()->user()->nama_lengkap : 'Admin');
+                @endphp
+                <div class="profile" title="My Profile">{{ strtoupper(substr($displayName, 0, 1)) }}</div>
+            </a>
         </div>
     </header>
 
