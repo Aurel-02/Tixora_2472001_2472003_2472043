@@ -67,3 +67,6 @@ Route::post('/admin/events', [EventController::class, 'store']);
 Route::get('/admin/events/{id}/edit', [EventController::class, 'edit']);
 Route::post('/admin/events/{id}/update', [EventController::class, 'update']);
 Route::get('/admin/events/{id}/delete', [EventController::class, 'destroy']);
+Route::get('/admin/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->name('admin.revenue');
+Route::get('/admin/event/{id}', [DashboardController::class, 'showAdminEventDetail'])->name('admin.event.detail');
+

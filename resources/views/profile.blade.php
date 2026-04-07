@@ -368,25 +368,38 @@
 <body>
 
 @php
+    $userRole = null;
+    $userName = 'User';
+    $userPhoto = null;
     $unreadNotifCount = 0;
+
     if(auth()->check()) {
-        $unreadNotifCount = \Illuminate\Support\Facades\DB::table('notifikasi')->where('id_user', auth()->id())->where('is_read', 0)->count();
+        $userRole = auth()->user()->role;
+        $userName = auth()->user()->nama_lengkap;
+        $userPhoto = auth()->user()->photo_profile;
+        $unreadNotifCount = \Illuminate\Support\Facades\DB::table('notifikasi')
+            ->where('id_user', auth()->id())
+            ->where('is_read', 0)
+            ->count();
+    } elseif(session()->has('login_admin')) {
+        $userRole = session('login_admin.role');
+        $userName = session('login_admin.name');
     }
 @endphp
 
 
     <header class="topbar">
-        <a href="{{ auth()->check() && auth()->user()->role == 'Organizer' ? route('organizerdashboard') : (auth()->check() && auth()->user()->role == 'Admin' ? '/admin/dashboard' : '/dashboard') }}" class="logo">TIXORA</a>
+        <a href="{{ $userRole == '2' || $userRole == 'Organizer' ? route('organizerdashboard') : ($userRole == '1' || $userRole == 'Admin' ? '/admin/dashboard' : '/dashboard') }}" class="logo">TIXORA</a>
         <div style="display: flex; align-items: center; gap: 15px;">
             <div class="search-box" style="display: flex; align-items: center; border: 1px solid rgba(243, 200, 221, 0.4); border-radius: 50px; background: rgba(58, 52, 91, 0.4); padding: 8px 18px; min-width: 250px; transition: all 0.3s ease;">
                 <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1.1rem; margin-right: 10px;"></i>
                 <input type="text" id="globalSearch" placeholder="Search events..." style="width: 100%; border: none; outline: none; background: transparent; color: #fff; font-size: 0.95rem; font-family: 'Outfit', sans-serif;" />
             </div>
             <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
-                @if(auth()->user()->photo_profile)
-                    <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                @if($userPhoto)
+                    <img src="{{ asset($userPhoto) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 @else
-                    {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
+                    {{ strtoupper(substr($userName ?? 'U', 0, 1)) }}
                 @endif
             </a>
         </div>
@@ -395,7 +408,7 @@
     <aside class="sidebar">
         <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
             <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
-                @if(auth()->check() && auth()->user()->role == 'Organizer')
+                @if($userRole == '2' || $userRole == 'Organizer')
                     <li>
                         <a href="{{ route('organizerdashboard') }}" class="sidebar-item">
                             <i class="ph ph-house sidebar-icon"></i>
@@ -420,11 +433,17 @@
                             <span class="sidebar-text">Notifications</span>
                         </a>
                     </li>
-                @elseif(auth()->check() && auth()->user()->role == 'Admin')
+                @elseif($userRole == '1' || $userRole == 'Admin')
                     <li>
                         <a href="/admin/dashboard" class="sidebar-item">
                             <i class="ph ph-house sidebar-icon"></i>
                             <span class="sidebar-text">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.revenue') }}" class="sidebar-item">
+                            <i class="ph ph-currency-dollar sidebar-icon"></i>
+                            <span class="sidebar-text">Revenue</span>
                         </a>
                     </li>
                 @else
@@ -441,14 +460,13 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('buyer.notification') }}" class="sidebar-item" style="position: relative;"">
+                        <a href="{{ route('buyer.notification') }}" class="sidebar-item" style="position: relative;">
                             <i class="ph ph-bell sidebar-icon"></i>
                             <span class="sidebar-text">Notifications</span>
-                        
-        @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-            <span style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: #E74C3C; color: white; border-radius: 50%; width: 22px; height: 22px; display:flex; align-items:center; justify-content:center; font-size: 0.75rem; font-weight: bold; box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);">{{ $unreadNotifCount }}</span>
-        @endif
-</a>
+                            @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+                                <span style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: #E74C3C; color: white; border-radius: 50%; width: 22px; height: 22px; display:flex; align-items:center; justify-content:center; font-size: 0.75rem; font-weight: bold; box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);">{{ $unreadNotifCount }}</span>
+                            @endif
+                        </a>
                     </li>
                 @endif
             </ul>
@@ -456,7 +474,7 @@
             <div style="padding: 10px 0;">
                 <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
                     @csrf
-                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; padding: 15px 22px; cursor: pointer;">
+                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: #ff6b6b; width: 100%; text-align: left; padding: 15px 22px; cursor: pointer;">
                         <i class="ph ph-sign-out sidebar-icon"></i>
                         <span class="sidebar-text">Logout</span>
                     </button>
@@ -494,11 +512,13 @@
                             value="{{ old('email', $user->email ?? '') }}" required>
                     </div>
 
+                    @if(!$isAdmin)
                     <div class="form-group">
                         <label class="form-label">No Telp</label>
                         <input type="text" name="no_telp" class="form-input"
                             value="{{ old('no_telp', $user->no_telp ?? '') }}">
                     </div>
+                    @endif
 
                     <div class="form-group" style="display: flex; align-items: flex-end; gap: 15px;">
                         <div style="flex-grow: 1;">
@@ -512,6 +532,7 @@
                 </form>
             </div>
 
+            @if(!$isAdmin)
             <div class="photo-container">
                 <h1 class="form-title" style="margin-bottom: 20px;">Profile Photo</h1>
 
@@ -536,16 +557,17 @@
                         onchange="previewPhoto(event)">
                 </label>
             </div>
+            @endif
         </div>
     </main>
 
     <script>
         document.getElementById('globalSearch')?.addEventListener('keyup', function(e) {
             if(e.key === 'Enter') {
-                const role = "{{ auth()->check() ? auth()->user()->role : '' }}";
-                if (role === 'Organizer') {
+                const userRole = "{{ $userRole }}";
+                if (userRole === 'Organizer' || userRole === '2') {
                     window.location.href = '/organizerdashboard';
-                } else if (role === 'Admin') {
+                } else if (userRole === 'Admin' || userRole === '1') {
                     window.location.href = '/admin/dashboard';
                 } else {
                     window.location.href = '/dashboard';

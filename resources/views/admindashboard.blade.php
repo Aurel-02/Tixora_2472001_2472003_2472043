@@ -436,7 +436,12 @@ or<!DOCTYPE html>
                 <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1rem; margin-right: 8px;"></i>
                 <input type="text" placeholder="Search" style="width: 100%; border: none; outline: none; background: transparent; color: var(--queen-pink); font-size: 0.95rem;" />
             </div>
-            <a href="{{ route('profile.edit') }}" style="text-decoration: none;"><div class="profile" title="My Profile">{{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}</div></a>
+            <a href="{{ route('profile.edit') }}" style="text-decoration: none;">
+                @php
+                    $displayName = session('login_admin.name') ?? (auth()->check() ? auth()->user()->nama_lengkap : 'Admin');
+                @endphp
+                <div class="profile" title="My Profile">{{ strtoupper(substr($displayName, 0, 1)) }}</div>
+            </a>
         </div>
     </header>
 
@@ -444,9 +449,15 @@ or<!DOCTYPE html>
         <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
             <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
                 <li>
-                    <a href="#" class="sidebar-item active">
+                    <a href="{{ url('/admin/dashboard') }}" class="sidebar-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
                         <i class="ph ph-house sidebar-icon"></i>
                         <span class="sidebar-text">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.revenue') }}" class="sidebar-item {{ Request::is('admin/revenue') ? 'active' : '' }}">
+                        <i class="ph ph-currency-dollar sidebar-icon"></i>
+                        <span class="sidebar-text">Revenue</span>
                     </a>
                 </li>
 
@@ -482,6 +493,7 @@ or<!DOCTYPE html>
     </main>
 
     <script>
+        const STORAGE_URL = "{{ asset('') }}";
         const data = @json($eventsByCategory ?? ['indonesia' => [], 'western' => [], 'kpop' => []]);
 
         const gridContainer = document.getElementById('artistGrid');
@@ -496,12 +508,17 @@ or<!DOCTYPE html>
         }
 
         function createEventCard(event) {
-            const imageUrl = event.gambar_event || event.image_url || event.banner || event.image || null;
+            let imageUrl = event.poster || event.gambar_event || event.image_url || event.banner || event.image || null;
+            
+            if (imageUrl && !imageUrl.startsWith('http')) {
+                imageUrl = STORAGE_URL + imageUrl;
+            }
+            
             const eventDate = event.tanggal_pelaksanaan ? formatDate(event.tanggal_pelaksanaan) : '-';
             const eventId = event.id_event || event.id;
 
             return `
-                <a href="/event/${eventId}" style="text-decoration: none; display: block; color: inherit;">
+                <a href="/admin/event/${eventId}" style="text-decoration: none; display: block; color: inherit;">
                     <div class="artist-card">
                         <div class="artist-card-img">
                             ${imageUrl ? `<img src="${imageUrl}" alt="${event.nama_event}" style="width: 100%; height: 100%; object-fit: cover;" />` : '<i class="ph ph-ticket"></i>'}

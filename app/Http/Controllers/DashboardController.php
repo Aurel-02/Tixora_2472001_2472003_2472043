@@ -104,7 +104,6 @@ class DashboardController extends Controller
         return view('organizerdashboard', compact('eventsByCategory'));
     }
 
-
     public function showEvent($id)
     {
         $role = $this->currentRole();
@@ -114,9 +113,9 @@ class DashboardController extends Controller
 
         $event = Event::findOrFail($id);
         
-        $totalTickets = (int)\Illuminate\Support\Facades\DB::table('tiket')->where('id_event', $id)->sum('kuota');
+        $totalTickets = (int)DB::table('tiket')->where('id_event', $id)->sum('kuota');
         
-        $tikets = \Illuminate\Support\Facades\DB::table('tiket')->where('id_event', $id)->get();
+        $tikets = DB::table('tiket')->where('id_event', $id)->get();
         $ticketsSold = 0;
         foreach ($tikets as $t) {
             $ticketsSold += (int)collect(DB::select("SELECT hitung_tiket_terjual(?) as sold", [$t->id_tiket]))->first()->sold;
@@ -142,9 +141,7 @@ class DashboardController extends Controller
 
         $event = Event::findOrFail($id);
         
-        $tikets = \Illuminate\Support\Facades\DB::table('tiket')
-            ->where('id_event', $id)
-            ->get();
+        $tikets = DB::table('tiket')->where('id_event', $id)->get();
             
         $ticketStats = [];
         $totalTickets = 0;
@@ -152,7 +149,6 @@ class DashboardController extends Controller
 
         foreach ($tikets as $t) {
             $sold = (int)collect(DB::select("SELECT hitung_tiket_terjual(?) as sold", [$t->id_tiket]))->first()->sold;
-                
             $available = (int)$t->kuota - (int)$sold;
             if ($available < 0) $available = 0;
 
@@ -165,9 +161,9 @@ class DashboardController extends Controller
                 'sisa' => $available,
             ];
 
-        $totalTickets += (int)$t->kuota;
-        $ticketsSold += $sold;
-    }
+            $totalTickets += (int)$t->kuota;
+            $ticketsSold += $sold;
+        }
 
         $ticketsAvailable = $totalTickets - $ticketsSold;
         if ($ticketsAvailable < 0) $ticketsAvailable = 0;
@@ -183,7 +179,6 @@ class DashboardController extends Controller
         }
 
         $event = Event::findOrFail($id);
-        
         return view('select-seat', compact('event'));
     }
 
@@ -211,7 +206,6 @@ class DashboardController extends Controller
 
             if (array_key_exists($catId, $kategoriMap)) {
                 $slug = $kategoriMap[$catId];
-
                 $tanggal = $event->tanggal_pelaksanaan ? Carbon::parse($event->tanggal_pelaksanaan) : null;
                 $isUpcoming = $tanggal && $tanggal->isAfter($threeMonthsLater);
 
@@ -234,7 +228,45 @@ class DashboardController extends Controller
                 }
             }
         }
-
         return $frontendData;
     }
+
+    public function showAdminEventDetail($id)
+    {
+        $role = $this->currentRole();
+        if ($role !== '1' && $role !== 'admin') {
+            return redirect('/login');
+        }
+
+        $event = Event::findOrFail($id);
+        $tikets = DB::table('tiket')->where('id_event', $id)->get();
+            
+        $ticketStats = [];
+        $totalTickets = 0;
+        $ticketsSold = 0;
+
+        foreach ($tikets as $t) {
+            $sold = (int)collect(DB::select("SELECT hitung_tiket_terjual(?) as sold", [$t->id_tiket]))->first()->sold;
+            $available = (int)$t->kuota - (int)$sold;
+            if ($available < 0) $available = 0;
+
+            $ticketStats[] = (object)[
+                'id_tiket' => $t->id_tiket,
+                'jenis_tiket' => $t->jenis_tiket,
+                'harga' => $t->harga,
+                'kuota' => $t->kuota,
+                'terjual' => $sold,
+                'sisa' => $available,
+            ];
+
+            $totalTickets += (int)$t->kuota;
+            $ticketsSold += $sold;
+        }
+
+        $ticketsAvailable = $totalTickets - $ticketsSold;
+        if ($ticketsAvailable < 0) $ticketsAvailable = 0;
+
+        return view('admin-detailevent', compact('event', 'ticketStats', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
+    }
 }
+
