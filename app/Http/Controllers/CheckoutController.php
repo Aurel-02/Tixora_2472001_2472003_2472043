@@ -31,6 +31,7 @@ class CheckoutController extends Controller
 
         $results = [];
         $errors = [];
+        $totalQtyToScan = 0;
 
         foreach ($tickets as $ticketId => $qty) {
             if ($qty <= 0) continue;
@@ -60,6 +61,8 @@ class CheckoutController extends Controller
                     $message = $res[0]->pesan ?? 'Unknown error occurred.';
                     
                     if ($status === 'SUCCESS') {
+                        $totalQtyToScan += (int)$qty;
+
                         // Di sini kamu bisa panggil fungsi kirim email pakai $randomCode
                         if(Auth::user()->email) {
                             Mail::to(Auth::user()->email)->send(new TicketMail($randomCode, $eventName));
@@ -107,7 +110,14 @@ class CheckoutController extends Controller
             if (empty($results)) {
                 return redirect('/dashboard')->with('error', $errorMsg);
             }
+            if ($totalQtyToScan > 0) {
+                return redirect()->route('face-scan.index', ['total' => $totalQtyToScan])->with('warning', 'Some tickets failed: ' . $errorMsg . ' | But successfully purchased tickets require a face scan.');
+            }
             return redirect()->route('my-tickets')->with('warning', 'Some tickets failed: ' . $errorMsg);
+        }
+
+        if ($totalQtyToScan > 0) {
+            return redirect()->route('face-scan.index', ['total' => $totalQtyToScan])->with('success', 'Checkout successful! Please scan your faces for your tickets.');
         }
 
         return redirect()->route('my-tickets')->with('success', 'Checkout successful! Your tickets are ready.');
