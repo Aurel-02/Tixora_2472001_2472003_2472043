@@ -405,53 +405,42 @@
     <main class="main-wrapper">
         <div class="page-header">
             <h1 class="page-title">Revenue Analytics</h1>
-            <p class="page-subtitle">Track and analyze earnings from all sources.</p>
         </div>
 
         <div class="revenue-grid">
-            @if(($role ?? 1) == 1)
-                <div class="revenue-card">
-                    <div class="card-icon"><i class="ph ph-crown"></i></div>
-                    <div class="card-label">Admin Earnings</div>
-                    <div class="card-value">Rp {{ number_format($adminRevenue ?? 0, 0, ',', '.') }}</div>
-                </div>
+            <div class="revenue-card">
+                <div class="card-icon"><i class="ph ph-wallet"></i></div>
+                <div class="card-label">Total Uang Masuk</div>
+                <div class="card-value">Rp {{ number_format($totalUangMasuk ?? 0, 0, ',', '.') }}</div>
+            </div>
 
-                <div class="revenue-card" style="--middle-purple: #F3C8DD;">
-                    <div class="card-icon" style="background: rgba(243, 200, 221, 0.15); color: #F3C8DD;"><i class="ph ph-users-three"></i></div>
-                    <div class="card-label">Organizer Earnings</div>
-                    <div class="card-value">Rp {{ number_format($organizerRevenue ?? 0, 0, ',', '.') }}</div>
-                </div>
-            @else
-                <div class="revenue-card">
-                    <div class="card-icon"><i class="ph ph-wallet"></i></div>
-                    <div class="card-label">Your Total Revenue</div>
-                    <div class="card-value">Rp {{ number_format($organizerRevenue ?? 0, 0, ',', '.') }}</div>
-                    <div class="card-trend trend-up">
-                        <i class="ph ph-trend-up"></i> +12% from last month
-                    </div>
-                </div>
+            <div class="revenue-card" style="--middle-purple: #F3C8DD;">
+                <div class="card-icon" style="background: rgba(243, 200, 221, 0.15); color: #F3C8DD;"><i class="ph ph-shield-check"></i></div>
+                <div class="card-label">Biaya Admin</div>
+                <div class="card-value">Rp {{ number_format($totalJatahAdmin ?? 0, 0, ',', '.') }}</div>
+            </div>
 
-                <div class="revenue-card" style="--middle-purple: #F3C8DD;">
-                    <div class="card-icon" style="background: rgba(243, 200, 221, 0.15); color: #F3C8DD;"><i class="ph ph-hand-coins"></i></div>
-                    <div class="card-label">Pending Payout</div>
-                    <div class="card-value">Rp 0</div>
-                </div>
+            @if($role != '1' && $role != 'admin')
+            <div class="revenue-card" style="--middle-purple: #84d8a5;">
+                <div class="card-icon" style="background: rgba(132, 216, 165, 0.15); color: #84d8a5;"><i class="ph ph-bank"></i></div>
+                <div class="card-label">Pendapatan Organizer</div>
+                <div class="card-value">Rp {{ number_format($totalJatahOrganizer ?? 0, 0, ',', '.') }}</div>
+            </div>
             @endif
 
             <div class="revenue-card" style="--middle-purple: #71557A;">
                 <div class="card-icon" style="background: rgba(113, 85, 122, 0.2); color: #D183A9;"><i class="ph ph-ticket"></i></div>
                 <div class="card-label">Total Transactions</div>
                 <div class="card-value">{{ number_format($totalTransactions ?? 0, 0, ',', '.') }}</div>
-                <div class="card-trend">
-                    <i class="ph ph-swap"></i> Processed tickets
-                </div>
             </div>
         </div>
 
         <div class="section-container">
             <div class="section-header">
-                <h2 class="section-title"><i class="ph ph-clock-counter-clockwise"></i> Recent Revenue Stream</h2>
-                <div style="font-size: 0.9rem; opacity: 0.5;">Last updated: Today, 10:15 AM</div>
+                <h2 class="section-title">
+                    <i class="ph ph-clock-counter-clockwise"></i> 
+                    Recent Revenue Stream
+                </h2>
             </div>
 
             <table class="revenue-table">
@@ -460,20 +449,30 @@
                         <th>Transaction ID</th>
                         <th>Event Name</th>
                         <th>Amount</th>
-                        <th>Date</th>
-                        <th>Status</th>
+                        <th>Status Transaksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($recentTransactions as $tx)
+                    @forelse($recentTransactions as $tx)
                     <tr>
                         <td style="font-family: monospace; letter-spacing: 1px;">{{ $tx['id'] }}</td>
                         <td class="table-event-name">{{ $tx['event'] }}</td>
                         <td style="font-weight: 700;">Rp {{ number_format($tx['amount'], 0, ',', '.') }}</td>
-                        <td>{{ date('d M Y', strtotime($tx['date'])) }}</td>
-                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>
+                            @if($tx['status'] == 'Berhasil')
+                                <span class="badge badge-success">Berhasil</span>
+                            @else
+                                <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Gagal</span>
+                            @endif
+                        </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 40px; opacity: 0.5;">
+                            No revenue data available.
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

@@ -440,7 +440,6 @@
                 </div>
             </div>
 
-            <!-- Scanner Area -->
             <div class="scanner-area">
                 
                 <div class="scanner-box" id="scanner-box" onclick="simulateScan()">
@@ -452,7 +451,6 @@
                     <p id="inst-desc">Pusatkan QR Code atau Barcode tiket ke dalam area kotak di atas untuk melakukan check in otomatis.</p>
                 </div>
 
-                <!-- Notif success trigger for demonstration -->
                 <div class="dummy-result" id="dummy-success">
                     <i class="ph ph-check-circle"></i>
                     <h2>Check In Berhasil</h2>
