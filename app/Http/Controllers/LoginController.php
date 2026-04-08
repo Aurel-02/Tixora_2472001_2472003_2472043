@@ -58,7 +58,7 @@ class LoginController extends Controller
                     }
                 } else {
                     session(['login_admin' => [
-                        'id' => $user->id_admin,
+                        'id' => $user->id,
                         'name' => $user->nama,
                         'role' => $user->role,
                         'email' => $user->email,

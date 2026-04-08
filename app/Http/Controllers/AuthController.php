@@ -21,14 +21,20 @@ class AuthController extends Controller
         ]);
 
         $user = DB::table('user')->where('email', $credentials['email'])->first();
+        $isAdminTable = false;
+
+        if (!$user) {
+            $user = DB::table('admin')->where('email', $credentials['email'])->first();
+            $isAdminTable = true;
+        }
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return back()->withErrors(['loginError' => 'Email atau password salah'])->withInput();
         }
 
         session(['login_admin' => [
-            'id' => $user->id_user,
-            'name' => $user->nama_lengkap,
+            'id' => $isAdminTable ? $user->id : $user->id_user,
+            'name' => $isAdminTable ? $user->nama : $user->nama_lengkap,
             'role' => $user->role,
             'email' => $user->email,
         ]]);

@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('events', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id_admin');
+        Schema::create('event', function (Blueprint $table) {
+            $table->id('id_event');
+            $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_kategori')->nullable();
 
             $table->string('nama_event');
@@ -24,6 +24,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('events');
+        Schema::dropIfExists('event');
     }
 };

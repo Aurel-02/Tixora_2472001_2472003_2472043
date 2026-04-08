@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('user', function (Blueprint $table) {
             $table->id('id_user'); // Sesuai dengan $primaryKey di model kamu
-            $table->string('name');
+            $table->string('nama_lengkap');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('role')->nullable();
+            $table->string('no_telp')->nullable();
             $table->timestamps();
         });
     }
