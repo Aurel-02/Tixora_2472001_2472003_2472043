@@ -6,7 +6,6 @@
     <title>Tixora - Statistik Penjualan</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --jacarta: #3A345B;
@@ -333,8 +332,8 @@
         }
 
         .detail-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 30px;
         }
 
@@ -342,9 +341,6 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid rgba(243, 200, 221, 0.1);
         }
 
         .summary-item {
@@ -404,6 +400,122 @@
             font-weight: 600;
         }
 
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(243, 200, 221, 0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--middle-purple), var(--queen-pink));
+            border-radius: 50px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .event-perf-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(243, 200, 221, 0.05);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .event-perf-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+            border-color: rgba(243, 200, 221, 0.2);
+        }
+
+        .event-perf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .event-perf-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .event-perf-stats {
+            font-size: 0.9rem;
+            color: var(--queen-pink);
+            opacity: 0.8;
+        }
+
+        .category-pill-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .category-pill {
+            background: rgba(209, 131, 169, 0.1);
+            border: 1px solid rgba(209, 131, 169, 0.2);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: var(--queen-pink);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .category-pill i {
+            font-size: 0.8rem;
+            color: var(--middle-purple);
+        }
+
+        .event-performance-list {
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .event-performance-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .event-performance-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .event-performance-list::-webkit-scrollbar-thumb {
+            background: rgba(209, 131, 169, 0.3);
+            border-radius: 10px;
+        }
+
+        .event-performance-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(209, 131, 169, 0.5);
+        }
+
         @media (max-width: 1100px) {
             .detail-layout { grid-template-columns: 1fr; }
             .overall-stats-grid { grid-template-columns: 1fr 1fr; }
@@ -441,6 +553,12 @@
                     <a href="{{ route('organizer.statistik') }}" class="sidebar-item active">
                         <i class="ph ph-chart-bar sidebar-icon"></i>
                         <span class="sidebar-text">Statistik Penjualan</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('organizer.revenue') }}" class="sidebar-item">
+                        <i class="ph ph-currency-dollar sidebar-icon"></i>
+                        <span class="sidebar-text">Revenue</span>
                     </a>
                 </li>
                 <li>
@@ -483,40 +601,37 @@
             </div>
 
             <div class="section-card">
-                <h2 class="section-title"><i class="ph ph-presentation-chart"></i> Performa Penjualan Per Event</h2>
-                <div class="chart-container" style="max-width: 100%; height: 450px;">
-                    <canvas id="overallStackedChart"></canvas>
+                <h2 class="section-title"><i class="ph ph-presentation-chart"></i> Performa Penjualan Seluruh Event</h2>
+                <div class="event-performance-list">
+                    @foreach($eventChartData as $eventData)
+                    @php
+                        $totalSoldEvent = $eventData['sold'] ?? 0;
+                        $totalQuotaEvent = $eventData['total'] ?? ($totalSoldEvent > 0 ? $totalSoldEvent : 1);
+                        $percentage = ($totalQuotaEvent > 0) ? round(($totalSoldEvent / $totalQuotaEvent) * 100, 1) : 0;
+                    @endphp
+                    <div class="event-perf-item">
+                        <div class="event-perf-header">
+                            <span class="event-perf-name">{{ $eventData['name'] }}</span>
+                            <span class="event-perf-stats">
+                                <strong>{{ number_format($totalSoldEvent) }}</strong> / {{ number_format($totalQuotaEvent) }} Tiket
+                                <span style="margin-left: 10px; color: var(--middle-purple); font-weight: 700;">{{ $percentage }}%</span>
+                            </span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-fill" style="width: {{ $percentage }}%"></div>
+                        </div>
+                        <div class="category-pill-grid">
+                            @foreach($eventData['categories'] as $cat)
+                                <div class="category-pill">
+                                    <i class="ph ph-tag"></i>
+                                    {{ $cat['label'] }}: <strong>{{ $cat['sold'] }}</strong>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
             </div>
-
-            <div class="overall-stats-grid">
-                <div class="stat-card" style="grid-column: span 2; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 40px;">
-                    <div style="flex: 1;">
-                        <div class="stat-icon" style="background: rgba(209, 131, 169, 0.2); width: 60px; height: 60px; font-size: 2rem;"><i class="ph ph-ticket"></i></div>
-                        <p class="stat-label" style="font-size: 1rem; margin-top: 15px; font-weight: 500;">Total Penjualan Seluruh Event</p>
-                        <div style="display: flex; align-items: baseline; gap: 15px; margin-top: 5px;">
-                            <span class="stat-value" style="font-size: 4.5rem; line-height: 1; letter-spacing: -2px;">{{ number_format($overallSold) }}</span>
-                            <span style="font-size: 1.2rem; opacity: 0.6; font-weight: 500;">TIKET TERJUAL</span>
-                        </div>
-                        <p style="opacity: 0.5; margin-top: 15px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
-                            <i class="ph ph-info"></i> Mencakup {{ number_format($overallTotal) }} total kuota kolektif
-                        </p>
-                    </div>
-                    <div style="text-align: right; display: flex; flex-direction: column; gap: 10px;">
-                         <div style="background: rgba(209, 131, 169, 0.1); border: 1px solid rgba(209, 131, 169, 0.3); padding: 20px 30px; border-radius: 20px; text-align: center; backdrop-filter: blur(5px);">
-                            <span style="display: block; font-size: 2.2rem; font-weight: 800; color: var(--middle-purple); line-height: 1.2;">{{ $overallTotal > 0 ? round(($overallSold / $overallTotal) * 100, 1) : 0 }}%</span>
-                            <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.9; font-weight: 600; color: var(--queen-pink);">UTILITY</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="stat-card" style="justify-content: center; align-items: center; text-align: center; border-left: 4px solid var(--middle-purple);">
-                    <div class="stat-icon" style="background: rgba(243, 200, 221, 0.2); color: var(--queen-pink); width: 70px; height: 70px; font-size: 2.5rem; border-radius: 20px;"><i class="ph ph-calendar-check"></i></div>
-                    <span class="stat-label" style="margin-top: 15px; font-weight: 600; font-size: 1.1rem;">Total Events</span>
-                    <span class="stat-value" style="font-size: 4rem; line-height: 1;">{{ count($events) }}</span>
-                    <p style="opacity: 0.6; margin-top: 10px; font-size: 0.9rem;">Aktif & Mendatang</p>
-                </div>
-            </div>
-
 
             <div class="section-card">
                 <h2 class="section-title"><i class="ph ph-calendar-check"></i> Pilih Event</h2>
@@ -551,23 +666,18 @@
                 <h3 class="section-title"><i class="ph ph-chart-line"></i> Detail Performa: {{ $selectedEvent->nama_event }}</h3>
                 
                 <div class="detail-layout">
-                    <div>
-                        <div class="chart-container">
-                            <canvas id="ticketChart"></canvas>
+                    <div class="stats-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Kuota</span>
+                            <span class="summary-value">{{ number_format($selectedTotal) }}</span>
                         </div>
-                        <div class="stats-summary">
-                            <div class="summary-item">
-                                <span class="summary-label">Kuota</span>
-                                <span class="summary-value">{{ number_format($selectedTotal) }}</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">Terjual</span>
-                                <span class="summary-value" style="color: #84d8a5;">{{ number_format($selectedSold) }}</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">Sisa</span>
-                                <span class="summary-value" style="color: var(--middle-purple);">{{ number_format($selectedAvailable) }}</span>
-                            </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Terjual</span>
+                            <span class="summary-value" style="color: #84d8a5;">{{ number_format($selectedSold) }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Sisa</span>
+                            <span class="summary-value" style="color: var(--middle-purple);">{{ number_format($selectedAvailable) }}</span>
                         </div>
                     </div>
 
@@ -612,175 +722,9 @@
         </div>
     </main>
 
-    <script>
-        const overallData = @json($eventChartData);
-        const overallCtx = document.getElementById('overallStackedChart').getContext('2d');
-        
-        const allCategories = [];
-        overallData.forEach(event => {
-            event.categories.forEach(cat => {
-                if (!allCategories.includes(cat.label)) {
-                    allCategories.push(cat.label);
-                }
-            });
-        });
-
-        const colors = [
-            'rgba(209, 131, 169, 0.8)', 
-            'rgba(243, 200, 221, 0.8)', 
-            'rgba(113, 85, 122, 0.8)', 
-            'rgba(58, 52, 91, 0.8)',   
-            'rgba(168, 230, 207, 0.8)', 
-        ];
-
-        const datasets = allCategories.map((catLabel, index) => {
-            return {
-                label: catLabel,
-                data: overallData.map(event => {
-                    const found = event.categories.find(c => c.label === catLabel);
-                    return found ? found.sold : 0;
-                }),
-                backgroundColor: colors[index % colors.length],
-                borderColor: 'transparent',
-                borderWidth: 0,
-                borderRadius: 4
-            };
-        });
-
-        new Chart(overallCtx, {
-            type: 'bar',
-            data: {
-                labels: overallData.map(d => d.name),
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                layout: {
-                    padding: { right: 50 }
-                },
-                scales: {
-                    x: {
-                        stacked: true,
-                        beginAtZero: true,
-                        grid: { color: 'rgba(243, 200, 221, 0.05)' },
-                        ticks: { color: 'rgba(243, 200, 221, 0.7)' }
-                    },
-                    y: {
-                        stacked: true,
-                        grid: { display: false },
-                        ticks: { 
-                            color: '#fff',
-                            font: { weight: '600' }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        align: 'end',
-                        labels: {
-                            color: '#F3C8DD',
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            font: { family: "'Outfit', sans-serif" }
-                        }
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(58, 52, 91, 0.95)',
-                        titleFont: { size: 14, family: "'Outfit', sans-serif" },
-                        padding: 12,
-                        cornerRadius: 12
-                    }
-                }
-            },
-            plugins: [{
-                id: 'totalLabels',
-                afterDatasetsDraw(chart) {
-                    const { ctx, scales: { x, y } } = chart;
-                    ctx.save();
-                    ctx.font = 'bold 12px Outfit';
-                    ctx.fillStyle = '#fff';
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'middle';
-
-                    chart.data.labels.forEach((label, i) => {
-                        let total = 0;
-                        chart.data.datasets.forEach(dataset => {
-                            total += dataset.data[i];
-                        });
-
-                        const meta = chart.getDatasetMeta(chart.data.datasets.length - 1);
-                        const bar = meta.data[i];
-                        if (bar) {
-                            ctx.fillText(` Total: ${total}`, bar.x + 5, bar.y);
-                        }
-                    });
-                    ctx.restore();
-                }
-            }]
-        });
-
-        @if($selectedEvent)
-        const ctx = document.getElementById('ticketChart').getContext('2d');
-        const stats = @json($ticketStats);
-        
-        const labels = stats.map(s => s.jenis_tiket);
-        const soldData = stats.map(s => s.terjual);
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Tiket Terjual',
-                        data: soldData,
-                        backgroundColor: [
-                            'rgba(209, 131, 169, 0.7)',
-                            'rgba(113, 85, 122, 0.7)',
-                            'rgba(58, 52, 91, 0.7)'
-                        ],
-                        borderColor: '#D183A9',
-                        borderWidth: 2,
-                        borderRadius: 8
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(243, 200, 221, 0.1)' },
-                        ticks: { color: 'rgba(243, 200, 221, 0.7)' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: 'rgba(243, 200, 221, 0.7)' }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: '#F3C8DD',
-                            font: { family: "'Outfit', sans-serif" }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(58, 52, 91, 0.9)',
-                        padding: 12,
-                        displayColors: false
-                    }
-                }
-            }
-        });
-        @endif
-    </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    });
+</script>
 </body>
 </html>

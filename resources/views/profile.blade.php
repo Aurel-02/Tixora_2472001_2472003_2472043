@@ -418,6 +418,12 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ route('organizer.revenue') }}" class="sidebar-item">
+                            <i class="ph ph-currency-dollar sidebar-icon"></i>
+                            <span class="sidebar-text">Revenue</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('organizer.events.create') }}" class="sidebar-item">
                             <i class="ph ph-plus-circle sidebar-icon"></i>
                             <span class="sidebar-text">Tambah Event</span>

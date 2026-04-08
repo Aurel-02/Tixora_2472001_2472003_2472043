@@ -50,6 +50,7 @@ Route::get('/organizer/statistik', [\App\Http\Controllers\StatistikController::c
 Route::post('/organizer/event/{id}/update-description', [\App\Http\Controllers\EditEventController::class, 'updateDescription'])->middleware(['auth', 'role:2'])->name('organizer.event.update-description');
 Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventController::class, 'addQuota'])->middleware(['auth', 'role:2'])->name('organizer.event.add-quota');
 Route::get('/organizer/notifications', [\App\Http\Controllers\NotifikasiController::class, 'organizer'])->middleware(['auth', 'role:2'])->name('organizer.notifications');
+Route::get('/organizer/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.revenue');
 Route::get('/organizer/checkin', function () {
     return view('checkin');
 })->middleware(['auth', 'role:2'])->name('organizer.checkin');

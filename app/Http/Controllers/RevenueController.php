@@ -8,8 +8,11 @@ class RevenueController extends Controller
 {
     public function index()
     {
+        $role = auth()->check() ? auth()->user()->role : (session()->has('login_admin') ? 1 : 3);
+        
+        // Mock data for now, could be made dynamic based on $role
         $adminRevenue = 5000000;
-        $organizerRevenue = 45000000;
+        $organizerRevenue = 45000000; 
         $totalTransactions = 1240;
         
         $recentTransactions = [
@@ -18,6 +21,6 @@ class RevenueController extends Controller
             ['id' => 'TX-1003', 'event' => 'Art Exhibition', 'amount' => 75000, 'date' => '2024-04-06'],
         ];
 
-        return view('revenue', compact('adminRevenue', 'organizerRevenue', 'totalTransactions', 'recentTransactions'));
+        return view('revenue', compact('adminRevenue', 'organizerRevenue', 'totalTransactions', 'recentTransactions', 'role'));
     }
 }

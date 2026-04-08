@@ -337,18 +337,57 @@
     <aside class="sidebar">
         <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
             <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
-                <li>
-                    <a href="{{ url('/admin/dashboard') }}" class="sidebar-item">
-                        <i class="ph ph-house sidebar-icon"></i>
-                        <span class="sidebar-text">Home</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.revenue') }}" class="sidebar-item active">
-                        <i class="ph ph-currency-dollar sidebar-icon"></i>
-                        <span class="sidebar-text">Revenue</span>
-                    </a>
-                </li>
+                @if(($role ?? 1) == 1)
+                    <li>
+                        <a href="{{ url('/admin/dashboard') }}" class="sidebar-item">
+                            <i class="ph ph-house sidebar-icon"></i>
+                            <span class="sidebar-text">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.revenue') }}" class="sidebar-item active">
+                            <i class="ph ph-currency-dollar sidebar-icon"></i>
+                            <span class="sidebar-text">Revenue</span>
+                        </a>
+                    </li>
+                @else
+                    <li>
+                        <a href="{{ url('/organizerdashboard') }}" class="sidebar-item">
+                            <i class="ph ph-house sidebar-icon"></i>
+                            <span class="sidebar-text">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('organizer.statistik') }}" class="sidebar-item">
+                            <i class="ph ph-chart-bar sidebar-icon"></i>
+                            <span class="sidebar-text">Statistik Penjualan</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('organizer.revenue') }}" class="sidebar-item active">
+                            <i class="ph ph-currency-dollar sidebar-icon"></i>
+                            <span class="sidebar-text">Revenue</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('organizer.events.create') }}" class="sidebar-item">
+                            <i class="ph ph-plus-circle sidebar-icon"></i>
+                            <span class="sidebar-text">Tambah Event</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('organizer.checkin') }}" class="sidebar-item">
+                            <i class="ph ph-qr-code sidebar-icon"></i>
+                            <span class="sidebar-text">Check In</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('organizer.notifications') }}" class="sidebar-item">
+                            <i class="ph ph-bell sidebar-icon"></i>
+                            <span class="sidebar-text">Notifications</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
 
             <div style="padding: 10px 0;">
@@ -370,17 +409,34 @@
         </div>
 
         <div class="revenue-grid">
-            <div class="revenue-card">
-                <div class="card-icon"><i class="ph ph-crown"></i></div>
-                <div class="card-label">Admin Earnings</div>
-                <div class="card-value">Rp {{ number_format($adminRevenue ?? 0, 0, ',', '.') }}</div>
-            </div>
+            @if(($role ?? 1) == 1)
+                <div class="revenue-card">
+                    <div class="card-icon"><i class="ph ph-crown"></i></div>
+                    <div class="card-label">Admin Earnings</div>
+                    <div class="card-value">Rp {{ number_format($adminRevenue ?? 0, 0, ',', '.') }}</div>
+                </div>
 
-            <div class="revenue-card" style="--middle-purple: #F3C8DD;">
-                <div class="card-icon" style="background: rgba(243, 200, 221, 0.15); color: #F3C8DD;"><i class="ph ph-users-three"></i></div>
-                <div class="card-label">Organizer Earnings</div>
-                <div class="card-value">Rp {{ number_format($organizerRevenue ?? 0, 0, ',', '.') }}</div>
-            </div>
+                <div class="revenue-card" style="--middle-purple: #F3C8DD;">
+                    <div class="card-icon" style="background: rgba(243, 200, 221, 0.15); color: #F3C8DD;"><i class="ph ph-users-three"></i></div>
+                    <div class="card-label">Organizer Earnings</div>
+                    <div class="card-value">Rp {{ number_format($organizerRevenue ?? 0, 0, ',', '.') }}</div>
+                </div>
+            @else
+                <div class="revenue-card">
+                    <div class="card-icon"><i class="ph ph-wallet"></i></div>
+                    <div class="card-label">Your Total Revenue</div>
+                    <div class="card-value">Rp {{ number_format($organizerRevenue ?? 0, 0, ',', '.') }}</div>
+                    <div class="card-trend trend-up">
+                        <i class="ph ph-trend-up"></i> +12% from last month
+                    </div>
+                </div>
+
+                <div class="revenue-card" style="--middle-purple: #F3C8DD;">
+                    <div class="card-icon" style="background: rgba(243, 200, 221, 0.15); color: #F3C8DD;"><i class="ph ph-hand-coins"></i></div>
+                    <div class="card-label">Pending Payout</div>
+                    <div class="card-value">Rp 0</div>
+                </div>
+            @endif
 
             <div class="revenue-card" style="--middle-purple: #71557A;">
                 <div class="card-icon" style="background: rgba(113, 85, 122, 0.2); color: #D183A9;"><i class="ph ph-ticket"></i></div>
