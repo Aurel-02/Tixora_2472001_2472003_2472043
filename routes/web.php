@@ -70,4 +70,7 @@ Route::post('/admin/events/{id}/update', [EventController::class, 'update']);
 Route::get('/admin/events/{id}/delete', [EventController::class, 'destroy']);
 Route::get('/admin/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->name('admin.revenue');
 Route::get('/admin/event/{id}', [DashboardController::class, 'showAdminEventDetail'])->name('admin.event.detail');
-
+Route::post('/admin/event/{id}/approve',
+    [EventController::class,'approve'])->name('admin.event.approve');
+Route::post('/admin/event/{id}/reject',
+    [EventController::class,'reject'])->name('admin.event.reject');

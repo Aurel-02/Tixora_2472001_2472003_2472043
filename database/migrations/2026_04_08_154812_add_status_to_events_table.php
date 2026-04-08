@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->string('poster')->nullable()->after('tanggal_pelaksanaan');
+            $table->enum('status', ['pending', 'approved', 'rejected'])
+                ->default('pending');
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->dropColumn('poster');
+            $table->dropColumn('status');
         });
     }
 };

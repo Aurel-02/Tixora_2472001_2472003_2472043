@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('event', function (Blueprint $table) {
+        Schema::create('events', function (Blueprint $table) {
             $table->id('id_event');
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_kategori')->nullable();

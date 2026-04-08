@@ -1,4 +1,4 @@
-or<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -75,7 +75,7 @@ or<!DOCTYPE html>
             transition: transform 0.3s;
             text-transform: uppercase;
         }
-        
+
         .topbar .profile:hover {
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(209, 131, 169, 0.6);
@@ -230,7 +230,7 @@ or<!DOCTYPE html>
 
         .artist-card-img {
             height: 260px;
-            background: rgba(255, 255, 255, 0.05); 
+            background: rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -298,13 +298,13 @@ or<!DOCTYPE html>
             width: 100%;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
-            -ms-overflow-style: none; 
-            scrollbar-width: none; 
+            -ms-overflow-style: none;
+            scrollbar-width: none;
             scroll-behavior: smooth;
         }
-        
+
         .event-list::-webkit-scrollbar {
-            display: none; 
+            display: none;
         }
 
         .event-card {
@@ -342,7 +342,7 @@ or<!DOCTYPE html>
             height: 80px;
             border: 1px solid rgba(209, 131, 169, 0.3);
         }
-        
+
         .event-date .month {
             font-size: 0.9rem;
             font-weight: 600;
@@ -509,28 +509,119 @@ or<!DOCTYPE html>
 
         function createEventCard(event) {
             let imageUrl = event.poster || event.gambar_event || event.image_url || event.banner || event.image || null;
-            
+
             if (imageUrl && !imageUrl.startsWith('http')) {
                 imageUrl = STORAGE_URL + imageUrl;
             }
-            
+
             const eventDate = event.tanggal_pelaksanaan ? formatDate(event.tanggal_pelaksanaan) : '-';
             const eventId = event.id_event || event.id;
 
+            let statusBadge = '';
+            let actionButton = '';
+
+            if(event.status === 'pending'){
+                statusBadge = `
+        <span style="
+            background:#ffc107;
+            color:black;
+            padding:4px 10px;
+            border-radius:6px;
+            font-size:12px;
+        ">
+        Pending
+        </span>`;
+
+                actionButton = `
+        <div style="margin-top:10px; display:flex; gap:5px; justify-content:center;">
+            <form method="POST" action="/admin/event/${eventId}/approve">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <button style="
+                    background:#28a745;
+                    color:white;
+                    border:none;
+                    padding:5px 10px;
+                    border-radius:6px;
+                    cursor:pointer;
+                ">
+                Approve
+                </button>
+            </form>
+
+            <form method="POST" action="/admin/event/${eventId}/reject">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <button style="
+                    background:#dc3545;
+                    color:white;
+                    border:none;
+                    padding:5px 10px;
+                    border-radius:6px;
+                    cursor:pointer;
+                ">
+                Reject
+                </button>
+            </form>
+        </div>
+        `;
+            }
+
+            if(event.status === 'approved'){
+                statusBadge = `
+        <span style="
+            background:#28a745;
+            padding:4px 10px;
+            border-radius:6px;
+            font-size:12px;
+        ">
+        Approved
+        </span>`;
+            }
+
+            if(event.status === 'rejected'){
+                statusBadge = `
+        <span style="
+            background:#dc3545;
+            padding:4px 10px;
+            border-radius:6px;
+            font-size:12px;
+        ">
+        Rejected
+        </span>`;
+            }
+
             return `
-                <a href="/admin/event/${eventId}" style="text-decoration: none; display: block; color: inherit;">
-                    <div class="artist-card">
-                        <div class="artist-card-img">
-                            ${imageUrl ? `<img src="${imageUrl}" alt="${event.nama_event}" style="width: 100%; height: 100%; object-fit: cover;" />` : '<i class="ph ph-ticket"></i>'}
-                        </div>
-                        <div class="artist-card-info">
-                            <div class="artist-name">${event.nama_event || 'Nama event tidak tersedia'}</div>
-                            <div class="artist-desc"><i class="ph ph-map-pin"></i> ${event.lokasi_event || 'Lokasi belum diset'}</div>
-                            <div class="artist-desc"><i class="ph ph-calendar"></i> ${eventDate}</div>
-                        </div>
-                    </div>
-                </a>
-            `;
+        <div class="artist-card">
+            <div class="artist-card-img">
+                ${imageUrl
+                ? `<img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;">`
+                : '<i class="ph ph-ticket"></i>'
+            }
+            </div>
+
+            <div class="artist-card-info">
+                <div class="artist-name">
+                    ${event.nama_event || 'Nama event tidak tersedia'}
+                </div>
+
+                <div style="margin-bottom:8px;">
+                    ${statusBadge}
+                </div>
+
+                <div class="artist-desc">
+                    <i class="ph ph-map-pin"></i>
+                    ${event.lokasi_event || 'Lokasi belum diset'}
+                </div>
+
+                <div class="artist-desc">
+                    <i class="ph ph-calendar"></i>
+                    ${eventDate}
+                </div>
+
+                ${actionButton}
+
+            </div>
+        </div>
+    `;
         }
 
         function renderEvents(events, isSearch = false) {
@@ -562,7 +653,7 @@ or<!DOCTYPE html>
                 allCategories.forEach(cat => {
                     events = events.concat(data[cat] || []);
                 });
-                
+
                 // Unique events
                 events = Array.from(new Map(events.map(item => [item.id_event || item.id, item])).values());
 
@@ -571,12 +662,12 @@ or<!DOCTYPE html>
                     const location = (event.lokasi_event || '').toLowerCase();
                     return name.includes(query) || location.includes(query);
                 });
-                
+
                 document.querySelectorAll('.tab-btn').forEach(btn => {
                     btn.classList.remove('active');
                     btn.style.opacity = '0.5';
                 });
-                
+
                 renderEvents(events, true);
             } else {
                 events = getCurrentCategoryEvents();
@@ -588,7 +679,7 @@ or<!DOCTYPE html>
                         btn.classList.add('active');
                     }
                 });
-                
+
                 renderEvents(events, false);
             }
         }

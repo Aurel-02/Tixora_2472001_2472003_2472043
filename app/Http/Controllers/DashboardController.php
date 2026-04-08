@@ -12,8 +12,8 @@ class DashboardController extends Controller
 {
     private function currentRole()
     {
-        if (Auth::check()) { 
-            return strtolower(trim(Auth::user()->role)); 
+        if (Auth::check()) {
+            return strtolower(trim(Auth::user()->role));
         }
 
         $adminSession = session('login_admin');
@@ -43,7 +43,9 @@ class DashboardController extends Controller
             return redirect('/login');
         }
 
-        $events = Event::all();
+        $pending = Event::where('status', 'pending')->get();
+        $approved = Event::where('status', 'approved')->get();
+        $rejected = Event::where('status', 'rejected')->get();
 
         $kategoriMap = [
             1 => 'indonesia',
@@ -57,12 +59,17 @@ class DashboardController extends Controller
             'kpop' => [],
         ];
 
-        foreach ($events as $event) {
+        foreach ($approved as $event) {
             $catKey = $kategoriMap[$event->id_kategori] ?? 'indonesia';
             $eventsByCategory[$catKey][] = $event;
         }
 
-        return view('admindashboard', compact('eventsByCategory'));
+        return view('admindashboard', compact(
+            'pending',
+            'approved',
+            'rejected',
+            'eventsByCategory'
+        ));
     }
 
     public function organizer()
@@ -112,9 +119,9 @@ class DashboardController extends Controller
         }
 
         $event = Event::findOrFail($id);
-        
+
         $totalTickets = (int)DB::table('tiket')->where('id_event', $id)->sum('kuota');
-        
+
         $tikets = DB::table('tiket')->where('id_event', $id)->get();
         $ticketsSold = 0;
         foreach ($tikets as $t) {
@@ -140,9 +147,9 @@ class DashboardController extends Controller
         }
 
         $event = Event::findOrFail($id);
-        
+
         $tikets = DB::table('tiket')->where('id_event', $id)->get();
-            
+
         $ticketStats = [];
         $totalTickets = 0;
         $ticketsSold = 0;
@@ -199,7 +206,7 @@ class DashboardController extends Controller
             'kpop' => ['artists' => [], 'events' => []]
         ];
 
-        $allEvents = Event::all();
+        $allEvents = Event::where('status','approved')->get();
 
         foreach ($allEvents as $event) {
             $catId = $event->id_kategori;
@@ -240,7 +247,7 @@ class DashboardController extends Controller
 
         $event = Event::findOrFail($id);
         $tikets = DB::table('tiket')->where('id_event', $id)->get();
-            
+
         $ticketStats = [];
         $totalTickets = 0;
         $ticketsSold = 0;

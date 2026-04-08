@@ -3,43 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Event;
 
 class EventController extends Controller
 {
-    public function index()
+    public function approve($id)
     {
-        $events = Event::all();
-        return view('admin.events.index', compact('events'));
+        $event = \App\Models\Event::findOrFail($id);
+        $event->status = 'approved';
+        $event->save();
+
+        return back()->with('success','Event Approved');
     }
 
-    public function create()
+    public function reject($id)
     {
-        return view('admin.events.create');
-    }
+        $event = \App\Models\Event::findOrFail($id);
+        $event->status = 'rejected';
+        $event->save();
 
-    public function store(Request $request)
-    {
-        Event::create($request->all());
-        return redirect('/admin/events');
-    }
-
-    public function edit($id)
-    {
-        $event = Event::find($id);
-        return view('admin.events.edit', compact('event'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        Event::find($id)->update($request->all());
-        return redirect('/admin/events');
-    }
-
-    public function destroy($id)
-    {
-        Event::find($id)->delete();
-        return redirect('/admin/events');
+        return back()->with('success','Event Rejected');
     }
 }
