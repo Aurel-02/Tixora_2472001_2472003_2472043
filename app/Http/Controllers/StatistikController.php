@@ -35,13 +35,24 @@ class StatistikController extends Controller
             $tikets = DB::table('tiket')->where('id_event', $event->id_event)->get();
             $eventTotal = 0;
             $eventSold = 0;
+            $eventSold7Days = 0;
+            $eventRevenue = 0;
             $categories = [];
 
             foreach ($tikets as $t) {
+                // Total Sold (Historical)
                 $sold = DB::table('detail_transaksi')
                     ->where('id_tiket', $t->id_tiket)
                     ->sum('jumlah_beli') ?? 0;
                 
+                // Sold in last 7 Days
+                $sold7Days = DB::table('detail_transaksi')
+                    ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+                    ->where('detail_transaksi.id_tiket', $t->id_tiket)
+                    ->whereIn('transaksi.status_transaksi', ['lunas', 'Selesai'])
+                    ->where('transaksi.tanggal_transaksi', '>=', now()->subDays(7))
+                    ->sum('detail_transaksi.jumlah_beli') ?? 0;
+
                 $categories[] = [
                     'label' => $t->jenis_tiket,
                     'sold' => (int)$sold
@@ -49,6 +60,8 @@ class StatistikController extends Controller
 
                 $eventTotal += (int)$t->kuota;
                 $eventSold += (int)$sold;
+                $eventSold7Days += (int)$sold7Days;
+                $eventRevenue += (int)$sold * (int)$t->harga;
             }
             
             $overallTotal += $eventTotal;
@@ -57,7 +70,9 @@ class StatistikController extends Controller
             $eventChartData[] = [
                 'name' => $event->nama_event,
                 'sold' => $eventSold,
+                'sold_7days' => $eventSold7Days,
                 'quota' => $eventTotal,
+                'revenue' => $eventRevenue,
                 'categories' => $categories
             ];
         }
@@ -118,6 +133,25 @@ class StatistikController extends Controller
                 $selectedSold += (int)$sold;
             }
             $selectedAvailable = $selectedTotal - $selectedSold;
+
+            // Detail buyer list for export
+            $buyerList = DB::table('transaksi')
+                ->join('user', 'transaksi.id_user', '=', 'user.id_user')
+                ->join('detail_transaksi', 'transaksi.id_transaksi', '=', 'detail_transaksi.id_transaksi')
+                ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
+                ->where('tiket.id_event', $selectedEvent->id_event)
+                ->whereIn('transaksi.status_transaksi', ['lunas', 'Selesai'])
+                ->select(
+                    'user.nama_user as Nama Buyer',
+                    'user.email as Email',
+                    'user.no_telp as No Telp',
+                    'tiket.jenis_tiket as Kategori Tiket',
+                    'transaksi.id_transaksi as ID Transaksi',
+                    'detail_transaksi.jumlah_beli as Jumlah'
+                )
+                ->get();
+        } else {
+            $buyerList = collect([]);
         }
 
         return view('statistikpenjualan', compact(
@@ -132,7 +166,8 @@ class StatistikController extends Controller
             'selectedAvailable',
             'eventChartData',
             'globalCategories',
-            'role'
+            'role',
+            'buyerList'
         ));
     }
 
