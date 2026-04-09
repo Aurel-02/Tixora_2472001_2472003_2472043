@@ -337,15 +337,15 @@
     <aside class="sidebar">
         <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
             <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
-                @if(($role ?? 1) == 1)
+                @if(($role ?? '') == '1' || ($role ?? '') == 'admin')
                     <li>
-                        <a href="{{ url('/admin/dashboard') }}" class="sidebar-item">
+                        <a href="{{ url('/admin/dashboard') }}" class="sidebar-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
                             <i class="ph ph-house sidebar-icon"></i>
                             <span class="sidebar-text">Home</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.revenue') }}" class="sidebar-item active">
+                        <a href="{{ route('admin.revenue') }}" class="sidebar-item {{ Request::is('admin/revenue') ? 'active' : '' }}">
                             <i class="ph ph-currency-dollar sidebar-icon"></i>
                             <span class="sidebar-text">Revenue</span>
                         </a>

@@ -340,11 +340,17 @@
                             <span class="sidebar-text">Notifications</span>
                         </a>
                     </li>
-                @elseif(auth()->check() && auth()->user()->role == 'Admin')
+                @elseif(auth()->check() && (auth()->user()->role == 'Admin' || auth()->user()->role == '1'))
                     <li>
-                        <a href="/admin/dashboard" class="sidebar-item">
+                        <a href="/admin/dashboard" class="sidebar-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
                             <i class="ph ph-house sidebar-icon"></i>
                             <span class="sidebar-text">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.revenue') }}" class="sidebar-item {{ Request::is('admin/revenue') ? 'active' : '' }}">
+                            <i class="ph ph-currency-dollar sidebar-icon"></i>
+                            <span class="sidebar-text">Revenue</span>
                         </a>
                     </li>
                 @else
