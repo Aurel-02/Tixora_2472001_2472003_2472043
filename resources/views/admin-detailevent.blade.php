@@ -468,7 +468,7 @@
                     <li>
                         <a href="{{ route('admin.statistik') }}" class="sidebar-item {{ Request::is('admin/statistik') ? 'active' : '' }}">
                             <i class="ph ph-chart-bar sidebar-icon"></i>
-                            <span class="sidebar-text">Statistik Penjualan</span>
+                            <span class="sidebar-text">Analitik Penjualan</span>
                         </a>
                     </li>
             </ul>
