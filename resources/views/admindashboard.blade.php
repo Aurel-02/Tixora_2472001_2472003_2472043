@@ -534,7 +534,7 @@
 
                 actionButton = `
         <div style="margin-top:10px; display:flex; gap:5px; justify-content:center;">
-            <form method="POST" action="/admin/event/${eventId}/approve">
+            <form method="POST" action="/admin/event/${eventId}/approve" onclick="event.stopPropagation()">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <button style="
                     background:#28a745;
@@ -548,7 +548,7 @@
                 </button>
             </form>
 
-            <form method="POST" action="/admin/event/${eventId}/reject">
+            <form method="POST" action="/admin/event/${eventId}/reject" onclick="event.stopPropagation()">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <button style="
                     background:#dc3545;
@@ -590,7 +590,7 @@
             }
 
             return `
-        <div class="artist-card">
+        <div class="artist-card" onclick="window.location.href='/admin/event/${eventId}'">
             <div class="artist-card-img">
                 ${imageUrl
                 ? `<img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;">`

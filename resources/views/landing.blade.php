@@ -184,7 +184,35 @@
             position: relative;
             overflow: hidden;
             text-align: center;
+            padding: 0; /* Changed to 0 for full bleed posters, internal elements will have padding if needed */
+        }
+
+        .carousel-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .poster-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
             padding: 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            text-align: left;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .carousel-card:hover .poster-overlay {
+            opacity: 1;
         }
 
         .carousel-card:hover {
@@ -317,34 +345,31 @@
     <!-- carousel -->
     <main class="carousel-container">
         <div class="carousel-track" id="carousel">
-            <div class="carousel-card">
-                <div class="placeholder-text">
-                    Poster Konser 1
+            @forelse($events as $event)
+                <a href="{{ route('event.detail', $event->id_event) }}" class="carousel-card">
+                    @if($event->poster)
+                        <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}">
+                        <div class="poster-overlay">
+                            <h3 style="font-size: 1.2rem; margin-bottom: 5px;">{{ $event->nama_event }}</h3>
+                            <p style="font-size: 0.9rem; opacity: 0.8;">{{ \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d M Y') }}</p>
+                        </div>
+                    @else
+                        <div class="placeholder-text" style="padding: 20px;">
+                            {{ $event->nama_event }}
+                            <small>Poster belum tersedia</small>
+                        </div>
+                    @endif
+                </a>
+            @empty
+                <div class="carousel-card">
+                    <div class="placeholder-text" style="padding: 20px;">
+                        Belum ada event yang tersedia
+                    </div>
                 </div>
-            </div>
-            
-            <div class="carousel-card">
-                <div class="placeholder-text">
-                    Poster Konser 2
-                </div>
-            </div>
-            
-            <div class="carousel-card">
-                <div class="placeholder-text">
-                    Poster Konser 3
-                </div>
-            </div>
-            
-            <div class="carousel-card">
-                <div class="placeholder-text">
-                    Poster Konser 4
-                </div>
-            </div>
-            
+            @endforelse
         </div>
     </main>
 
-    <!-- footer -->
     <footer class="footer">
         
         <div class="footer-title" style="margin-top: 20px;">TIXORA</div>

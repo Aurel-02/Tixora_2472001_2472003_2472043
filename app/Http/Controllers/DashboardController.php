@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function landing()
+    {
+        $events = Event::orderBy('id_event', 'desc')->get();
+        return view('landing', compact('events'));
+    }
+
     private function currentRole()
     {
         if (Auth::check()) {

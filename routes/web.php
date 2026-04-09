@@ -10,13 +10,9 @@ use App\Http\Controllers\SignupController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FaceScanController;
 
-Route::get('/', function () {
-    return view('landing');
-});
+Route::get('/', [DashboardController::class, 'landing']);
 
-Route::get('/landing', function () {
-    return view('landing');
-});
+Route::get('/landing', [DashboardController::class, 'landing']);
 
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
@@ -65,9 +61,9 @@ Route::post('/checkout/face-scan/upload', [FaceScanController::class, 'upload'])
 Route::get('/admin/events', [EventController::class, 'index']);
 Route::get('/admin/events/create', [EventController::class, 'create']);
 Route::post('/admin/events', [EventController::class, 'store']);
-Route::get('/admin/events/{id}/edit', [EventController::class, 'edit']);
-Route::post('/admin/events/{id}/update', [EventController::class, 'update']);
-Route::get('/admin/events/{id}/delete', [EventController::class, 'destroy']);
+Route::get('/admin/events/{id}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
+Route::post('/admin/events/{id}/update', [EventController::class, 'update'])->name('admin.events.update');
+Route::post('/admin/events/{id}/delete', [EventController::class, 'destroy'])->name('admin.events.destroy');
 Route::get('/admin/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->name('admin.revenue');
 Route::get('/admin/event/{id}', [DashboardController::class, 'showAdminEventDetail'])->name('admin.event.detail');
 Route::post('/admin/event/{id}/approve',
