@@ -11,12 +11,21 @@ class StatistikController extends Controller
 {
     public function index(Request $request)
     {
+        $role = $this->currentRole();
         $adminId = session('login_admin.id');
-        if (!$adminId) {
+
+        if (!$role) {
             return redirect('/login');
         }
 
-        $events = Event::where('id_user', $adminId)->get();
+        // Scope Events based on role
+        if ($role === 'admin' || $role === '1') {
+            $events = Event::orderBy('tanggal_pelaksanaan', 'desc')->get();
+        } else {
+            // Organizer scope
+            if (!$adminId) return redirect('/login');
+            $events = Event::where('id_user', $adminId)->get();
+        }
 
         $overallTotal = 0;
         $overallSold = 0;
@@ -81,7 +90,14 @@ class StatistikController extends Controller
         $selectedAvailable = 0;
 
         if ($request->has('id')) {
-            $selectedEvent = Event::where('id_user', $adminId)->where('id_event', $request->id)->firstOrFail();
+            $query = Event::where('id_event', $request->id);
+            
+            // If organizer, further restrict to their own events
+            if ($role !== 'admin' && $role !== '1') {
+                $query->where('id_user', $adminId);
+            }
+            
+            $selectedEvent = $query->firstOrFail();
             
             $tikets = DB::table('tiket')->where('id_event', $selectedEvent->id_event)->get();
             foreach ($tikets as $t) {
@@ -104,7 +120,7 @@ class StatistikController extends Controller
             $selectedAvailable = $selectedTotal - $selectedSold;
         }
 
-        return view('statistik-penjualan-organizer', compact(
+        return view('statistikpenjualan', compact(
             'events', 
             'overallTotal', 
             'overallSold', 
@@ -115,7 +131,22 @@ class StatistikController extends Controller
             'selectedSold',
             'selectedAvailable',
             'eventChartData',
-            'globalCategories'
+            'globalCategories',
+            'role'
         ));
+    }
+
+    private function currentRole()
+    {
+        if (Auth::check()) {
+            return strtolower(trim(Auth::user()->role));
+        }
+
+        $adminSession = session('login_admin');
+        if (is_array($adminSession) && isset($adminSession['role'])) {
+            return strtolower(trim($adminSession['role']));
+        }
+
+        return null;
     }
 }

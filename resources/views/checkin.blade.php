@@ -392,7 +392,6 @@
                     </a>
                 </li>
                 <li>
-                <li>
                     <a href="{{ route('organizer.checkin') }}" class="sidebar-item active">
                         <i class="ph ph-qr-code sidebar-icon"></i>
                         <span class="sidebar-text">Check In</span>

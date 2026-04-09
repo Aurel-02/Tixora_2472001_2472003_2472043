@@ -68,3 +68,4 @@ Route::get('/admin/revenue', [\App\Http\Controllers\RevenueController::class, 'i
 Route::get('/admin/event/{id}', [DashboardController::class, 'showAdminEventDetail'])->name('admin.event.detail');
 Route::post('/admin/event/{id}/reject',
     [EventController::class,'reject'])->name('admin.event.reject');
+Route::get('/admin/statistik', [\App\Http\Controllers\StatistikController::class, 'index'])->name('admin.statistik');

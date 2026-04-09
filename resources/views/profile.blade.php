@@ -449,6 +449,18 @@
                             <span class="sidebar-text">Revenue</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('admin.events.create') }}" class="sidebar-item {{ Request::is('admin/events/create') ? 'active' : '' }}">
+                            <i class="ph ph-plus-circle sidebar-icon"></i>
+                            <span class="sidebar-text">Tambah Event</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.statistik') }}" class="sidebar-item {{ Request::is('admin/statistik') ? 'active' : '' }}">
+                            <i class="ph ph-chart-bar sidebar-icon"></i>
+                            <span class="sidebar-text">Statistik Penjualan</span>
+                        </a>
+                    </li>
                 @else
                     <li>
                         <a href="/dashboard" class="sidebar-item">
