@@ -264,7 +264,7 @@
                     <div class="role-icon">🎸</div>
                     <div class="role-info">
                         <h3>Concert Enthusiast</h3>
-                        <p>Buy tickets, follow artists, and join the party.</p>
+                        <p>Buy tickets, follow artists, and join the events.</p>
                     </div>
                 </div>
 
@@ -272,7 +272,7 @@
                     <div class="role-icon">🏗️</div>
                     <div class="role-info">
                         <h3>Event Organizer</h3>
-                        <p>Create concerts, manage tickets, and grow your fans.</p>
+                        <p>Manage tickets, and grow your fans.</p>
                     </div>
                 </div>
 
@@ -280,7 +280,7 @@
                     <div class="role-icon">🛡️</div>
                     <div class="role-info">
                         <h3>Admin</h3>
-                        <p>Manage platform, events, and users.</p>
+                        <p>Manage events and statistics.</p>
                     </div>
                 </div>
             </div>
