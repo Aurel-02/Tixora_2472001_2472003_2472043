@@ -22,7 +22,7 @@ class SignupController extends Controller
             'email' => 'required|string|email|max:255|unique:user',
             'no_telp' => 'required|string|max:20',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:Organizer,Buyer',
+            'role' => 'required|in:Organizer,Buyer,Admin',
         ]);
 
         DB::statement('CALL sp_add_user(?, ?, ?, ?, ?)', [

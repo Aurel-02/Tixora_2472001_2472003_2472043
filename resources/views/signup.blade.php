@@ -79,8 +79,8 @@
 
         .role-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
             margin-bottom: 30px;
         }
 
@@ -241,7 +241,7 @@
             transform: translateY(10px);
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .role-grid {
                 grid-template-columns: 1fr;
             }
@@ -273,6 +273,14 @@
                     <div class="role-info">
                         <h3>Event Organizer</h3>
                         <p>Create concerts, manage tickets, and grow your fans.</p>
+                    </div>
+                </div>
+
+                <div class="role-card" onclick="selectRole('Admin', this)">
+                    <div class="role-icon">🛡️</div>
+                    <div class="role-info">
+                        <h3>Admin</h3>
+                        <p>Manage platform, events, and users.</p>
                     </div>
                 </div>
             </div>
@@ -361,7 +369,9 @@
                 }, 50);
             }, 400);
 
-            const subtitle = selectedRole === 'Organizer' ? 'Apply as an Organizer' : 'Join as a Concert Enthusiast';
+            let subtitle = 'Join as a Concert Enthusiast';
+            if (selectedRole === 'Organizer') subtitle = 'Apply as an Organizer';
+            if (selectedRole === 'Admin') subtitle = 'Register as Platform Admin';
             document.getElementById('role-subtitle').innerText = subtitle;
         }
 
@@ -385,7 +395,9 @@
                 document.getElementById('step-form').style.opacity = '1';
                 document.getElementById('step-form').style.transform = 'translateY(0)';
                 document.getElementById('role-input').value = selectedRole;
-                const subtitle = selectedRole === 'Organizer' ? 'Apply as an Organizer' : 'Join as a Concert Enthusiast';
+                let subtitle = 'Join as a Concert Enthusiast';
+                if (selectedRole === 'Organizer') subtitle = 'Apply as an Organizer';
+                if (selectedRole === 'Admin') subtitle = 'Register as Platform Admin';
                 document.getElementById('role-subtitle').innerText = subtitle;
             }
         @endif
