@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tixora - Notifikasi Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --jacarta: #3A345B;
+            --queen-pink: #F3C8DD;
+            --middle-purple: #D183A9;
+            --old-lavender: #71557A;
+            --brown-chocolate: #4B1535;
+            --sidebar-width-collapsed: 70px;
+            --sidebar-width-expanded: 240px;
+            --topbar-height: 70px;
+        }
+
+        /* Essential styles copied from admindashboard */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: linear-gradient(135deg, var(--jacarta), var(--brown-chocolate)); color: var(--queen-pink); min-height: 100vh; background-attachment: fixed; }
+        
+        .topbar { position: fixed; top: 0; left: var(--sidebar-width-collapsed); right: 0; height: var(--topbar-height); background: rgba(58, 52, 91, 0.6); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(243, 200, 221, 0.1); display: flex; justify-content: space-between; align-items: center; padding: 0 40px; z-index: 900; }
+        .topbar .logo { font-size: 1.8rem; font-weight: 700; letter-spacing: 2px; color: var(--queen-pink); text-shadow: 0 0 10px rgba(243, 200, 221, 0.5); text-transform: uppercase; }
+        
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width-collapsed); height: 100vh; background: rgba(113, 85, 122, 0.4); backdrop-filter: blur(15px); border-right: 1px solid rgba(243, 200, 221, 0.15); z-index: 1000; transition: width 0.3s ease; overflow: hidden; display: flex; flex-direction: column; padding-top: var(--topbar-height); }
+        .sidebar:hover { width: var(--sidebar-width-expanded); }
+        .sidebar-menu { list-style: none; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .sidebar-item { display: flex; align-items: center; padding: 15px 22px; color: var(--queen-pink); text-decoration: none; transition: background 0.2s; border-left: 3px solid transparent; cursor: pointer; white-space: nowrap; }
+        .sidebar-item:hover, .sidebar-item.active { background: rgba(209, 131, 169, 0.2); border-left: 3px solid var(--middle-purple); }
+        .sidebar-icon { font-size: 1.4rem; min-width: 25px; margin-right: 20px; }
+        .sidebar-text { font-size: 1rem; font-weight: 500; opacity: 0; transition: opacity 0.3s ease; }
+        .sidebar:hover .sidebar-text { opacity: 1; }
+
+        .main-wrapper { margin-left: var(--sidebar-width-collapsed); padding: calc(var(--topbar-height) + 40px) 40px 40px; min-height: 100vh; transition: margin-left 0.3s; }
+        .header-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; }
+
+        .notification-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(243, 200, 221, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+        .notification-card:hover { transform: scale(1.01); background: rgba(255, 255, 255, 0.05); }
+        
+        .notif-info { flex-grow: 1; }
+        .notif-title { font-size: 1.2rem; font-weight: 600; color: #fff; margin-bottom: 5px; }
+        .notif-user { font-size: 0.95rem; color: var(--middle-purple); font-weight: 500; }
+        .notif-date { font-size: 0.85rem; color: var(--queen-pink); opacity: 0.6; margin-top: 5px; }
+
+        .action-btns { display: flex; gap: 12px; }
+        .btn-approve { background: #4caf50; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-reject { background: #f44336; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-approve:hover { background: #43a047; box-shadow: 0 0 15px rgba(76, 175, 80, 0.4); }
+        .btn-reject:hover { background: #e53935; box-shadow: 0 0 15px rgba(244, 67, 54, 0.4); }
+
+        .empty-state { text-align: center; padding: 100px 0; opacity: 0.5; }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; }
+
+        @media (max-width: 768px) {
+            .main-wrapper { margin-left: 0; padding: 20px; }
+            .notification-card { flex-direction: column; text-align: center; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo">TIXORA</div>
+    </header>
+
+    <aside class="sidebar">
+        <div class="sidebar-content" style="display: flex; flex-direction: column; height: 100%;">
+            <ul class="sidebar-menu" style="flex-grow: 1;">
+                <li><a href="{{ url('/admin/dashboard') }}" class="sidebar-item"><i class="ph ph-house sidebar-icon"></i><span class="sidebar-text">Home</span></a></li>
+                <li><a href="{{ route('admin.revenue') }}" class="sidebar-item"><i class="ph ph-currency-dollar sidebar-icon"></i><span class="sidebar-text">Revenue</span></a></li>
+                <li><a href="{{ route('admin.events.create') }}" class="sidebar-item"><i class="ph ph-plus-circle sidebar-icon"></i><span class="sidebar-text">Tambah Event</span></a></li>
+                <li><a href="{{ route('admin.statistik') }}" class="sidebar-item"><i class="ph ph-chart-bar sidebar-icon"></i><span class="sidebar-text">Analitik Penjualan</span></a></li>
+                <li><a href="{{ route('admin.notifications') }}" class="sidebar-item active"><i class="ph ph-bell sidebar-icon"></i><span class="sidebar-text">Notifikasi Admin</span></a></li>
+            </ul>
+            <div style="padding: 10px 0;">
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; cursor: pointer;"><i class="ph ph-sign-out sidebar-icon"></i><span class="sidebar-text">Logout</span></button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-wrapper">
+        <div class="header-title">
+            <i class="ph ph-bell-ringing" style="color: var(--middle-purple);"></i>
+            Notifikasi Permohonan Event
+        </div>
+
+        @if(session('success'))
+            <div style="background: rgba(76, 175, 80, 0.2); border: 1px solid #4caf50; color: #fff; padding: 15px; border-radius: 10px; margin-bottom: 25px;">{{ session('success') }}</div>
+        @endif
+
+        <div class="notification-list">
+            @forelse($requests as $req)
+                <div class="notification-card">
+                    <div class="notif-info">
+                        <div class="notif-title">Permohonan Pengelolaan: {{ $req->nama_event }}</div>
+                        <div class="notif-user">Diajukan oleh: {{ $req->organizer_name }}</div>
+                        <div class="notif-date">{{ date('d M Y, H:i', strtotime($req->created_at)) }}</div>
+                    </div>
+                    <div class="action-btns">
+                        <form action="{{ route('admin.permohonan.approve', $req->id_permohonan) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn-approve">Approve</button>
+                        </form>
+                        <form action="{{ route('admin.permohonan.reject', $req->id_permohonan) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn-reject">Reject</button>
+                        </form>
+                    </div>
+                </div>
+            @empty
+                <div class="empty-state">
+                    <i class="ph ph-tray"></i>
+                    <p>Tidak ada permohonan tertunda saat ini.</p>
+                </div>
+            @endforelse
+        </div>
+    </main>
+</body>
+</html>

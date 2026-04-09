@@ -42,8 +42,10 @@ class StatistikController extends Controller
             foreach ($tikets as $t) {
                 // Total Sold (Historical)
                 $sold = DB::table('detail_transaksi')
-                    ->where('id_tiket', $t->id_tiket)
-                    ->sum('jumlah_beli') ?? 0;
+                    ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+                    ->where('detail_transaksi.id_tiket', $t->id_tiket)
+                    ->whereIn('transaksi.status_transaksi', ['lunas', 'Selesai'])
+                    ->sum('detail_transaksi.jumlah_beli') ?? 0;
                 
                 // Sold in last 7 Days
                 $sold7Days = DB::table('detail_transaksi')
@@ -117,8 +119,10 @@ class StatistikController extends Controller
             $tikets = DB::table('tiket')->where('id_event', $selectedEvent->id_event)->get();
             foreach ($tikets as $t) {
                 $sold = DB::table('detail_transaksi')
-                    ->where('id_tiket', $t->id_tiket)
-                    ->sum('jumlah_beli') ?? 0;
+                    ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+                    ->where('detail_transaksi.id_tiket', $t->id_tiket)
+                    ->whereIn('transaksi.status_transaksi', ['lunas', 'Selesai'])
+                    ->sum('detail_transaksi.jumlah_beli') ?? 0;
                     
                 $ticketStats[] = (object)[
                     'id_tiket' => $t->id_tiket,
@@ -142,7 +146,7 @@ class StatistikController extends Controller
                 ->where('tiket.id_event', $selectedEvent->id_event)
                 ->whereIn('transaksi.status_transaksi', ['lunas', 'Selesai'])
                 ->select(
-                    'user.nama_user as Nama Buyer',
+                    'user.nama_lengkap as Nama Buyer',
                     'user.email as Email',
                     'user.no_telp as No Telp',
                     'tiket.jenis_tiket as Kategori Tiket',

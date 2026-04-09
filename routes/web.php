@@ -50,6 +50,7 @@ Route::get('/organizer/revenue', [\App\Http\Controllers\RevenueController::class
 Route::get('/organizer/checkin', function () {
     return view('checkin');
 })->middleware(['auth', 'role:2'])->name('organizer.checkin');
+Route::post('/organizer/request-event/{id}', [DashboardController::class, 'requestEventManagement'])->middleware(['auth', 'role:2'])->name('organizer.event.request');
 
 
 Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('event.detail');
@@ -69,3 +70,6 @@ Route::get('/admin/event/{id}', [DashboardController::class, 'showAdminEventDeta
 Route::post('/admin/event/{id}/reject',
     [EventController::class,'reject'])->name('admin.event.reject');
 Route::get('/admin/statistik', [\App\Http\Controllers\StatistikController::class, 'index'])->name('admin.statistik');
+Route::get('/admin/notifikasi', [DashboardController::class, 'adminNotifications'])->name('admin.notifications');
+Route::post('/admin/approve-permohonan/{id}', [DashboardController::class, 'approveEventManagement'])->name('admin.permohonan.approve');
+Route::post('/admin/reject-permohonan/{id}', [DashboardController::class, 'rejectEventManagement'])->name('admin.permohonan.reject');

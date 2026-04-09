@@ -362,6 +362,12 @@
                             <span class="sidebar-text">Analitik Penjualan</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('admin.notifications') }}" class="sidebar-item {{ Request::is('admin/notifikasi') ? 'active' : '' }}">
+                            <i class="ph ph-bell sidebar-icon"></i>
+                            <span class="sidebar-text">Notifikasi</span>
+                        </a>
+                    </li>
                 @else
                     <li>
                         <a href="{{ url('/organizerdashboard') }}" class="sidebar-item">

@@ -511,6 +511,55 @@ or<!DOCTYPE html>
 
         <div class="event-list" id="eventList">
         </div>
+
+        <div class="section-header" style="margin-top: 50px; padding-top: 30px; border-top: 1px solid rgba(243, 200, 221, 0.1);">
+            Pendaftaran Event Tersedia
+        </div>
+
+        <div class="artist-grid" style="margin-top: 25px; margin-bottom: 50px;">
+            @forelse($availableEvents as $available)
+                <div class="artist-card" style="cursor: default; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(243, 200, 221, 0.05);">
+                    <div class="artist-card-img">
+                        @if($available->poster)
+                            <img src="{{ $available->poster }}" alt="{{ $available->nama_event }}" style="width: 100%; height: 100%; object-fit: cover;" />
+                        @else
+                            <i class="ph ph-ticket"></i>
+                        @endif
+                    </div>
+                    <div class="artist-card-info">
+                        <div class="artist-name" style="color: #fff;">{{ $available->nama_event }}</div>
+                        <div class="artist-desc"><i class="ph ph-map-pin"></i> {{ $available->lokasi_event ?? 'TBD' }}</div>
+                        <div class="artist-desc"><i class="ph ph-calendar"></i> {{ $available->tanggal_pelaksanaan ? date('d M Y', strtotime($available->tanggal_pelaksanaan)) : '-' }}</div>
+                        
+                        <div style="margin-top: 15px;">
+                            @if(isset($myRequests[$available->id_event]))
+                                @if($myRequests[$available->id_event] == 'pending')
+                                    <div style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--middle-purple); color: var(--middle-purple); text-align: center; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                        <i class="ph ph-clock-counter-clockwise"></i> Menunggu Admin
+                                    </div>
+                                @elseif($myRequests[$available->id_event] == 'rejected')
+                                    <div style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255, 107, 107, 0.1); border: 1px solid #ff6b6b; color: #ff6b6b; text-align: center; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                        <i class="ph ph-x-circle"></i> Pendaftaran Ditolak
+                                    </div>
+                                @endif
+                            @else
+                                <form action="{{ route('organizer.event.request', $available->id_event) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="tab-btn" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--middle-purple); border: none; color: var(--jacarta); font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                        <i class="ph"></i> Daftar Menjadi Organizer
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(243, 200, 221, 0.1);">
+                    <i class="ph ph-ticket" style="font-size: 2.5rem; opacity: 0.2; display: block; margin-bottom: 10px;"></i>
+                    <p style="opacity: 0.5;">Belum ada event tersedia untuk dikelola</p>
+                </div>
+            @endforelse
+        </div>
     </main>
 
     <script>

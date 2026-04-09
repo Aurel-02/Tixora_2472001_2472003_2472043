@@ -119,7 +119,115 @@ class DashboardController extends Controller
             $eventsByCategory[$catKey][] = $event;
         }
 
-        return view('organizerdashboard', compact('eventsByCategory'));
+        // Available events for management (no organizer assigned)
+        $availableEvents = Event::whereNull('id_user')->get();
+        $myRequests = DB::table('permohonan_events')
+            ->where('id_user', $adminId)
+            ->pluck('status', 'id_event')
+            ->toArray();
+
+        return view('organizerdashboard', compact('eventsByCategory', 'availableEvents', 'myRequests'));
+    }
+
+    public function requestEventManagement($id)
+    {
+        $adminId = session('login_admin.id');
+        if (!$adminId) return back();
+
+        $exists = DB::table('permohonan_events')
+            ->where('id_event', $id)
+            ->where('id_user', $adminId)
+            ->where('status', 'pending')
+            ->exists();
+
+        if (!$exists) {
+            DB::table('permohonan_events')->insert([
+                'id_event' => $id,
+                'id_user' => $adminId,
+                'status' => 'pending',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // Notify Admin (ID 1 as fallback or handle differently)
+            DB::table('notifikasi')->insert([
+                'id_user' => 1,
+                'pesan' => "Organizer mengajukan pendaftaran untuk event #" . $id,
+                'is_read' => 0,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+        return back()->with('success', 'Permohonan pendaftaran telah dikirim.');
+    }
+
+    public function adminNotifications()
+    {
+        $role = $this->currentRole();
+        if ($role !== 'admin' && $role !== '1') return redirect('/login');
+
+        $requests = DB::table('permohonan_events')
+            ->join('event', 'permohonan_events.id_event', '=', 'event.id_event')
+            ->join('user', 'permohonan_events.id_user', '=', 'user.id_user')
+            ->where('permohonan_events.status', 'pending')
+            ->select('permohonan_events.*', 'event.nama_event', 'user.nama_lengkap as organizer_name')
+            ->orderBy('permohonan_events.created_at', 'desc')
+            ->get();
+
+        return view('admin-notifikasi', compact('requests'));
+    }
+
+    public function approveEventManagement($id)
+    {
+        $request = DB::table('permohonan_events')->where('id_permohonan', $id)->first();
+        if (!$request) return back();
+
+        DB::transaction(function() use ($request, $id) {
+            // Assign organizer to event
+            DB::table('event')->where('id_event', $request->id_event)->update([
+                'id_user' => $request->id_user
+            ]);
+
+            // Update permohonan status
+            DB::table('permohonan_events')->where('id_permohonan', $id)->update([
+                'status' => 'approved',
+                'updated_at' => now()
+            ]);
+
+            // Notify Organizer
+            DB::table('notifikasi')->insert([
+                'id_user' => $request->id_user,
+                'pesan' => "Pendaftaran event Anda telah DISETUJUI oleh Admin.",
+                'is_read' => 0,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        });
+
+        return back()->with('success', 'Pendaftaran disetujui.');
+    }
+
+    public function rejectEventManagement($id)
+    {
+        $request = DB::table('permohonan_events')->where('id_permohonan', $id)->first();
+        if (!$request) return back();
+
+        DB::table('permohonan_events')->where('id_permohonan', $id)->update([
+            'status' => 'rejected',
+            'updated_at' => now()
+        ]);
+
+        // Notify Organizer
+        DB::table('notifikasi')->insert([
+            'id_user' => $request->id_user,
+            'pesan' => "Pendaftaran event Anda telah DITOLAK oleh Admin.",
+            'is_read' => 0,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        return back()->with('success', 'Pendaftaran ditolak.');
     }
 
     public function showEvent($id)
