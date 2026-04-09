@@ -459,6 +459,12 @@
                             <span class="sidebar-text">Revenue</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('admin.events.create') }}" class="sidebar-item {{ Request::is('admin/events/create') ? 'active' : '' }}">
+                            <i class="ph ph-plus-circle sidebar-icon"></i>
+                            <span class="sidebar-text">Tambah Event</span>
+                        </a>
+                    </li>
             </ul>
         </div>
     </aside>
