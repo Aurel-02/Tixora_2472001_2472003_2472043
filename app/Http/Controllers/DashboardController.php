@@ -43,9 +43,14 @@ class DashboardController extends Controller
             return redirect('/login');
         }
 
-        $pending = Event::where('status', 'pending')->get();
-        $approved = Event::where('status', 'approved')->get();
-        $rejected = Event::where('status', 'rejected')->get();
+        // Coment out because column 'status' not found in database
+        // $pending = Event::where('status', 'pending')->get();
+        // $approved = Event::where('status', 'approved')->get();
+        // $rejected = Event::where('status', 'rejected')->get();
+
+        $pending = collect();
+        $approved = Event::all(); // Show all for now
+        $rejected = collect();
 
         $kategoriMap = [
             1 => 'indonesia',
@@ -206,7 +211,8 @@ class DashboardController extends Controller
             'kpop' => ['artists' => [], 'events' => []]
         ];
 
-        $allEvents = Event::where('status','approved')->get();
+        // $allEvents = Event::where('status','approved')->get();
+        $allEvents = Event::all(); // Show all for now
 
         foreach ($allEvents as $event) {
             $catId = $event->id_kategori;
