@@ -13,21 +13,17 @@ class TambahEventController extends Controller
     {
         $role = $this->currentRole();
 
-        if ($role === 'buyer' || $role === '3') {
-            return redirect('/dashboard');
-        }
-
-        if ($role !== 'organizer' && $role !== '2') {
+        if ($role !== 'admin' && $role !== '1') {
             return redirect('/login');
         }
 
-        return view('tambahevent');
+        return view('admin-tambahevent');
     }
 
     public function store(Request $request)
     {
         $role = $this->currentRole();
-        if ($role !== 'organizer' && $role !== '2') {
+        if ($role !== 'admin' && $role !== '1') {
             return redirect('/login');
         }
 
@@ -105,7 +101,7 @@ class TambahEventController extends Controller
                 }
             }
 
-            return redirect()->route('organizerdashboard')->with('success', 'Event berhasil disimpan');
+            return redirect()->route('admin.dashboard')->with('success', 'Event berhasil disimpan');
         } catch (\Illuminate\Database\QueryException $e) {
             $errorMessage = $e->getMessage();
             if (str_contains($errorMessage, 'Event sudah ada pada tanggal, waktu, dan lokasi yang sama')) {

@@ -8,15 +8,6 @@ use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
-    public function approve($id)
-    {
-        $event = \App\Models\Event::findOrFail($id);
-        // $event->status = 'approved';
-        // $event->save();
-
-        return back()->with('success','Event Approved (Simulation - Column Status missing)');
-    }
-
     public function reject($id)
     {
         $event = \App\Models\Event::findOrFail($id);

@@ -19,7 +19,7 @@ Route::post('/login', [LoginController::class, 'authenticate'])->name('login.pos
 
 Route::get('/signup', [SignupController::class, 'show'])->name('signup');
 Route::post('/signup', [SignupController::class, 'store'])->name('signup.post');
-Route::get('/admin/dashboard', [DashboardController::class, 'adminDashboard']);
+Route::get('/admin/dashboard', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
 Route::get('/admin/login', [AuthController::class, 'loginPage']);
 Route::post('/admin/login', [AuthController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -38,9 +38,9 @@ Route::get('/profile/change-password', [\App\Http\Controllers\ProfileController:
 Route::post('/profile/change-password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->middleware(['auth'])->name('profile.password.update');
 Route::get('/organizerdashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2'])->name('organizerdashboard');
 Route::get('/organizer/dashboard', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
-Route::get('/organizer/events/create', [TambahEventController::class, 'create'])->middleware(['auth', 'role:2'])->name('organizer.events.create');
+// Route::get('/organizer/events/create', [TambahEventController::class, 'create'])->middleware(['auth', 'role:2'])->name('organizer.events.create');
 Route::get('/organizer/events', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
-Route::post('/organizer/events', [TambahEventController::class, 'store'])->middleware(['auth', 'role:2'])->name('organizer.events.store');
+// Route::post('/organizer/events', [TambahEventController::class, 'store'])->middleware(['auth', 'role:2'])->name('organizer.events.store');
 Route::get('/organizer/event/{id}', [DashboardController::class, 'showEventOrganizer'])->middleware(['auth', 'role:2'])->name('organizer.event.detail');
 Route::get('/organizer/statistik', [\App\Http\Controllers\StatistikController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.statistik');
 Route::post('/organizer/event/{id}/update-description', [\App\Http\Controllers\EditEventController::class, 'updateDescription'])->middleware(['auth', 'role:2'])->name('organizer.event.update-description');
@@ -59,14 +59,12 @@ Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('
 Route::get('/checkout/face-scan', [FaceScanController::class, 'index'])->name('face-scan.index');
 Route::post('/checkout/face-scan/upload', [FaceScanController::class, 'upload'])->name('face-scan.upload');
 Route::get('/admin/events', [EventController::class, 'index']);
-Route::get('/admin/events/create', [EventController::class, 'create']);
-Route::post('/admin/events', [EventController::class, 'store']);
+Route::get('/admin/events/create', [TambahEventController::class, 'create'])->name('admin.events.create');
+Route::post('/admin/events', [TambahEventController::class, 'store'])->name('admin.events.store');
 Route::get('/admin/events/{id}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
 Route::post('/admin/events/{id}/update', [EventController::class, 'update'])->name('admin.events.update');
 Route::post('/admin/events/{id}/delete', [EventController::class, 'destroy'])->name('admin.events.destroy');
 Route::get('/admin/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->name('admin.revenue');
 Route::get('/admin/event/{id}', [DashboardController::class, 'showAdminEventDetail'])->name('admin.event.detail');
-Route::post('/admin/event/{id}/approve',
-    [EventController::class,'approve'])->name('admin.event.approve');
 Route::post('/admin/event/{id}/reject',
     [EventController::class,'reject'])->name('admin.event.reject');

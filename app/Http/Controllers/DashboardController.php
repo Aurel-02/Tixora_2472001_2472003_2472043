@@ -186,7 +186,7 @@ class DashboardController extends Controller
         $ticketsAvailable = $totalTickets - $ticketsSold;
         if ($ticketsAvailable < 0) $ticketsAvailable = 0;
 
-        return view('eventdetailorganizer', compact('event', 'ticketStats', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
+        return view('organizer-detailevent', compact('event', 'ticketStats', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
     }
 
     public function bookEvent($id)

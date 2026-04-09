@@ -460,8 +460,12 @@
                         <span class="sidebar-text">Revenue</span>
                     </a>
                 </li>
-
-
+                <li>
+                    <a href="{{ route('admin.events.create') }}" class="sidebar-item {{ Request::is('admin/events/create') ? 'active' : '' }}">
+                        <i class="ph ph-plus-circle sidebar-icon"></i>
+                        <span class="sidebar-text">Tambah Event</span>
+                    </a>
+                </li>
             </ul>
 
             <div style="padding: 10px 0;">
@@ -519,63 +523,6 @@
 
             let statusBadge = '';
             let actionButton = '';
-
-            if(event.status === 'pending'){
-                statusBadge = `
-        <span style="
-            background:#ffc107;
-            color:black;
-            padding:4px 10px;
-            border-radius:6px;
-            font-size:12px;
-        ">
-        Pending
-        </span>`;
-
-                actionButton = `
-        <div style="margin-top:10px; display:flex; gap:5px; justify-content:center;">
-            <form method="POST" action="/admin/event/${eventId}/approve" onclick="event.stopPropagation()">
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <button style="
-                    background:#28a745;
-                    color:white;
-                    border:none;
-                    padding:5px 10px;
-                    border-radius:6px;
-                    cursor:pointer;
-                ">
-                Approve
-                </button>
-            </form>
-
-            <form method="POST" action="/admin/event/${eventId}/reject" onclick="event.stopPropagation()">
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <button style="
-                    background:#dc3545;
-                    color:white;
-                    border:none;
-                    padding:5px 10px;
-                    border-radius:6px;
-                    cursor:pointer;
-                ">
-                Reject
-                </button>
-            </form>
-        </div>
-        `;
-            }
-
-            if(event.status === 'approved'){
-                statusBadge = `
-        <span style="
-            background:#28a745;
-            padding:4px 10px;
-            border-radius:6px;
-            font-size:12px;
-        ">
-        Approved
-        </span>`;
-            }
 
             if(event.status === 'rejected'){
                 statusBadge = `
