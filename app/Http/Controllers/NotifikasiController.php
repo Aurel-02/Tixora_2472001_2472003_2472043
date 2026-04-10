@@ -69,10 +69,10 @@ class NotifikasiController extends Controller
             $icon = '<i class="ph ph-bell-ringing"></i>';
 
             if (stripos($sn->pesan, 'diterima') !== false || stripos($sn->pesan, 'disetujui') !== false) {
-                $title = 'Horeee! Permintaan Disetujui 🎉';
+                $title = 'Horeee! Permintaan Disetujui';
                 $icon = '<i class="ph ph-confetti"></i>';
             } elseif (stripos($sn->pesan, 'ditolak') !== false) {
-                $title = 'Ups! Permintaan Ditolak 😔';
+                $title = 'Ups! Permintaan Ditolak';
                 $icon = '<i class="ph ph-x-circle"></i>';
             }
 
@@ -88,11 +88,14 @@ class NotifikasiController extends Controller
             ]);
         }
 
+        // Get unread count before marking them read
+        $pageUnreadCount = DB::table('notifikasi')->where('id_user', $adminId)->where('is_read', 0)->count();
+
         // Mark all true system notifications as read
         DB::table('notifikasi')->where('id_user', $adminId)->where('is_read', 0)->update(['is_read' => 1]);
 
         $notifications = $notifications->sortByDesc('raw_time')->values();
 
-        return view('notification', compact('notifications'));
+        return view('organizer-notifikasi', compact('notifications', 'pageUnreadCount'));
     }
 }

@@ -351,9 +351,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('organizer.notifications') }}" class="sidebar-item active">
+                    <a href="{{ route('organizer.notifications') }}" class="sidebar-item active" style="position: relative;">
                         <i class="ph ph-bell sidebar-icon"></i>
                         <span class="sidebar-text">Notifications</span>
+                        @php $badgeCount = isset($pageUnreadCount) ? $pageUnreadCount : ($unreadCount ?? 0); @endphp
+                        @if($badgeCount > 0)
+                        <span style="position: absolute; right: 15px; margin-top: -3px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);">{{ $badgeCount }}</span>
+                        @endif
                     </a>
                 </li>
             </ul>
@@ -372,7 +376,12 @@
 
     <main class="main-wrapper">
         <div class="section-header">
-            <span class="section-title"><i class="ph ph-bell-ringing"></i> Notifikasi Kamu</span>
+            <span class="section-title">
+                <i class="ph ph-bell-ringing"></i> Notifikasi Kamu
+                @if(isset($pageUnreadCount) && $pageUnreadCount > 0)
+                    <span style="background: #ef4444; font-family: 'Outfit'; color: white; font-size: 1.1rem; padding: 4px 14px; border-radius: 20px; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); margin-left: 15px;">{{ $pageUnreadCount }} Baru</span>
+                @endif
+            </span>
         </div>
 
         <div class="notifications-container">

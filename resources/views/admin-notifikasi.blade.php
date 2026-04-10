@@ -151,7 +151,16 @@
                 <li><a href="{{ route('admin.revenue') }}" class="sidebar-item"><i class="ph ph-currency-dollar sidebar-icon"></i><span class="sidebar-text">Revenue</span></a></li>
                 <li><a href="{{ route('admin.events.create') }}" class="sidebar-item"><i class="ph ph-plus-circle sidebar-icon"></i><span class="sidebar-text">Tambah Event</span></a></li>
                 <li><a href="{{ route('admin.statistik') }}" class="sidebar-item"><i class="ph ph-chart-bar sidebar-icon"></i><span class="sidebar-text">Analitik Penjualan</span></a></li>
-                <li><a href="{{ route('admin.notifications') }}" class="sidebar-item active"><i class="ph ph-bell sidebar-icon"></i><span class="sidebar-text">Notifikasi</span></a></li>
+                <li>
+                    <a href="{{ route('admin.notifications') }}" class="sidebar-item active" style="position: relative;">
+                        <i class="ph ph-bell sidebar-icon"></i>
+                        <span class="sidebar-text">Notifikasi</span>
+                        @php $badgeCount = isset($pageUnreadCount) ? $pageUnreadCount : ($unreadCount ?? 0); @endphp
+                        @if($badgeCount > 0)
+                        <span style="position: absolute; right: 15px; margin-top: -3px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);">{{ $badgeCount }}</span>
+                        @endif
+                    </a>
+                </li>
             </ul>
             <div style="padding: 10px 0;">
                 <form action="{{ route('logout') }}" method="POST">
@@ -166,6 +175,9 @@
         <div class="header-title" style="margin-bottom: 20px;">
             <i class="ph ph-bell-ringing" style="color: var(--middle-purple);"></i>
             Pusat Notifikasi Admin
+            @if(isset($pageUnreadCount) && $pageUnreadCount > 0)
+                <span style="background: #ef4444; font-family: 'Outfit'; color: white; font-size: 0.9rem; padding: 4px 12px; border-radius: 20px; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); margin-left: 10px;">{{ $pageUnreadCount }} Baru</span>
+            @endif
         </div>
 
         <div class="category-tabs">
