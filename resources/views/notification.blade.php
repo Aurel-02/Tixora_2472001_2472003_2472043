@@ -248,6 +248,12 @@
             border-color: rgba(243, 200, 221, 0.3);
         }
 
+        .notif-icon.system-notif {
+            background: rgba(209, 131, 169, 0.2);
+            color: var(--middle-purple);
+            border-color: rgba(209, 131, 169, 0.4);
+        }
+
         .notif-content {
             flex-grow: 1;
         }
