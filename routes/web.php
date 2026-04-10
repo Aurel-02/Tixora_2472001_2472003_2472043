@@ -69,6 +69,7 @@ Route::get('/admin/events/{id}/edit', [EventController::class, 'edit'])->name('a
 Route::post('/admin/events/{id}/update', [EventController::class, 'update'])->name('admin.events.update');
 Route::post('/admin/events/{id}/delete', [EventController::class, 'destroy'])->name('admin.events.destroy');
 Route::get('/admin/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->name('admin.revenue');
+Route::get('/admin/revenue/export-pdf', [\App\Http\Controllers\RevenueController::class, 'exportPdf'])->name('admin.revenue.export_pdf');
 Route::get('/admin/event/{id}', [DashboardController::class, 'showAdminEventDetail'])->name('admin.event.detail');
 Route::post('/admin/event/{id}/reject',
     [EventController::class,'reject'])->name('admin.event.reject');
