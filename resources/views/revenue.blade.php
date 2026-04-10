@@ -425,6 +425,7 @@
         </div>
 
         <div class="revenue-grid">
+            @if($role == '1' || $role == 'admin')
             <div class="revenue-card">
                 <div class="card-icon"><i class="ph ph-wallet"></i></div>
                 <div class="card-label">Total Uang Masuk</div>
@@ -433,14 +434,19 @@
 
             <div class="revenue-card" style="--middle-purple: #F3C8DD;">
                 <div class="card-icon" style="background: rgba(243, 200, 221, 0.15); color: #F3C8DD;"><i class="ph ph-shield-check"></i></div>
-                <div class="card-label">Biaya Admin</div>
+                <div class="card-label">Total Uang Masuk Admin</div>
                 <div class="card-value">Rp {{ number_format($totalJatahAdmin ?? 0, 0, ',', '.') }}</div>
             </div>
 
-            @if($role != '1' && $role != 'admin')
             <div class="revenue-card" style="--middle-purple: #84d8a5;">
                 <div class="card-icon" style="background: rgba(132, 216, 165, 0.15); color: #84d8a5;"><i class="ph ph-bank"></i></div>
-                <div class="card-label">Pendapatan Organizer</div>
+                <div class="card-label">Total Uang Masuk Organizer</div>
+                <div class="card-value">Rp {{ number_format($totalJatahOrganizer ?? 0, 0, ',', '.') }}</div>
+            </div>
+            @else
+            <div class="revenue-card" style="--middle-purple: #84d8a5;">
+                <div class="card-icon" style="background: rgba(132, 216, 165, 0.15); color: #84d8a5;"><i class="ph ph-bank"></i></div>
+                <div class="card-label">Pendapatanku</div>
                 <div class="card-value">Rp {{ number_format($totalJatahOrganizer ?? 0, 0, ',', '.') }}</div>
             </div>
             @endif
@@ -453,47 +459,99 @@
         </div>
 
         <div class="section-container">
-            <div class="section-header">
+            <div class="section-header" style="flex-wrap: wrap; gap: 20px;">
                 <h2 class="section-title">
-                    <i class="ph ph-clock-counter-clockwise"></i> 
-                    Recent Revenue Stream
+                    <i class="ph ph-chart-line"></i> 
+                    Event Revenue Breakdown
                 </h2>
+                <div class="event-selector" style="position: relative; min-width: 250px;">
+                    <select id="eventFilter" onchange="filterEvents(this.value)" style="width: 100%; padding: 12px 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(243, 200, 221, 0.2); border-radius: 12px; color: #fff; font-family: 'Outfit'; font-size: 0.9rem; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none;">
+                        <option value="all" style="background: var(--jacarta);">Semua Event</option>
+                        @foreach($eventEarnings as $event)
+                            <option value="{{ $event['id'] }}" style="background: var(--jacarta);">{{ $event['name'] }}</option>
+                        @endforeach
+                    </select>
+                    <i class="ph ph-caret-down" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.6;"></i>
+                </div>
             </div>
 
-            <table class="revenue-table">
+            <table class="revenue-table" id="revenueTable">
                 <thead>
                     <tr>
-                        <th>Transaction ID</th>
                         <th>Event Name</th>
-                        <th>Amount</th>
-                        <th>Status Transaksi</th>
+                        @if($role == '1' || $role == 'admin')
+                        <th>Total Gross Sales</th>
+                        @endif
+                        <th>Your Share ({{ ($role == '1' || $role == 'admin') ? '90' : '10' }}%)</th>
+                        <th>Tickets Sold</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($recentTransactions as $tx)
-                    <tr>
-                        <td style="font-family: monospace; letter-spacing: 1px;">{{ $tx['id'] }}</td>
-                        <td class="table-event-name">{{ $tx['event'] }}</td>
-                        <td style="font-weight: 700;">Rp {{ number_format($tx['amount'], 0, ',', '.') }}</td>
+                    @forelse($eventEarnings as $event)
+                    <tr class="event-row" data-event-id="{{ $event['id'] }}">
+                        <td class="table-event-name">{{ $event['name'] }}</td>
+                        @if($role == '1' || $role == 'admin')
+                        <td>Rp {{ number_format($event['total_sales'], 0, ',', '.') }}</td>
+                        @endif
+                        <td style="font-weight: 700; color: #84d8a5;">Rp {{ number_format($event['revenue'], 0, ',', '.') }}</td>
                         <td>
-                            @if($tx['status'] == 'Berhasil')
-                                <span class="badge badge-success">Berhasil</span>
-                            @else
-                                <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Gagal</span>
-                            @endif
+                            <span class="badge badge-success">{{ number_format($event['tickets'], 0, ',', '.') }} Tickets</span>
                         </td>
                     </tr>
                     @empty
                     <tr>
                         <td colspan="4" style="text-align: center; padding: 40px; opacity: 0.5;">
-                            No revenue data available.
+                            No event revenue data available.
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        @if($role == '1' || $role == 'admin')
+        <div class="export-section" style="margin-top: 30px; padding: 25px 30px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(243, 200, 221, 0.15); border-radius: 20px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+            <div>
+                <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 5px;">Rekapan Detail Penjualan</h3>
+                <p style="color: rgba(243, 200, 221, 0.8); font-size: 0.95rem; margin: 0;">Unduh dokumen PDF berisi rincian penjualan seluruh event.</p>
+            </div>
+            <a href="{{ route('admin.revenue.export_pdf') }}" target="_blank" style="background: rgba(132, 216, 165, 0.15); border: 1px solid #84d8a5; color: #84d8a5; padding: 12px 28px; border-radius: 12px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.background='rgba(132, 216, 165, 0.25)'" onmouseout="this.style.background='rgba(132, 216, 165, 0.15)'">
+                <i class="ph ph-file-pdf" style="font-size: 1.3rem;"></i>
+                Export PDF
+            </a>
+        </div>
+        @endif
     </main>
+
+    <script>
+        function filterEvents(eventId) {
+            const rows = document.querySelectorAll('.event-row');
+            rows.forEach(row => {
+                if (eventId === 'all' || row.getAttribute('data-event-id') === eventId) {
+                    row.style.display = 'table-row';
+                    row.style.animation = 'fadeIn 0.4s ease forwards';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #eventFilter:hover {
+            border-color: var(--middle-purple);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        option {
+            padding: 10px;
+        }
+    </style>
 
 </body>
 </html>

@@ -12,101 +12,171 @@ class RevenueController extends Controller
         $rawRole = auth()->check() ? auth()->user()->role : (session()->has('login_admin') ? session('login_admin.role') : '3');
         $role = strtolower(trim($rawRole));
 
-        $adminRevenue = 0;
-        $organizerRevenue = 0;
-        $totalTransactions = 0;
         $totalUangMasuk = 0;
         $totalJatahAdmin = 0;
         $totalJatahOrganizer = 0;
-        $recentTransactions = [];
+        $totalTransactions = 0;
+        $eventEarnings = [];
 
         if ($role == '1' || $role == 'admin') {
-            $totals = DB::table('detail_transaksi')
-                ->where('status_item', 'berhasil')
-                ->select(DB::raw('SUM(subtotal) as total_gross, SUM(jumlah_beli) as total_sold'))
-                ->first();
-
-            $totalGross = (float)($totals->total_gross ?? 0);
-            $totalSoldCount = (int)($totals->total_sold ?? 0);
-            
-            $totalUangMasuk = $totalGross;
-            $totalJatahAdmin = $totalSoldCount * 5000;
-            $totalJatahOrganizer = $totalGross - $totalJatahAdmin;
-
-            $adminRevenue = $totalJatahAdmin;
-            $organizerRevenue = $totalJatahOrganizer;
-            $totalTransactions = $totalSoldCount;
-
-            $transactions = DB::table('detail_transaksi')
-                ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
-                ->join('event', 'tiket.id_event', '=', 'event.id_event')
-                ->select('detail_transaksi.*', 'event.nama_event', 'tiket.jenis_tiket')
-                ->orderBy('detail_transaksi.id_detail', 'desc')
-                ->limit(10)
-                ->get();
-
-            foreach ($transactions as $tx) {
-                $recentTransactions[] = [
-                    'id' => $tx->kode_QR ?? ('TX-' . str_pad($tx->id_detail, 4, '0', STR_PAD_LEFT)),
-                    'event' => $tx->nama_event . ' (' . $tx->jenis_tiket . ')',
-                    'amount' => (float)$tx->subtotal,
-                    'status' => ($tx->status_item == 'berhasil') ? 'Berhasil' : 'Gagal',
-                ];
-            }
-        } elseif ($role == '2' || $role == 'organizer') {
-            $organizerId = session('login_admin.id') ?? auth()->id();
-            
-            $events = Event::where('id_user', $organizerId)->get();
-            $totalTransactionsCount = 0;
+            // Admin View
+            $events = Event::all();
             
             foreach ($events as $event) {
-                $revenueData = DB::table('tiket')
-                    ->join('detail_transaksi', 'tiket.id_tiket', '=', 'detail_transaksi.id_tiket')
+                // Pendapatan admin 90%
+                $revResult = DB::select("SELECT pendapatan_event(?) as rev", [$event->id_event]);
+                $eventRev = (float)($revResult[0]->rev ?? 0);
+                
+                // Total penjualan
+                $rawSales = DB::table('detail_transaksi')
+                    ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+                    ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
                     ->where('tiket.id_event', $event->id_event)
-                    ->where('detail_transaksi.status_item', 'berhasil')
-                    ->select(DB::raw('SUM(detail_transaksi.subtotal) as total_kotor, SUM(detail_transaksi.jumlah_beli) as total_sold'))
+                    ->where(function($q) {
+                        $q->where('detail_transaksi.status_item', 'berhasil')
+                          ->orWhere('transaksi.status_transaksi', 'Selesai');
+                    })
+                    ->select(DB::raw('SUM(detail_transaksi.subtotal) as total, SUM(detail_transaksi.jumlah_beli) as tickets'))
                     ->first();
                 
-                $totalKotor = (float)($revenueData->total_kotor ?? 0);
-                $totalTiket = (int)($revenueData->total_sold ?? 0);
-                $feeAdmin = $totalTiket * 5000;
-                $pendapatanBersih = max(0, $totalKotor - $feeAdmin);
-                
-                $totalUangMasuk += $totalKotor;
-                $totalJatahAdmin += $feeAdmin;
-                $totalJatahOrganizer += $pendapatanBersih;
-                
-                $totalTransactionsCount += $totalTiket;
-            }
+                $eventTotal = (float)($rawSales->total ?? 0);
+                $eventTickets = (int)($rawSales->tickets ?? 0);
 
-            $transactions = DB::table('detail_transaksi')
-                ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
-                ->join('event', 'tiket.id_event', '=', 'event.id_event')
-                ->where('event.id_user', $organizerId)
-                ->select('detail_transaksi.*', 'event.nama_event', 'tiket.jenis_tiket')
-                ->orderBy('detail_transaksi.id_detail', 'desc')
-                ->limit(10)
-                ->get();
-
-            foreach ($transactions as $tx) {
-                $recentTransactions[] = [
-                    'id' => $tx->kode_QR ?? ('TX-' . str_pad($tx->id_detail, 4, '0', STR_PAD_LEFT)),
-                    'event' => $tx->nama_event . ' (' . $tx->jenis_tiket . ')',
-                    'amount' => (float)$tx->subtotal,
-                    'status' => ($tx->status_item == 'berhasil') ? 'Berhasil' : 'Gagal',
-                ];
+                if ($eventTotal > 0 || $eventTickets > 0) {
+                    $eventEarnings[] = [
+                        'id' => $event->id_event,
+                        'name' => $event->nama_event,
+                        'total_sales' => $eventTotal,
+                        'revenue' => $eventRev, // This is 90%
+                        'tickets' => $eventTickets
+                    ];
+                    
+                    $totalUangMasuk += $eventTotal;
+                    $totalJatahAdmin += $eventRev;
+                    $totalTransactions += $eventTickets;
+                }
             }
+            
+            $totalJatahOrganizer = $totalUangMasuk - $totalJatahAdmin;
+
+        } elseif ($role == '2' || $role == 'organizer') {
+            // Organizer View: 10% Revenue per Event
+            $organizerId = session('login_admin.id') ?? auth()->id();
+            $events = Event::where('id_user', $organizerId)->get();
+
+            // Total Jatah Organizer
+            $totalResult = DB::select("SELECT hitung_pendapatan_organizer(?) as total", [$organizerId]);
+            $totalJatahOrganizer = (float)($totalResult[0]->total ?? 0);
+
+            foreach ($events as $event) {
+                // Hitung pendapatan organizer
+                $rawSales = DB::table('detail_transaksi')
+                    ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+                    ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
+                    ->where('tiket.id_event', $event->id_event)
+                    ->where(function($q) {
+                        $q->where('detail_transaksi.status_item', 'berhasil')
+                          ->orWhere('transaksi.status_transaksi', 'Selesai');
+                    })
+                    ->select(DB::raw('SUM(detail_transaksi.subtotal) as total, SUM(detail_transaksi.jumlah_beli) as tickets'))
+                    ->first();
+                
+                $eventTotal = (float)($rawSales->total ?? 0);
+                $eventTickets = (int)($rawSales->tickets ?? 0);
+                $eventRev = $eventTotal * 0.10; // 10% for Organizer
+
+                if ($eventTotal > 0 || $eventTickets > 0) {
+                    $eventEarnings[] = [
+                        'id' => $event->id_event,
+                        'name' => $event->nama_event,
+                        'total_sales' => $eventTotal,
+                        'revenue' => $eventRev,
+                        'tickets' => $eventTickets
+                    ];
+                    
+                    $totalUangMasuk += $eventTotal;
+                    $totalTransactions += $eventTickets;
+                }
+            }
+            
+            $totalJatahAdmin = $totalUangMasuk - $totalJatahOrganizer;
         }
 
+        $recentTransactions = $eventEarnings; 
+
         return view('revenue', compact(
-            'adminRevenue', 
-            'organizerRevenue', 
-            'totalTransactions', 
-            'recentTransactions', 
             'role',
             'totalUangMasuk',
             'totalJatahAdmin',
-            'totalJatahOrganizer'
+            'totalJatahOrganizer',
+            'totalTransactions',
+            'eventEarnings'
         ));
+    }
+
+    public function exportPdf()
+    {
+        $rawRole = auth()->check() ? auth()->user()->role : (session()->has('login_admin') ? session('login_admin.role') : '3');
+        $role = strtolower(trim($rawRole));
+
+        if ($role != '1' && $role != 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $categories = DB::table('detail_transaksi')
+            ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+            ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
+            ->join('event', 'tiket.id_event', '=', 'event.id_event')
+            ->where(function($q) {
+                $q->where('detail_transaksi.status_item', 'berhasil')
+                  ->orWhere('transaksi.status_transaksi', 'Selesai');
+            })
+            ->select(
+                'event.nama_event',
+                'tiket.jenis_tiket',
+                'tiket.harga',
+                DB::raw('SUM(detail_transaksi.jumlah_beli) as total_sold'),
+                DB::raw('SUM(detail_transaksi.subtotal) as gross_sales')
+            )
+            ->groupBy('event.id_event', 'event.nama_event', 'tiket.id_tiket', 'tiket.jenis_tiket', 'tiket.harga')
+            ->orderBy('event.nama_event', 'asc')
+            ->get();
+
+        $reportData = [];
+        $totalGrossAll = 0;
+        $totalAdminAll = 0;
+        $totalOrganizerAll = 0;
+
+        foreach ($categories as $cat) {
+            $gross = (float)$cat->gross_sales;
+            $adminShare = $gross * 0.90;
+            $orgShare = $gross * 0.10;
+
+            if ($gross > 0 || (int)$cat->total_sold > 0) {
+                $reportData[$cat->nama_event][] = [
+                    'jenis_tiket' => $cat->jenis_tiket,
+                    'harga' => (float)$cat->harga,
+                    'total_sold' => (int)$cat->total_sold,
+                    'gross_sales' => $gross,
+                    'admin_share' => $adminShare,
+                    'organizer_share' => $orgShare
+                ];
+
+                $totalGrossAll += $gross;
+                $totalAdminAll += $adminShare;
+                $totalOrganizerAll += $orgShare;
+            }
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.revenue-report', compact(
+            'reportData', 
+            'totalGrossAll', 
+            'totalAdminAll', 
+            'totalOrganizerAll'
+        ));
+
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->download('Revenue_Report_' . date('Y-m-d_H-i') . '.pdf');
     }
 }

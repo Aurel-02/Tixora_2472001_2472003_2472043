@@ -49,11 +49,6 @@ class DashboardController extends Controller
             return redirect('/login');
         }
 
-        // Coment out because column 'status' not found in database
-        // $pending = Event::where('status', 'pending')->get();
-        // $approved = Event::where('status', 'approved')->get();
-        // $rejected = Event::where('status', 'rejected')->get();
-
         $pending = collect();
         $approved = Event::all(); // Show all for now
         $rejected = collect();
