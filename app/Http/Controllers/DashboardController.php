@@ -202,10 +202,14 @@ class DashboardController extends Controller
             ->limit(50)
             ->get();
 
-        // Mark all as read when opening notifications page
-        DB::table('notifikasi')->where('id_user', session('login_admin.id') ?? auth()->id())->where('is_read', 0)->update(['is_read' => 1]);
+        // Calculate unread count before marking them as read for the page header badge
+        $adminId = session('login_admin.id') ?? auth()->id();
+        $pageUnreadCount = DB::table('notifikasi')->where('id_user', $adminId)->where('is_read', 0)->count();
 
-        return view('admin-notifikasi', compact('requests', 'purchases'));
+        // Mark all as read when opening notifications page
+        DB::table('notifikasi')->where('id_user', $adminId)->where('is_read', 0)->update(['is_read' => 1]);
+
+        return view('admin-notifikasi', compact('requests', 'purchases', 'pageUnreadCount'));
     }
 
     public function approveEventManagement($id)
