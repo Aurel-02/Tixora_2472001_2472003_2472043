@@ -144,14 +144,20 @@ class DashboardController extends Controller
                 'updated_at' => now()
             ]);
 
-            // Notify Admin (ID 1 as fallback or handle differently)
-            DB::table('notifikasi')->insert([
-                'id_user' => 1,
-                'pesan' => "Organizer mengajukan pendaftaran untuk event #" . $id,
-                'is_read' => 0,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+            $eventName = DB::table('event')->where('id_event', $id)->value('nama_event') ?? "Event #$id";
+            $organizerName = DB::table('user')->where('id_user', $adminId)->value('nama_lengkap') ?? "Organizer";
+            
+            // Notify all Admins
+            $admins = DB::table('user')->where('role', '1')->orWhere('role', 'admin')->get();
+            foreach ($admins as $adm) {
+                DB::table('notifikasi')->insert([
+                    'id_user' => $adm->id_user,
+                    'pesan' => "Organizer {$organizerName} mengajukan permintaan untuk mengelola event: {$eventName}",
+                    'is_read' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
         }
 
         return back()->with('success', 'Permohonan pendaftaran telah dikirim.');
@@ -191,6 +197,9 @@ class DashboardController extends Controller
             ->limit(50)
             ->get();
 
+        // Mark all as read when opening notifications page
+        DB::table('notifikasi')->where('id_user', session('login_admin.id') ?? auth()->id())->where('is_read', 0)->update(['is_read' => 1]);
+
         return view('admin-notifikasi', compact('requests', 'purchases'));
     }
 
@@ -211,10 +220,12 @@ class DashboardController extends Controller
                 'updated_at' => now()
             ]);
 
+            $eventName = DB::table('event')->where('id_event', $request->id_event)->value('nama_event') ?? "Event";
+            
             // Notify Organizer
             DB::table('notifikasi')->insert([
                 'id_user' => $request->id_user,
-                'pesan' => "Pendaftaran event Anda telah DISETUJUI oleh Admin.",
+                'pesan' => "Permintaan untuk mengelola event '{$eventName}' telah diterima Admin.",
                 'is_read' => 0,
                 'created_at' => now(),
                 'updated_at' => now()
@@ -234,10 +245,11 @@ class DashboardController extends Controller
             'updated_at' => now()
         ]);
 
+        $eventName = DB::table('event')->where('id_event', $request->id_event)->value('nama_event') ?? "Event";
         // Notify Organizer
         DB::table('notifikasi')->insert([
             'id_user' => $request->id_user,
-            'pesan' => "Pendaftaran event Anda telah DITOLAK oleh Admin.",
+            'pesan' => "Permintaan untuk mengelola event '{$eventName}' telah DITOLAK oleh Admin.",
             'is_read' => 0,
             'created_at' => now(),
             'updated_at' => now()

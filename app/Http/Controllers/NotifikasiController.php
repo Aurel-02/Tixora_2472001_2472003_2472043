@@ -71,6 +71,32 @@ class NotifikasiController extends Controller
             ]);
         }
 
+        // Fetch system notifications from notifikasi table
+        $systemNotifs = DB::table('notifikasi')
+            ->where('id_user', $adminId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        foreach ($systemNotifs as $sn) {
+            $date = $sn->created_at ?? \Carbon\Carbon::now();
+            $badge = ($sn->is_read == 0) ? '<span class="notif-badge">Baru</span>' : '';
+            $unreadClass = ($sn->is_read == 0) ? 'unread' : '';
+
+            $notifications->push((object)[
+                'type' => 'system',
+                'title' => 'Pesan Sistem ' . $badge,
+                'desc' => $sn->pesan,
+                'icon' => '<i class="ph ph-bell-ringing"></i>',
+                'icon_class' => 'system-notif',
+                'unread_class' => $unreadClass,
+                'time' => Carbon::parse($date)->diffForHumans(),
+                'raw_time' => Carbon::parse($date)->timestamp
+            ]);
+        }
+
+        // Mark all true system notifications as read
+        DB::table('notifikasi')->where('id_user', $adminId)->where('is_read', 0)->update(['is_read' => 1]);
+
         $notifications = $notifications->sortByDesc('raw_time')->values();
 
         return view('notification', compact('notifications'));

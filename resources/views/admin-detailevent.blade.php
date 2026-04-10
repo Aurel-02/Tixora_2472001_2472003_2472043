@@ -474,9 +474,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.notifications') }}" class="sidebar-item {{ Request::is('admin/notifikasi') ? 'active' : '' }}">
+                        <a href="{{ route('admin.notifications') }}" class="sidebar-item {{ Request::is('admin/notifikasi') ? 'active' : '' }}" style="position: relative;">
                             <i class="ph ph-bell sidebar-icon"></i>
                             <span class="sidebar-text">Notifikasi</span>
+                            @if(isset($unreadCount) && $unreadCount > 0)
+                            <span style="position: absolute; right: 15px; margin-top: -3px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);">{{ $unreadCount }}</span>
+                            @endif
                         </a>
                     </li>
             </ul>

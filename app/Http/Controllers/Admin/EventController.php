@@ -100,7 +100,11 @@ class EventController extends Controller
 
         $eventName = $event->nama_event;
 
-        $event->delete();
+        // Clean up any remaining records in tables that might lack cascade constraints
+        DB::table('permohonan_events')->where('id_event', $id)->delete();
+
+        // Perform hard delete to permanently remove from the database
+        $event->forceDelete();
 
         if (request()->expectsJson()) {
             return response()->json(['success' => true, 'event_name' => $eventName]);

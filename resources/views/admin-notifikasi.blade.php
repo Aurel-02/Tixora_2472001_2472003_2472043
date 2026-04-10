@@ -157,8 +157,8 @@
         </div>
 
         <div class="category-tabs">
-            <button class="tab-btn {{ request('tab') != 'permohonan' ? 'active' : '' }}" onclick="switchTab('pembelian', this)">Notifikasi Pembelian</button>
-            <button class="tab-btn {{ request('tab') == 'permohonan' ? 'active' : '' }}" onclick="switchTab('permohonan', this)">Permohonan Organizer</button>
+            <button class="tab-btn active" onclick="switchTab('pembelian', this)">Notifikasi Pembelian</button>
+            <button class="tab-btn" onclick="switchTab('permohonan', this)">Permohonan Organizer</button>
         </div>
 
         @if(session('success'))
@@ -166,7 +166,7 @@
         @endif
 
         <!-- Tab Notifikasi Pembelian -->
-        <div id="tab-pembelian" class="tab-content" {!! request('tab') == 'permohonan' ? 'style="display: none;"' : '' !!}>
+        <div id="tab-pembelian" class="tab-content">
             <div class="notification-list">
                 @forelse($purchases as $purchase)
                     <div class="notification-card">
@@ -201,7 +201,7 @@
         </div>
 
         <!-- Tab Permohonan Organizer -->
-        <div id="tab-permohonan" class="tab-content" {!! request('tab') != 'permohonan' ? 'style="display: none;"' : '' !!}>
+        <div id="tab-permohonan" class="tab-content" style="display: none;">
             <div class="notification-list">
                 @forelse($requests as $req)
                     <div class="notification-card">
