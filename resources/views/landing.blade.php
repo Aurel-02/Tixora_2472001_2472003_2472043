@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tixora - Konser</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
     <style>
         :root {
             --jacarta: #3A345B;
@@ -100,7 +102,7 @@
 
         .footer {
             text-align: center;
-            padding: 40px 30px;
+            padding: 10px 30px;
             background: rgba(58, 52, 91, 0.6);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -108,12 +110,12 @@
             margin-top: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 3px;
         }
 
         .hero {
             text-align: center;
-            padding: 50px 20px 20px;
+            padding: 15px 20px 5px;
         }
 
         .hero h1 {
@@ -131,7 +133,7 @@
         }
 
         .carousel-container {
-            flex: 1; 
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -140,7 +142,7 @@
             max-width: 1200px;
             margin: 0 auto;
             position: relative;
-            padding: 20px 0;
+            padding: 5px 0;
             cursor: grab;
         }
 
@@ -155,19 +157,19 @@
             scroll-snap-type: x mandatory;
             padding: 20px 40px;
             width: 100%;
-            -ms-overflow-style: none; 
-            scrollbar-width: none; 
+            -ms-overflow-style: none;
+            scrollbar-width: none;
             scroll-behavior: smooth;
         }
-        
+
         .carousel-track::-webkit-scrollbar {
             display: none;
         }
 
         .carousel-card {
-            flex: 0 0 calc(33.333% - 20px);
-            min-width: 280px;
-            height: 400px;
+            flex: 0 0 calc(30% - 20px);
+            min-width: 240px;
+            height: 340px;
             scroll-snap-align: center;
             background: rgba(113, 85, 122, 0.25);
             backdrop-filter: blur(12px);
@@ -184,7 +186,7 @@
             overflow: hidden;
             text-align: center;
             padding: 0;
-            cursor: default;         
+            cursor: default;
             user-select: none;
         }
 
@@ -193,7 +195,7 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
-            pointer-events: none;     
+            pointer-events: none;
         }
 
         .carousel-card:hover img {
@@ -206,12 +208,12 @@
             left: 0;
             right: 0;
             padding: 20px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
             color: white;
             text-align: left;
             opacity: 0;
             transition: opacity 0.3s ease;
-            pointer-events: none;     
+            pointer-events: none;
         }
 
         .carousel-card:hover .poster-overlay {
@@ -243,16 +245,8 @@
         }
 
         .footer {
-            text-align: center;
-            padding: 30px;
-            background: rgba(58, 52, 91, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(113, 85, 122, 0.4);
-            margin-top: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            padding: 10px 30px;
+            gap: 3px;
         }
 
         .footer .footer-title {
@@ -271,7 +265,8 @@
             flex-wrap: wrap;
         }
 
-        .footer .footer-links a, .footer .footer-links span {
+        .footer .footer-links a,
+        .footer .footer-links span {
             color: rgba(243, 200, 221, 0.8);
             text-decoration: none;
             font-size: 0.9rem;
@@ -304,22 +299,54 @@
         }
 
         @media (max-width: 768px) {
-            .navbar { padding: 15px 20px; }
-            .hero h1 { font-size: 2.5rem; }
-            .carousel-card { flex: 0 0 calc(50% - 15px); height: 350px; }
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .carousel-card {
+                flex: 0 0 calc(50% - 15px);
+                height: 350px;
+            }
         }
 
         @media (max-width: 480px) {
-            .navbar { padding: 12px 15px; }
-            .navbar .logo { font-size: 22px; }
-            .navbar .btn-login { padding: 6px 18px; font-size: 0.9rem; }
-            .hero h1 { font-size: 2rem; }
-            .carousel-card { flex: 0 0 85%; }
-            .footer .footer-links { flex-direction: column; gap: 8px; }
-            .footer .divider { display: none; }
+            .navbar {
+                padding: 12px 15px;
+            }
+
+            .navbar .logo {
+                font-size: 22px;
+            }
+
+            .navbar .btn-login {
+                padding: 6px 18px;
+                font-size: 0.9rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .carousel-card {
+                flex: 0 0 85%;
+            }
+
+            .footer .footer-links {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .footer .divider {
+                display: none;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <!-- navbar -->
@@ -346,7 +373,9 @@
                         <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}" draggable="false">
                         <div class="poster-overlay">
                             <h3 style="font-size: 1.2rem; margin-bottom: 5px;">{{ $event->nama_event }}</h3>
-                            <p style="font-size: 0.9rem; opacity: 0.8;">{{ \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d M Y') }}</p>
+                            <p style="font-size: 0.9rem; opacity: 0.8;">
+                                {{ \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d M Y') }}
+                            </p>
                         </div>
                     @else
                         <div class="placeholder-text" style="padding: 20px;">
@@ -366,27 +395,24 @@
     </main>
 
     <footer class="footer">
-        
-        <div class="footer-title" style="margin-top: 20px;">TIXORA</div>
-        <div class="footer-links">
-            <a href="#">Privacy Policy</a>
+        <div class="footer-title" style="font-size:0.9rem;">TIXORA</div>
+        <div class="footer-links" style="gap:10px;">
+            <a href="#" style="font-size:0.75rem;">Privacy Policy</a>
             <span class="divider">|</span>
-            <a href="#">Terms of Service</a>
+            <a href="#" style="font-size:0.75rem;">Terms of Service</a>
             <span class="divider">|</span>
-            <a href="mailto:info@tixora.com">info@tixora.com</a>
+            <a href="mailto:info@tixora.com" style="font-size:0.75rem;">info@tixora.com</a>
         </div>
-        <div class="footer-links" style="margin-top: 5px;">
-            <span style="font-size: 0.8rem; opacity: 0.6;">&copy; 2026 Tixora. All rights reserved.</span>
-        </div>
+        <span style="font-size:0.65rem;opacity:0.45;">&copy; 2026 Tixora. All rights reserved.</span>
     </footer>
 
     <script>
         const slider = document.getElementById('carousel');
-        const cards  = Array.from(document.querySelectorAll('.carousel-card'));
+        const cards = Array.from(document.querySelectorAll('.carousel-card'));
 
         let currentIndex = 0;
-        let autoTimer    = null;
-        let isDragging   = false;
+        let autoTimer = null;
+        let isDragging = false;
         let dragStartX, dragScrollLeft;
 
         /* ── Highlight card yang aktif ── */
@@ -397,9 +423,9 @@
         /* ── Scroll ke card tertentu (center di viewport carousel) ── */
         function scrollToCard(idx) {
             if (!cards[idx]) return;
-            const card          = cards[idx];
-            const sliderRect    = slider.getBoundingClientRect();
-            const cardRect      = card.getBoundingClientRect();
+            const card = cards[idx];
+            const sliderRect = slider.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
             const targetScrollLeft = slider.scrollLeft
                 + cardRect.left
                 - sliderRect.left
@@ -428,8 +454,8 @@
 
         /* ── Drag manual ── */
         slider.addEventListener('mousedown', e => {
-            isDragging   = true;
-            dragStartX   = e.pageX - slider.offsetLeft;
+            isDragging = true;
+            dragStartX = e.pageX - slider.offsetLeft;
             dragScrollLeft = slider.scrollLeft;
             slider.style.cursor = 'grabbing';
             stopAuto();
@@ -454,8 +480,8 @@
 
         /* ── Touch support ── */
         let touchStartX = 0;
-        slider.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; stopAuto(); }, { passive:true });
-        slider.addEventListener('touchend',   e => {
+        slider.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; stopAuto(); }, { passive: true });
+        slider.addEventListener('touchend', e => {
             const diff = touchStartX - e.changedTouches[0].clientX;
             if (Math.abs(diff) > 40) {
                 currentIndex = diff > 0
@@ -464,7 +490,7 @@
                 scrollToCard(currentIndex);
             }
             startAuto();
-        }, { passive:true });
+        }, { passive: true });
 
         /* ── Init ── */
         setActive(0);
@@ -472,4 +498,5 @@
         setTimeout(startAuto, 1500);
     </script>
 </body>
+
 </html>
