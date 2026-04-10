@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\SignupController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FaceScanController;
+use App\Http\Controllers\CheckInController;
 
 Route::get('/', [DashboardController::class, 'landing']);
 
@@ -47,9 +48,10 @@ Route::post('/organizer/event/{id}/update-description', [\App\Http\Controllers\E
 Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventController::class, 'addQuota'])->middleware(['auth', 'role:2'])->name('organizer.event.add-quota');
 Route::get('/organizer/notifications', [\App\Http\Controllers\NotifikasiController::class, 'organizer'])->middleware(['auth', 'role:2'])->name('organizer.notifications');
 Route::get('/organizer/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.revenue');
-Route::get('/organizer/checkin', function () {
-    return view('checkin');
-})->middleware(['auth', 'role:2'])->name('organizer.checkin');
+Route::get('/organizer/checkin', [CheckInController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.checkin');
+Route::post('/organizer/checkin/scan-qr', [CheckInController::class, 'scanQr'])->middleware(['auth', 'role:2'])->name('checkin.scan-qr');
+Route::post('/organizer/checkin/confirm', [CheckInController::class, 'confirmCheckin'])->middleware(['auth', 'role:2'])->name('checkin.confirm');
+Route::post('/organizer/checkin/sync-face', [CheckInController::class, 'syncFace'])->middleware(['auth', 'role:2'])->name('checkin.sync-face');
 Route::post('/organizer/request-event/{id}', [DashboardController::class, 'requestEventManagement'])->middleware(['auth', 'role:2'])->name('organizer.event.request');
 
 
