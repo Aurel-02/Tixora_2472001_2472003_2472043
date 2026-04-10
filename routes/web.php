@@ -61,6 +61,7 @@ Route::post('/checkout/process-payment', [\App\Http\Controllers\SelectSeatContro
 Route::get('/checkout/face-scan', [FaceScanController::class, 'index'])->name('face-scan.index');
 Route::post('/checkout/face-scan/upload', [FaceScanController::class, 'upload'])->name('face-scan.upload');
 Route::get('/checkout/face-scan/status', [FaceScanController::class, 'checkStatus'])->middleware(['auth', 'role:3'])->name('face-scan.status');
+Route::get('/admin/events/{id}/check-deletable', [\App\Http\Controllers\Admin\EventController::class, 'checkDeletable'])->name('admin.event.check-deletable');
 Route::get('/admin/events', [EventController::class, 'index']);
 Route::get('/admin/events/create', [TambahEventController::class, 'create'])->name('admin.events.create');
 Route::post('/admin/events', [TambahEventController::class, 'store'])->name('admin.events.store');

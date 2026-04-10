@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Tixora - Admin Event Detail</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --jacarta: #3A345B;
@@ -671,32 +673,11 @@
                     </table>
                 </div>
 
-                <!-- 4. Termination Actions - BOTTOM -->
+                <!-- 4. Delete Event -->
                 <div class="section-card" style="border-color: rgba(239, 83, 80, 0.2); text-align: center; padding: 40px;">
-                    <div id="termination-initial">
-                        <button onclick="revealTermination()" class="btn btn-danger" style="padding: 18px 60px; font-size: 1.1rem; border-radius: 50px;">
-                            <i class="ph ph-trash" style="margin-right: 8px;"></i> Hapus Event
-                        </button>
-                    </div>
-
-                    <div id="termination-options" style="display: none; justify-content: center; align-items: center; flex-direction: column; gap: 20px;">
-                        <span style="color: var(--queen-pink); font-size: 1.1rem; font-weight: 500;">Pilih tindakan terminasi:</span>
-                        <div style="display: flex; gap: 20px;">
-                            <form action="{{ route('admin.event.reject', $event->id_event) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-outline" style="border-color: #ef5350; color: #ef5350; padding: 12px 30px;">
-                                    <i class="ph ph-prohibit" style="margin-right: 8px;"></i> Reject Event
-                                </button>
-                            </form>
-                            <form action="{{ route('admin.events.destroy', $event->id_event) }}" method="POST" onsubmit="return confirm('Hapus permanen event ini?')">
-                                @csrf
-                                <button type="submit" class="btn btn-danger" style="padding: 12px 30px;">
-                                    <i class="ph ph-trash" style="margin-right: 8px;"></i> Hapus Permanen
-                                </button>
-                            </form>
-                        </div>
-                        <button onclick="hideTermination()" class="btn btn-outline" style="border: none; opacity: 0.6; font-size: 0.9rem;">Cancel</button>
-                    </div>
+                    <button id="btnHapusEvent" class="btn btn-danger" style="padding: 18px 60px; font-size: 1.1rem; border-radius: 50px;">
+                        <i class="ph ph-trash" style="margin-right: 8px;"></i> Hapus Event
+                    </button>
                 </div>
             </div>
         </div>
@@ -751,15 +732,76 @@
             });
         }
 
-        function revealTermination() {
-            document.getElementById('termination-initial').style.display = 'none';
-            document.getElementById('termination-options').style.display = 'flex';
-        }
 
-        function hideTermination() {
-            document.getElementById('termination-initial').style.display = 'block';
-            document.getElementById('termination-options').style.display = 'none';
-        }
+        const eventId   = {{ $event->id_event }};
+        const eventName = @json($event->nama_event);
+        const checkUrl  = "{{ route('admin.event.check-deletable', $event->id_event) }}";
+        const deleteUrl = "{{ route('admin.events.destroy', $event->id_event) }}";
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        document.getElementById('btnHapusEvent').addEventListener('click', function () {
+            fetch(checkUrl, { headers: { 'Accept': 'application/json' } })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.can_delete) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Event Tidak Bisa Dihapus',
+                            text: data.reason,
+                            confirmButtonText: 'Mengerti',
+                            background: '#3A345B',
+                            color: '#F3C8DD',
+                            confirmButtonColor: '#D183A9',
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Hapus Event?',
+                        html: `Event <strong>${eventName}</strong> akan dihapus.`,
+                            showCancelButton: true,
+                            confirmButtonText: 'Ya, Hapus',
+                            cancelButtonText: 'Batal',
+                            background: '#3A345B',
+                            color: '#F3C8DD',
+                            confirmButtonColor: '#ef5350',
+                            cancelButtonColor: '#71557A',
+                        }).then(result => {
+                            if (result.isConfirmed) {
+                                fetch(deleteUrl, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': csrfToken,
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({}),
+                                })
+                                .then(r => r.json())
+                                .then(res => {
+                                    if (res.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Berhasil!',
+                                            text: `Event "${res.event_name}" berhasil dihapus.`,
+                                            confirmButtonText: 'OK',
+                                            background: '#3A345B',
+                                            color: '#F3C8DD',
+                                            confirmButtonColor: '#D183A9',
+                                        }).then(() => {
+                                            window.location.href = '/admin/dashboard';
+                                        });
+                                    } else {
+                                        Swal.fire({ icon: 'error', title: 'Gagal', text: res.message });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                })
+                .catch(() => {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.' });
+                });
+        });
     </script>
 </body>
 </html>
