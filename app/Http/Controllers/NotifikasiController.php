@@ -16,10 +16,6 @@ class NotifikasiController extends Controller
             return redirect('/login');
         }
 
-        $events = DB::table('event')
-            ->where('id_user', $adminId)
-            ->get();
-
         $ticketsBought = DB::table('detail_transaksi')
             ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
             ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
@@ -37,19 +33,6 @@ class NotifikasiController extends Controller
             ->get();
 
         $notifications = collect();
-
-        foreach ($events as $event) {
-            $notifications->push((object)[
-                'type' => 'event',
-                'title' => 'Event Baru Ditambahkan',
-                'desc' => 'Anda berhasil menambahkan event <strong>' . htmlspecialchars($event->nama_event) . '</strong>.',
-                'icon' => '<i class="ph ph-star"></i>',
-                'icon_class' => 'new-user',
-                'unread_class' => '',
-                'time' => '-',
-                'raw_time' => 0
-            ]);
-        }
 
         foreach ($ticketsBought as $tb) {
             $date = $tb->tanggal_transaksi ?? \Carbon\Carbon::now();
@@ -82,11 +65,22 @@ class NotifikasiController extends Controller
             $badge = ($sn->is_read == 0) ? '<span class="notif-badge">Baru</span>' : '';
             $unreadClass = ($sn->is_read == 0) ? 'unread' : '';
 
+            $title = 'Pesan Sistem';
+            $icon = '<i class="ph ph-bell-ringing"></i>';
+
+            if (stripos($sn->pesan, 'diterima') !== false || stripos($sn->pesan, 'disetujui') !== false) {
+                $title = 'Horeee! Permintaan Disetujui 🎉';
+                $icon = '<i class="ph ph-confetti"></i>';
+            } elseif (stripos($sn->pesan, 'ditolak') !== false) {
+                $title = 'Ups! Permintaan Ditolak 😔';
+                $icon = '<i class="ph ph-x-circle"></i>';
+            }
+
             $notifications->push((object)[
                 'type' => 'system',
-                'title' => 'Pesan Sistem ' . $badge,
+                'title' => $title . ' ' . $badge,
                 'desc' => $sn->pesan,
-                'icon' => '<i class="ph ph-bell-ringing"></i>',
+                'icon' => $icon,
                 'icon_class' => 'system-notif',
                 'unread_class' => $unreadClass,
                 'time' => Carbon::parse($date)->diffForHumans(),
