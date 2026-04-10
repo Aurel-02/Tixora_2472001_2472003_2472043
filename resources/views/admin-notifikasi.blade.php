@@ -65,9 +65,65 @@
         .empty-state { text-align: center; padding: 100px 0; opacity: 0.5; }
         .empty-state i { font-size: 4rem; margin-bottom: 20px; }
 
+        .category-tabs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 50px;
+            padding: 10px 20px 30px;
+            border-bottom: 1px solid rgba(243, 200, 221, 0.15);
+            margin-bottom: 40px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--queen-pink);
+            font-size: 1.2rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 10px 5px;
+            position: relative;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            opacity: 0.9;
+        }
+
+        .tab-btn.active {
+            opacity: 1;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--middle-purple);
+            border-radius: 3px;
+            box-shadow: 0 0 12px var(--middle-purple);
+        }
+
+        .tab-content {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 768px) {
             .main-wrapper { margin-left: 0; padding: 20px; }
             .notification-card { flex-direction: column; text-align: center; gap: 20px; }
+            .category-tabs { gap: 20px; }
+            .tab-btn { font-size: 1rem; }
         }
     </style>
 </head>
@@ -83,7 +139,7 @@
                 <li><a href="{{ route('admin.revenue') }}" class="sidebar-item"><i class="ph ph-currency-dollar sidebar-icon"></i><span class="sidebar-text">Revenue</span></a></li>
                 <li><a href="{{ route('admin.events.create') }}" class="sidebar-item"><i class="ph ph-plus-circle sidebar-icon"></i><span class="sidebar-text">Tambah Event</span></a></li>
                 <li><a href="{{ route('admin.statistik') }}" class="sidebar-item"><i class="ph ph-chart-bar sidebar-icon"></i><span class="sidebar-text">Analitik Penjualan</span></a></li>
-                <li><a href="{{ route('admin.notifications') }}" class="sidebar-item active"><i class="ph ph-bell sidebar-icon"></i><span class="sidebar-text">Notifikasi Admin</span></a></li>
+                <li><a href="{{ route('admin.notifications') }}" class="sidebar-item active"><i class="ph ph-bell sidebar-icon"></i><span class="sidebar-text">Notifikasi</span></a></li>
             </ul>
             <div style="padding: 10px 0;">
                 <form action="{{ route('logout') }}" method="POST">
@@ -95,41 +151,102 @@
     </aside>
 
     <main class="main-wrapper">
-        <div class="header-title">
+        <div class="header-title" style="margin-bottom: 20px;">
             <i class="ph ph-bell-ringing" style="color: var(--middle-purple);"></i>
-            Notifikasi Permohonan Event
+            Pusat Notifikasi Admin
+        </div>
+
+        <div class="category-tabs">
+            <button class="tab-btn {{ request('tab') != 'permohonan' ? 'active' : '' }}" onclick="switchTab('pembelian', this)">Notifikasi Pembelian</button>
+            <button class="tab-btn {{ request('tab') == 'permohonan' ? 'active' : '' }}" onclick="switchTab('permohonan', this)">Permohonan Organizer</button>
         </div>
 
         @if(session('success'))
             <div style="background: rgba(76, 175, 80, 0.2); border: 1px solid #4caf50; color: #fff; padding: 15px; border-radius: 10px; margin-bottom: 25px;">{{ session('success') }}</div>
         @endif
 
-        <div class="notification-list">
-            @forelse($requests as $req)
-                <div class="notification-card">
-                    <div class="notif-info">
-                        <div class="notif-title">Permohonan Pengelolaan: {{ $req->nama_event }}</div>
-                        <div class="notif-user">Diajukan oleh: {{ $req->organizer_name }}</div>
-                        <div class="notif-date">{{ date('d M Y, H:i', strtotime($req->created_at)) }}</div>
+        <!-- Tab Notifikasi Pembelian -->
+        <div id="tab-pembelian" class="tab-content" {!! request('tab') == 'permohonan' ? 'style="display: none;"' : '' !!}>
+            <div class="notification-list">
+                @forelse($purchases as $purchase)
+                    <div class="notification-card">
+                        <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
+                            <div style="width: 55px; height: 55px; border-radius: 12px; background: rgba(209, 131, 169, 0.15); border: 1px solid rgba(209, 131, 169, 0.3); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                                @if($purchase->poster)
+                                    <img src="{{ asset($purchase->poster) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                @else
+                                    <i class="ph ph-shopping-cart-simple" style="font-size: 1.8rem; color: var(--middle-purple);"></i>
+                                @endif
+                            </div>
+                            <div class="notif-info">
+                                <div class="notif-title">
+                                    <span style="color: var(--middle-purple); font-weight: 700;">{{ $purchase->buyer_name }}</span> 
+                                    berhasil membeli <span style="color: #fff;">{{ $purchase->total_tickets }} tiket</span>
+                                </div>
+                                <div class="notif-user">Event: {{ $purchase->nama_event }}</div>
+                                <div class="notif-date"><i class="ph ph-clock" style="vertical-align: middle;"></i> {{ date('d M Y, H:i', strtotime($purchase->tanggal_transaksi)) }}</div>
+                            </div>
+                            <div style="font-size: 1.5rem; opacity: 0.3;">
+                                <i class="ph ph-check-circle"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="action-btns">
-                        <form action="{{ route('admin.permohonan.approve', $req->id_permohonan) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn-approve">Approve</button>
-                        </form>
-                        <form action="{{ route('admin.permohonan.reject', $req->id_permohonan) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn-reject">Reject</button>
-                        </form>
+                @empty
+                    <div class="empty-state">
+                        <i class="ph ph-shopping-cart"></i>
+                        <p>Belum ada aktivitas pembelian tiket terdeteksi.</p>
                     </div>
-                </div>
-            @empty
-                <div class="empty-state">
-                    <i class="ph ph-tray"></i>
-                    <p>Tidak ada permohonan tertunda saat ini.</p>
-                </div>
-            @endforelse
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Tab Permohonan Organizer -->
+        <div id="tab-permohonan" class="tab-content" {!! request('tab') != 'permohonan' ? 'style="display: none;"' : '' !!}>
+            <div class="notification-list">
+                @forelse($requests as $req)
+                    <div class="notification-card">
+                        <div class="notif-info">
+                            <div class="notif-title">Permohonan Pengelolaan: {{ $req->nama_event }}</div>
+                            <div class="notif-user">Diajukan oleh: <span style="color: var(--middle-purple);">{{ $req->organizer_name }}</span></div>
+                            <div class="notif-date"><i class="ph ph-clock" style="vertical-align: middle;"></i> {{ date('d M Y, H:i', strtotime($req->created_at)) }}</div>
+                        </div>
+                        <div class="action-btns">
+                            <form action="{{ route('admin.permohonan.approve', $req->id_permohonan) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn-approve">Setujui</button>
+                            </form>
+                            <form action="{{ route('admin.permohonan.reject', $req->id_permohonan) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn-reject">Tolak</button>
+                            </form>
+                        </div>
+                    </div>
+                @empty
+                    <div class="empty-state">
+                        <i class="ph ph-users-three"></i>
+                        <p>Tidak ada permohonan pendaftaran organizer saat ini.</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
     </main>
+
+    <script>
+        function switchTab(tabName, element) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show selected content
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            
+            // Update active button
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+    </script>
 </body>
 </html>

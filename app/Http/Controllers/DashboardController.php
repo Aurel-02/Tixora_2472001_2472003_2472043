@@ -167,6 +167,7 @@ class DashboardController extends Controller
         $role = $this->currentRole();
         if ($role !== 'admin' && $role !== '1') return redirect('/login');
 
+        // 1. Fetch Organizer Management Requests
         $requests = DB::table('permohonan_events')
             ->join('event', 'permohonan_events.id_event', '=', 'event.id_event')
             ->join('user', 'permohonan_events.id_user', '=', 'user.id_user')
@@ -175,7 +176,27 @@ class DashboardController extends Controller
             ->orderBy('permohonan_events.created_at', 'desc')
             ->get();
 
-        return view('admin-notifikasi', compact('requests'));
+        // 2. Fetch Global Purchase Notifications (Successful Transactions)
+        $purchases = DB::table('transaksi')
+            ->join('user', 'transaksi.id_user', '=', 'user.id_user')
+            ->join('detail_transaksi', 'transaksi.id_transaksi', '=', 'detail_transaksi.id_transaksi')
+            ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
+            ->join('event', 'tiket.id_event', '=', 'event.id_event')
+            ->whereIn('transaksi.status_transaksi', ['lunas', 'Selesai'])
+            ->select(
+                'transaksi.id_transaksi',
+                'transaksi.tanggal_transaksi',
+                'user.nama_lengkap as buyer_name',
+                'event.nama_event',
+                'event.poster',
+                DB::raw('SUM(detail_transaksi.jumlah_beli) as total_tickets')
+            )
+            ->groupBy('transaksi.id_transaksi', 'transaksi.tanggal_transaksi', 'user.nama_lengkap', 'event.nama_event', 'event.poster')
+            ->orderBy('transaksi.tanggal_transaksi', 'desc')
+            ->limit(50)
+            ->get();
+
+        return view('admin-notifikasi', compact('requests', 'purchases'));
     }
 
     public function approveEventManagement($id)
@@ -205,7 +226,7 @@ class DashboardController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Pendaftaran disetujui.');
+        return redirect()->route('admin.notifications', ['tab' => 'permohonan'])->with('success', 'Pendaftaran disetujui.');
     }
 
     public function rejectEventManagement($id)
@@ -227,7 +248,7 @@ class DashboardController extends Controller
             'updated_at' => now()
         ]);
 
-        return back()->with('success', 'Pendaftaran ditolak.');
+        return redirect()->route('admin.notifications', ['tab' => 'permohonan'])->with('success', 'Pendaftaran ditolak.');
     }
 
     public function showEvent($id)

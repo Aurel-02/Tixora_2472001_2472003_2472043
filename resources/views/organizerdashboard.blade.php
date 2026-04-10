@@ -535,7 +535,7 @@ or<!DOCTYPE html>
                             @if(isset($myRequests[$available->id_event]))
                                 @if($myRequests[$available->id_event] == 'pending')
                                     <div style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--middle-purple); color: var(--middle-purple); text-align: center; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                        <i class="ph ph-clock-counter-clockwise"></i> Menunggu Admin
+                                        <i class="ph ph-clock-counter-clockwise"></i> Menunggu Verifikasi
                                     </div>
                                 @elseif($myRequests[$available->id_event] == 'rejected')
                                     <div style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255, 107, 107, 0.1); border: 1px solid #ff6b6b; color: #ff6b6b; text-align: center; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
