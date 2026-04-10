@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class CheckInController extends Controller
 {
@@ -13,6 +14,25 @@ class CheckInController extends Controller
     public function index()
     {
         return view('checkin');
+    }
+
+    private function isOrganizerOfEvent($eventId, $organizerId): bool
+    {
+
+        $isOwner = DB::table('event')
+            ->where('id_event', $eventId)
+            ->where('id_user', $organizerId)
+            ->exists();
+
+        if ($isOwner) return true;
+
+        $isApproved = DB::table('permohonan_events')
+            ->where('id_event', $eventId)
+            ->where('id_user', $organizerId)
+            ->where('status', 'approved')
+            ->exists();
+
+        return $isApproved;
     }
 
     public function scanQr(Request $request)
@@ -41,6 +61,7 @@ class CheckInController extends Controller
                 'detail_transaksi.faceID',
                 'tiket.jenis_tiket',
                 'tiket.harga',
+                'event.id_event',
                 'event.nama_event',
                 'event.tanggal_pelaksanaan',
                 'event.waktu_pelaksanaan',
@@ -56,6 +77,15 @@ class CheckInController extends Controller
             return response()->json([
                 'status'  => 'not_found',
                 'message' => 'QR tidak ditemukan atau tiket tidak valid.',
+            ]);
+        }
+
+        $organizerId = Auth::id();
+        if (!$this->isOrganizerOfEvent($detail->id_event, $organizerId)) {
+            return response()->json([
+                'status'  => 'unauthorized',
+                'message' => 'Anda bukan organizer dari event "' . $detail->nama_event . '". Anda tidak dapat melakukan check-in untuk tiket event ini.',
+                'event_name' => $detail->nama_event,
             ]);
         }
 
@@ -110,6 +140,7 @@ class CheckInController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'Check-in berhasil!']);
     }
+
     public function syncFace(Request $request)
     {
         $descriptorInput = $request->input('descriptor');
@@ -132,7 +163,28 @@ class CheckInController extends Controller
             ]);
         }
 
-        $facesPath = public_path('faces');
+        $facesPath   = public_path('faces');
+        $organizerId = Auth::id();
+
+        $ownedEventIds = DB::table('event')
+            ->where('id_user', $organizerId)
+            ->pluck('id_event')
+            ->toArray();
+
+        $approvedEventIds = DB::table('permohonan_events')
+            ->where('id_user', $organizerId)
+            ->where('status', 'approved')
+            ->pluck('id_event')
+            ->toArray();
+
+        $myEventIds = array_unique(array_merge($ownedEventIds, $approvedEventIds));
+
+        if (empty($myEventIds)) {
+            return response()->json([
+                'status'  => 'not_match',
+                'message' => 'Anda belum memiliki event yang aktif.',
+            ]);
+        }
 
         $allDetails = DB::table('detail_transaksi')
             ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
@@ -142,6 +194,7 @@ class CheckInController extends Controller
             ->whereNotNull('detail_transaksi.faceID')
             ->where('detail_transaksi.faceID', '!=', '')
             ->where('detail_transaksi.status_item', 'berhasil')
+            ->whereIn('event.id_event', $myEventIds)
             ->select(
                 'detail_transaksi.id_detail',
                 'detail_transaksi.faceID',
@@ -156,9 +209,9 @@ class CheckInController extends Controller
             )
             ->get();
 
-        $bestMatch   = null;
-        $bestDist    = PHP_FLOAT_MAX;
-        $threshold   = 0.5;
+        $bestMatch = null;
+        $bestDist  = PHP_FLOAT_MAX;
+        $threshold = 0.5;
 
         foreach ($allDetails as $detail) {
             $faceFiles = explode(',', $detail->faceID);

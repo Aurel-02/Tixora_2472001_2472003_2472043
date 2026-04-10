@@ -386,10 +386,6 @@
                         <button class="btn-capture" id="btn-capture" onclick="captureAndSync()">
                             <i class="ph ph-camera"></i> Pindai Wajah
                         </button>
-                        <label class="btn-upload" title="Upload foto wajah">
-                            <i class="ph ph-image" style="font-size:1.4rem;"></i>
-                            <input type="file" id="face-file" accept="image/*" style="display:none;" onchange="handleUpload(event)">
-                        </label>
                     </div>
                 </div>
 
@@ -549,6 +545,17 @@ async function doScanSearch(kode) {
             Swal.fire({
                 icon:'error', title:'QR Tidak Ditemukan',
                 text:'Kode QR tidak valid atau tiket tidak ditemukan.',
+                background:'#3A345B', color:'#F3C8DD', confirmButtonColor:'#D183A9'
+            }).then(() => { hideTicketResult(); document.getElementById('qr-input').value=''; qrLocked=false; });
+            return;
+        }
+
+        if (data.status === 'unauthorized') {
+            showQrOverlay('error');
+            setTimeout(() => { hideQrOverlay(); qrLocked = false; }, 2500);
+            Swal.fire({
+                icon:'warning', title:'Bukan Event Anda',
+                html:`<p style="color:#F3C8DD;">Anda bukan organizer dari event <strong>"${data.event_name || ''}"</strong>.</p><p style="color:#F3C8DD;opacity:0.7;margin-top:8px;">Anda hanya dapat melakukan check-in untuk tiket event yang Anda kelola.</p>`,
                 background:'#3A345B', color:'#F3C8DD', confirmButtonColor:'#D183A9'
             }).then(() => { hideTicketResult(); document.getElementById('qr-input').value=''; qrLocked=false; });
             return;
