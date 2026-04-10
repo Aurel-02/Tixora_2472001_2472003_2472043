@@ -85,12 +85,25 @@ class MyTicketController extends Controller
                 // Cek siapa di antrean pertama sebelum SP mengubah tabel
                 $antrian = DB::table('antrian')->where('id_tiket', $detail->id_tiket)->orderBy('waktu_antri', 'asc')->first();
                 if ($antrian) {
+                    // Notifikasi: tiket berhasil didapat dari waiting list
                     DB::table('notifikasi')->insert([
-                        'id_user' => $antrian->id_user,
-                        'pesan' => "Selamat! Tiket event {$detail->nama_event} berhasil didapatkan dari waiting list.",
-                        'is_read' => 0,
+                        'id_user'    => $antrian->id_user,
+                        'pesan'      => "Selamat! Tiket event {$detail->nama_event} berhasil didapatkan dari waiting list.",
+                        'link_url'   => null,
+                        'is_read'    => 0,
                         'created_at' => now(),
-                        'updated_at' => now()
+                        'updated_at' => now(),
+                    ]);
+
+                    // Notifikasi: pengingat scan wajah dengan link
+                    $faceScanUrl = route('face-scan.index', ['total' => 1]);
+                    DB::table('notifikasi')->insert([
+                        'id_user'    => $antrian->id_user,
+                        'pesan'      => "Tiket event {$detail->nama_event} belum dilakukan verifikasi wajah. Klik untuk melakukan scan wajah sekarang.",
+                        'link_url'   => $faceScanUrl,
+                        'is_read'    => 0,
+                        'created_at' => now()->addSecond(),
+                        'updated_at' => now()->addSecond(),
                     ]);
                 }
 

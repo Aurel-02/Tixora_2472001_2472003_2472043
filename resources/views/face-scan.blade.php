@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
     <style>
         :root {
             --jacarta: #3A345B;
@@ -188,6 +189,10 @@
     </style>
 </head>
 <body>
+    <div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="font-size: 2rem; margin-bottom: 20px; color: var(--queen-pink); font-weight: 700;">Memuat Model AI Wajah...</div>
+        <div style="font-size: 1rem; color: #aaa;">Mohon tunggu sebentar</div>
+    </div>
 
     <div class="container">
         <h1>Face Verification</h1>
@@ -211,14 +216,12 @@
                 <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)">
             </label>
 
-            <!-- Capture Camera Action -->
             <button class="btn-capture" id="captureBtn" onclick="takeSnapshot()">
                 <i class="ph ph-camera"></i> Ambil Wajah
             </button>
         </div>
     </div>
 
-    <!-- Hidden Form to submit data when finished -->
     <form id="uploadForm" action="{{ route('face-scan.upload') }}" method="POST" style="display: none;">
         @csrf
         <input type="hidden" name="total_scanned" value="{{ $total }}">
@@ -227,13 +230,27 @@
     <script>
         const totalRequired = {{ $total }};
         let currentScanCount = 0;
+        let savedFaceDescriptors = [];
 
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const counterDisplay = document.getElementById('counterDisplay');
 
-        // Setup Webcam
+        async function loadModels() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            try {
+                const MODEL_URL = 'https://vladmandic.github.io/face-api/model';
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+            } catch (err) {
+                console.error(err);
+            }
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
         async function setupCamera() {
+            await loadModels();
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: "user" }, 
@@ -261,53 +278,150 @@
             }
         }
 
+        async function checkFaceDuplicate(imgElement) {
+            Swal.fire({
+                title: 'Menganalisis Wajah...',
+                text: 'Mohon tunggu, memindai dan memproses wajah...',
+                allowOutsideClick: false,
+                background: 'var(--jacarta)',
+                color: 'var(--queen-pink)',
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 150));
+
+            try {
+                const detection = await faceapi.detectSingleFace(imgElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                
+                if (!detection) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Wajah Tidak Terdeteksi',
+                        text: 'Pastikan wajah Anda terlihat dengan jelas.',
+                        background: 'var(--jacarta)',
+                        color: 'var(--queen-pink)',
+                        confirmButtonColor: 'var(--middle-purple)'
+                    });
+                    return null;
+                }
+
+                const currentDescriptor = detection.descriptor;
+
+                if (savedFaceDescriptors.length > 0) {
+                    for (let i = 0; i < savedFaceDescriptors.length; i++) {
+                        const distance = faceapi.euclideanDistance(savedFaceDescriptors[i], currentDescriptor);
+                        if (distance < 0.5) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Wajah Sudah Dimasukkan',
+                                text: 'Wajah ini telah digunakan untuk tiket sebelumnya. Harap masukkan wajah yang berbeda.',
+                                background: 'var(--jacarta)',
+                                color: 'var(--queen-pink)',
+                                confirmButtonColor: 'var(--middle-purple)'
+                            });
+                            return null;
+                        }
+                    }
+                }
+
+                return currentDescriptor;
+            } catch (err) {
+                console.error(err);
+                Swal.fire({icon: 'error', title: 'Kesalahan Validasi', text: 'Gagal menganalisis wajah.'});
+                return null;
+            }
+        }
+
         function takeSnapshot() {
-            // Draw video frame to canvas
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // Get base64 Data URL
             const imageDataUrl = canvas.toDataURL('image/png');
-            
-            // Send to server
-            fetch("{{ route('face-scan.upload') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ image: imageDataUrl })
-            }).then(response => response.json())
-              .then(data => {
-                  processScanSuccess();
-              }).catch(err => {
-                  console.error(err);
-                  Swal.fire({icon: 'error', title: 'Upload Gagal', text: 'Gagal mengunggah foto wajah.'});
-              });
+            const img = new Image();
+            img.src = imageDataUrl;
+            img.onload = async () => {
+                const descriptor = await checkFaceDuplicate(img);
+                if (descriptor) {
+                    fetch("{{ route('face-scan.upload') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ 
+                            image: imageDataUrl, 
+                            descriptor: JSON.stringify(Array.from(descriptor)) 
+                        })
+                    }).then(response => response.json())
+                      .then(data => {
+                          if (data.status === 'success') {
+                              savedFaceDescriptors.push(descriptor);
+                              processScanSuccess();
+                          } else {
+                              Swal.fire({
+                                icon: 'error', 
+                                title: 'Ditolak', 
+                                text: data.message,
+                                background: 'var(--jacarta)',
+                                color: 'var(--queen-pink)',
+                                confirmButtonColor: 'var(--middle-purple)'
+                              });
+                          }
+                      }).catch(err => {
+                          console.error(err);
+                          Swal.fire({icon: 'error', title: 'Upload Gagal', text: 'Gagal mengunggah foto wajah.'});
+                      });
+                }
+            };
         }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (file) {
-                const formData = new FormData();
-                formData.append('image_file', file);
-                
-                fetch("{{ route('face-scan.upload') }}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: formData
-                }).then(response => response.json())
-                  .then(data => {
-                      processScanSuccess();
-                  }).catch(err => {
-                      console.error(err);
-                      Swal.fire({icon: 'error', title: 'Upload Gagal', text: 'Gagal mengunggah foto wajah.'});
-                  });
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = async () => {
+                        const descriptor = await checkFaceDuplicate(img);
+                        if (descriptor) {
+                            const formData = new FormData();
+                            formData.append('image_file', file);
+                            formData.append('descriptor', JSON.stringify(Array.from(descriptor)));
+                            
+                            fetch("{{ route('face-scan.upload') }}", {
+                                method: "POST",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: formData
+                            }).then(response => response.json())
+                              .then(data => {
+                                  if (data.status === 'success') {
+                                      savedFaceDescriptors.push(descriptor);
+                                      processScanSuccess();
+                                  } else {
+                                      Swal.fire({
+                                        icon: 'error', 
+                                        title: 'Ditolak', 
+                                        text: data.message,
+                                        background: 'var(--jacarta)',
+                                        color: 'var(--queen-pink)',
+                                        confirmButtonColor: 'var(--middle-purple)'
+                                      });
+                                  }
+                              }).catch(err => {
+                                  console.error(err);
+                                  Swal.fire({icon: 'error', title: 'Upload Gagal', text: 'Gagal mengunggah foto wajah.'});
+                              });
+                        }
+                    };
+                };
+                reader.readAsDataURL(file);
             }
+            event.target.value = '';
         }
 
         function processScanSuccess() {
@@ -332,7 +446,6 @@
         }
 
         function finishScanning() {
-            // Stop video stream
             const stream = video.srcObject;
             if (stream) {
                 const tracks = stream.getTracks();
@@ -349,7 +462,6 @@
                 showConfirmButton: true,
                 confirmButtonText: 'Lanjutkan'
             }).then(() => {
-                // For demonstration, immediately redirecting to my-tickets since db logic is omitted
                 window.location.href = "{{ route('my-tickets') }}";
             });
         }

@@ -116,24 +116,10 @@ class SelectSeatController extends Controller
             if (!$ticketData) {
                 throw new \Exception('Invalid ticket selection.');
             }
-            $idEvent = $ticketData->id_event;
 
-            $totalAmount = 0;
-            foreach ($tickets as $id => $qty) {
-                if ($qty > 0) {
-                    $t = DB::table('tiket')->where('id_tiket', $id)->first();
-                    if ($t) {
-                        $totalAmount += $t->harga * $qty;
-                    }
-                }
-            }
-
-            $res = DB::selectOne('SELECT sp_buat_pesanan(?, ?, ?, ?) AS id', [
-                $userId, 
-                $idEvent, 
-                $paymentMethod, 
-                $totalAmount
-            ]);
+            // Panggil sp_buat_pesanan dengan parameter yang benar (3 param: user, metode, OUT id)
+            DB::statement('CALL sp_buat_pesanan(?, ?, @new_id)', [$userId, $paymentMethod]);
+            $res = DB::selectOne('SELECT @new_id AS id');
             $newOrderId = $res ? $res->id : null;
 
             if (!$newOrderId) {
@@ -141,25 +127,64 @@ class SelectSeatController extends Controller
             }
 
             $hasWaiting = false;
+            $hasSuccess = false;
+            $totalQtyToScan = 0;
+
             foreach ($tickets as $id => $qty) {
                 if ($qty > 0) {
+                    $tiket = DB::table('tiket')->where('id_tiket', $id)->first();
+                    $eventName = '';
+                    if ($tiket) {
+                        $eventRow = DB::table('event')->where('id_event', $tiket->id_event)->first();
+                        $eventName = $eventRow ? $eventRow->nama_event : 'Event';
+                    }
+
                     DB::statement('CALL sp_tambah_item(?, ?, ?)', [$newOrderId, $id, $qty]);
-                    
+
                     $detail = DB::table('detail_transaksi')
                         ->where('id_transaksi', $newOrderId)
                         ->where('id_tiket', $id)
                         ->first();
-                    if ($detail && $detail->status_item == 'waiting') {
+
+                    if ($detail && strtolower(trim($detail->status_item)) === 'waiting') {
                         $hasWaiting = true;
+                        // Notifikasi masuk waiting list
+                        DB::table('notifikasi')->insert([
+                            'id_user'    => $userId,
+                            'pesan'      => "Anda masuk waiting list untuk tiket event $eventName.",
+                            'is_read'    => 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    } elseif ($detail && strtolower(trim($detail->status_item)) === 'berhasil') {
+                        $hasSuccess = true;
+                        $totalQtyToScan += (int)$qty;
+                        // Notifikasi pembelian berhasil
+                        DB::table('notifikasi')->insert([
+                            'id_user'    => $userId,
+                            'pesan'      => "Pembelian tiket event $eventName berhasil.",
+                            'is_read'    => 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
                     }
                 }
             }
+
             DB::commit();
 
-            $message = $hasWaiting 
-                ? 'Order placed! Some tickets are in the Waiting List.' 
-                : 'Payment successful using ' . strtoupper($paymentMethod) . '!';
-            
+            if ($hasSuccess && $totalQtyToScan > 0) {
+                $message = $hasWaiting
+                    ? 'Pembayaran berhasil! Beberapa tiket masuk Waiting List.'
+                    : 'Pembayaran berhasil menggunakan ' . strtoupper($paymentMethod) . '!';
+                return redirect()->route('face-scan.index', ['total' => $totalQtyToScan])
+                    ->with('success', $message);
+            }
+
+            $message = $hasWaiting
+                ? 'Order berhasil! Tiket kamu masuk Waiting List.'
+                : 'Pembayaran berhasil menggunakan ' . strtoupper($paymentMethod) . '!';
+
             return redirect()->route('my-tickets')->with('success', $message);
 
         } catch (\Exception $e) {
