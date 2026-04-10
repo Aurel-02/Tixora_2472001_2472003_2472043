@@ -329,7 +329,11 @@
                 @php
                     $displayName = session('login_admin.name') ?? (auth()->check() ? auth()->user()->nama_lengkap : 'Admin');
                 @endphp
-                {{ strtoupper(substr($displayName, 0, 1)) }}
+                @if(auth()->check() && auth()->user()->photo_profile)
+                    <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                @else
+                    {{ strtoupper(substr($displayName, 0, 1)) }}
+                @endif
             </a>
         </div>
     </header>

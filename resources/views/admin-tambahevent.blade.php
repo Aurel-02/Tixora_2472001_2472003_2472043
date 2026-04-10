@@ -189,11 +189,15 @@
     <header class="topbar">
         <div class="logo">TIXORA</div>
         <div style="display: flex; align-items: center; gap: 12px;">
-            <a href="{{ route('profile.edit') }}" class="profile-link" style="text-decoration: none;">
+            <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration: none;">
                 @php
                     $displayName = session('login_admin.name') ?? (auth()->check() ? auth()->user()->nama_lengkap : 'Admin');
                 @endphp
-                <div class="profile" title="My Profile">{{ strtoupper(substr($displayName, 0, 1)) }}</div>
+                @if(auth()->check() && auth()->user()->photo_profile)
+                    <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                @else
+                    {{ strtoupper(substr($displayName, 0, 1)) }}
+                @endif
             </a>
         </div>
     </header>

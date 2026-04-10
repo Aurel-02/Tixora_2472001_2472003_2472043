@@ -130,6 +130,18 @@
 <body>
     <header class="topbar">
         <div class="logo">TIXORA</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration: none; width: 42px; height: 42px; border-radius: 50%; background: var(--middle-purple); color: var(--jacarta); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; cursor: pointer; box-shadow: 0 0 10px rgba(209, 131, 169, 0.4); transition: transform 0.3s; text-transform: uppercase; overflow: hidden;">
+                @php
+                    $displayName = session('login_admin.name') ?? (auth()->check() ? auth()->user()->nama_lengkap : 'Admin');
+                @endphp
+                @if(auth()->check() && auth()->user()->photo_profile)
+                    <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                @else
+                    {{ strtoupper(substr($displayName, 0, 1)) }}
+                @endif
+            </a>
+        </div>
     </header>
 
     <aside class="sidebar">
