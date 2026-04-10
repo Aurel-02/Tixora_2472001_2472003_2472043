@@ -12,7 +12,12 @@ class DashboardController extends Controller
 {
     public function landing()
     {
-        $events = Event::orderBy('id_event', 'desc')->get();
+        $events = Event::whereNotNull('poster')
+            ->where('poster', '!=', '')
+            ->get()
+            ->shuffle()
+            ->take(5);
+
         return view('landing', compact('events'));
     }
 

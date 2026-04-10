@@ -175,7 +175,6 @@
             border: 1px solid rgba(243, 200, 221, 0.2);
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -184,7 +183,9 @@
             position: relative;
             overflow: hidden;
             text-align: center;
-            padding: 0; /* Changed to 0 for full bleed posters, internal elements will have padding if needed */
+            padding: 0;
+            cursor: default;         
+            user-select: none;
         }
 
         .carousel-card img {
@@ -192,10 +193,11 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
+            pointer-events: none;     
         }
 
         .carousel-card:hover img {
-            transform: scale(1.1);
+            transform: scale(1.06);
         }
 
         .poster-overlay {
@@ -209,6 +211,7 @@
             text-align: left;
             opacity: 0;
             transition: opacity 0.3s ease;
+            pointer-events: none;     
         }
 
         .carousel-card:hover .poster-overlay {
@@ -216,9 +219,9 @@
         }
 
         .carousel-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(209, 131, 169, 0.4);
-            border-color: rgba(243, 200, 221, 0.6);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(209, 131, 169, 0.35);
+            border-color: rgba(243, 200, 221, 0.5);
         }
 
         .carousel-card .placeholder-text {
@@ -285,43 +288,35 @@
             color: rgba(243, 200, 221, 0.3);
         }
 
+        .carousel-card.active {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(209, 131, 169, 0.55);
+            border-color: rgba(243, 200, 221, 0.75);
+            z-index: 2;
+        }
+
+        .carousel-card.active img {
+            transform: scale(1.08);
+        }
+
+        .carousel-card.active .poster-overlay {
+            opacity: 1;
+        }
+
         @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-            }
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            .carousel-card {
-                flex: 0 0 calc(50% - 15px);
-                height: 350px;
-            }
+            .navbar { padding: 15px 20px; }
+            .hero h1 { font-size: 2.5rem; }
+            .carousel-card { flex: 0 0 calc(50% - 15px); height: 350px; }
         }
 
         @media (max-width: 480px) {
-            .navbar {
-                padding: 12px 15px;
-            }
-            .navbar .logo {
-                font-size: 22px;
-            }
-            .navbar .btn-login {
-                padding: 6px 18px;
-                font-size: 0.9rem;
-            }
-            .hero h1 {
-                font-size: 2rem;
-            }
-            .carousel-card {
-                flex: 0 0 85%;
-            }
-            .footer .footer-links {
-                flex-direction: column;
-                gap: 8px;
-            }
-            .footer .divider {
-                display: none;
-            }
+            .navbar { padding: 12px 15px; }
+            .navbar .logo { font-size: 22px; }
+            .navbar .btn-login { padding: 6px 18px; font-size: 0.9rem; }
+            .hero h1 { font-size: 2rem; }
+            .carousel-card { flex: 0 0 85%; }
+            .footer .footer-links { flex-direction: column; gap: 8px; }
+            .footer .divider { display: none; }
         }
     </style>
 </head>
@@ -346,9 +341,9 @@
     <main class="carousel-container">
         <div class="carousel-track" id="carousel">
             @forelse($events as $event)
-                <a href="{{ route('event.detail', $event->id_event) }}" class="carousel-card">
+                <div class="carousel-card">
                     @if($event->poster)
-                        <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}">
+                        <img src="{{ asset($event->poster) }}" alt="{{ $event->nama_event }}" draggable="false">
                         <div class="poster-overlay">
                             <h3 style="font-size: 1.2rem; margin-bottom: 5px;">{{ $event->nama_event }}</h3>
                             <p style="font-size: 0.9rem; opacity: 0.8;">{{ \Carbon\Carbon::parse($event->tanggal_pelaksanaan)->format('d M Y') }}</p>
@@ -359,7 +354,7 @@
                             <small>Poster belum tersedia</small>
                         </div>
                     @endif
-                </a>
+                </div>
             @empty
                 <div class="carousel-card">
                     <div class="placeholder-text" style="padding: 20px;">
@@ -387,34 +382,94 @@
 
     <script>
         const slider = document.getElementById('carousel');
-        let isDown = false;
-        let startX;
-        let scrollLeft;
+        const cards  = Array.from(document.querySelectorAll('.carousel-card'));
 
-        slider.addEventListener('mousedown', (e) => {
-            isDown = true;
+        let currentIndex = 0;
+        let autoTimer    = null;
+        let isDragging   = false;
+        let dragStartX, dragScrollLeft;
+
+        /* ── Highlight card yang aktif ── */
+        function setActive(idx) {
+            cards.forEach((c, i) => c.classList.toggle('active', i === idx));
+        }
+
+        /* ── Scroll ke card tertentu (center di viewport carousel) ── */
+        function scrollToCard(idx) {
+            if (!cards[idx]) return;
+            const card          = cards[idx];
+            const sliderRect    = slider.getBoundingClientRect();
+            const cardRect      = card.getBoundingClientRect();
+            const targetScrollLeft = slider.scrollLeft
+                + cardRect.left
+                - sliderRect.left
+                - (sliderRect.width - cardRect.width) / 2;
+
+            slider.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+            setActive(idx);
+        }
+
+        /* ── Maju ke card berikutnya (looping) ── */
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % cards.length;
+            scrollToCard(currentIndex);
+        }
+
+        /* ── Auto-scroll: interval lambat (3500ms) ── */
+        function startAuto() {
+            stopAuto();
+            autoTimer = setInterval(nextCard, 2500);
+        }
+
+        function stopAuto() {
+            clearInterval(autoTimer);
+            autoTimer = null;
+        }
+
+        /* ── Drag manual ── */
+        slider.addEventListener('mousedown', e => {
+            isDragging   = true;
+            dragStartX   = e.pageX - slider.offsetLeft;
+            dragScrollLeft = slider.scrollLeft;
             slider.style.cursor = 'grabbing';
-            startX = e.pageX - slider.offsetLeft;
-            scrollLeft = slider.scrollLeft;
+            stopAuto();
         });
 
         slider.addEventListener('mouseleave', () => {
-            isDown = false;
-            slider.style.cursor = 'grab';
+            if (isDragging) { isDragging = false; slider.style.cursor = 'grab'; startAuto(); }
         });
 
         slider.addEventListener('mouseup', () => {
-            isDown = false;
+            isDragging = false;
             slider.style.cursor = 'grab';
+            startAuto();
         });
 
-        slider.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
+        slider.addEventListener('mousemove', e => {
+            if (!isDragging) return;
             e.preventDefault();
-            const x = e.pageX - slider.offsetLeft;
-            const walk = (x - startX) * 2; 
-            slider.scrollLeft = scrollLeft - walk;
+            const walk = (e.pageX - slider.offsetLeft - dragStartX) * 2;
+            slider.scrollLeft = dragScrollLeft - walk;
         });
+
+        /* ── Touch support ── */
+        let touchStartX = 0;
+        slider.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; stopAuto(); }, { passive:true });
+        slider.addEventListener('touchend',   e => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 40) {
+                currentIndex = diff > 0
+                    ? Math.min(currentIndex + 1, cards.length - 1)
+                    : Math.max(currentIndex - 1, 0);
+                scrollToCard(currentIndex);
+            }
+            startAuto();
+        }, { passive:true });
+
+        /* ── Init ── */
+        setActive(0);
+        // Mulai 1.5 detik setelah halaman load agar terasa natural
+        setTimeout(startAuto, 1500);
     </script>
 </body>
 </html>
