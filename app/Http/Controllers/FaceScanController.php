@@ -14,6 +14,30 @@ class FaceScanController extends Controller
         return view('face-scan', compact('total'));
     }
 
+    public function checkStatus(Request $request)
+    {
+        $userId = Auth::id();
+
+        // Cari tiket berhasil yang belum ada faceID (berasal dari waiting list yang baru dapat tiket)
+        $unscannedDetail = DB::table('detail_transaksi')
+            ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+            ->where('transaksi.id_user', $userId)
+            ->where('detail_transaksi.status_item', 'berhasil')
+            ->where(function($q) {
+                $q->whereNull('detail_transaksi.faceID')
+                  ->orWhere('detail_transaksi.faceID', '');
+            })
+            ->first();
+
+        if ($unscannedDetail) {
+            // Belum scan wajah, arahkan ke face scan
+            return response()->json(['done' => false]);
+        }
+
+        // Sudah scan wajah
+        return response()->json(['done' => true]);
+    }
+
     private function calculateEuclideanDistance($desc1, $desc2) {
         $sum = 0;
         for ($i = 0; $i < count($desc1); $i++) {

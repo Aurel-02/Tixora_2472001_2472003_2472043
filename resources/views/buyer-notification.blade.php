@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Tixora - Notifications</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --jacarta: #3A345B;
@@ -308,16 +310,40 @@
         <div class="notifications-container">
             @if(isset($notifications) && $notifications->count() > 0)
                 @foreach($notifications as $notif)
-                    <div style="background: rgba(243, 200, 221, 0.08); border-radius: 15px; padding: 20px; border-left: 4px solid {{ strpos(strtolower($notif->pesan), 'berhasil dibatalkan') !== false ? '#E74C3C' : 'var(--middle-purple)' }}; display: flex; align-items: flex-start; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative;">
+                    @php
+                        $isCanceled = strpos(strtolower($notif->pesan), 'batal') !== false;
+                        $isFaceScan = !empty($notif->link_url);
+                        $borderColor = $isCanceled ? '#E74C3C' : ($isFaceScan ? '#84d8a5' : 'var(--middle-purple)');
+                        $iconClass = $isCanceled ? 'ph-x-circle' : ($isFaceScan ? 'ph-scan' : 'ph-check-circle');
+                        $iconColor = $isCanceled ? '#E74C3C' : ($isFaceScan ? '#84d8a5' : '#84d8a5');
+                    @endphp
+
+                    @if($isFaceScan)
+                        <a href="#" data-face-scan-url="{{ $notif->link_url }}" class="face-scan-notif" style="text-decoration: none; display: block;">
+                    @endif
+                    <div style="background: {{ $isFaceScan ? 'rgba(132, 216, 165, 0.08)' : 'rgba(243, 200, 221, 0.08)' }}; border-radius: 15px; padding: 20px; border-left: 4px solid {{ $borderColor }}; display: flex; align-items: flex-start; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; {{ $isFaceScan ? 'cursor: pointer; transition: background 0.2s, transform 0.2s;' : '' }}"
+                        @if($isFaceScan) onmouseover="this.style.background='rgba(132,216,165,0.18)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(132,216,165,0.08)'; this.style.transform='translateY(0)';" @endif>
+
                         @if(!$notif->is_read)
                             <div style="position: absolute; top: 15px; right: 20px; width: 10px; height: 10px; background: #E74C3C; border-radius: 50%; box-shadow: 0 0 8px rgba(231, 76, 60, 0.8);"></div>
                         @endif
-                        <i class="ph {{ strpos(strtolower($notif->pesan), 'batal') !== false ? 'ph-x-circle' : 'ph-check-circle' }}" style="font-size: 2rem; color: {{ strpos(strtolower($notif->pesan), 'batal') !== false ? '#E74C3C' : '#84d8a5' }};"></i>
-                        <div>
+
+                        <i class="ph {{ $iconClass }}" style="font-size: 2rem; color: {{ $iconColor }}; flex-shrink: 0;"></i>
+                        <div style="flex: 1;">
                             <div style="font-size: 1.1rem; color: #fff; font-weight: 500; margin-bottom: 5px;">{{ $notif->pesan }}</div>
                             <div style="font-size: 0.85rem; color: var(--queen-pink); opacity: 0.7;">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</div>
+                            @if($isFaceScan)
+                                <div style="margin-top: 10px;">
+                                    <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(132,216,165,0.2); color: #84d8a5; border: 1px solid rgba(132,216,165,0.5); border-radius: 50px; padding: 5px 14px; font-size: 0.85rem; font-weight: 600;">
+                                        <i class="ph ph-camera"></i> Scan Wajah Sekarang
+                                    </span>
+                                </div>
+                            @endif
                         </div>
                     </div>
+                    @if($isFaceScan)
+                        </a>
+                    @endif
                 @endforeach
             @else
                 <div class="empty-state">
@@ -335,6 +361,45 @@
             if(e.key === 'Enter') {
                 window.location.href = '/dashboard';
             }
+        });
+
+        const statusCheckUrl = "{{ route('face-scan.status') }}";
+        const faceScanUrl = "{{ route('face-scan.index', ['total' => 1]) }}";
+        const dashboardUrl = "{{ url('/dashboard') }}";
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+
+        document.querySelectorAll('.face-scan-notif').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                fetch(statusCheckUrl, {
+                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.done) {
+                        // Wajah sudah diverifikasi — tampilkan popup
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Verifikasi Wajah Telah Dilakukan',
+                            text: 'Kamu sudah melakukan scan wajah untuk tiket ini.',
+                            confirmButtonText: 'OK',
+                            background: '#3A345B',
+                            color: '#F3C8DD',
+                            confirmButtonColor: '#D183A9',
+                            iconColor: '#84d8a5'
+                        }).then(() => {
+                            window.location.href = dashboardUrl;
+                        });
+                    } else {
+                        // Belum scan, arahkan ke face scan
+                        window.location.href = faceScanUrl;
+                    }
+                })
+                .catch(() => {
+                    window.location.href = faceScanUrl;
+                });
+            });
         });
     </script>
 </body>

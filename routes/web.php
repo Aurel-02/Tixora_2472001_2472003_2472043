@@ -57,8 +57,10 @@ Route::get('/event/{id}', [DashboardController::class, 'showEvent'])->name('even
 Route::get('/event/{id}/select-seat', [\App\Http\Controllers\SelectSeatController::class, 'index'])->name('event.select-seat');
 Route::post('/event/{id}/checkout', [\App\Http\Controllers\SelectSeatController::class, 'checkout'])->name('event.checkout');
 Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+Route::post('/checkout/process-payment', [\App\Http\Controllers\SelectSeatController::class, 'processPayment'])->middleware(['auth', 'role:3'])->name('checkout.process-payment');
 Route::get('/checkout/face-scan', [FaceScanController::class, 'index'])->name('face-scan.index');
 Route::post('/checkout/face-scan/upload', [FaceScanController::class, 'upload'])->name('face-scan.upload');
+Route::get('/checkout/face-scan/status', [FaceScanController::class, 'checkStatus'])->middleware(['auth', 'role:3'])->name('face-scan.status');
 Route::get('/admin/events', [EventController::class, 'index']);
 Route::get('/admin/events/create', [TambahEventController::class, 'create'])->name('admin.events.create');
 Route::post('/admin/events', [TambahEventController::class, 'store'])->name('admin.events.store');
