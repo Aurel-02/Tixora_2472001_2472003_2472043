@@ -480,6 +480,15 @@
                         </a>
                     </li>
             </ul>
+            <div style="padding: 10px 0;">
+                <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
+                    @csrf
+                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; padding: 15px 22px; cursor: pointer;">
+                        <i class="ph ph-sign-out sidebar-icon"></i>
+                        <span class="sidebar-text">Logout</span>
+                    </button>
+                </form>
+            </div>
         </div>
     </aside>
 
