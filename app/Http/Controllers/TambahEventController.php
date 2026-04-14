@@ -17,7 +17,7 @@ class TambahEventController extends Controller
             return redirect('/login');
         }
 
-        return view('admin-tambahevent');
+        return view('admin.events.create');
     }
 
     public function store(Request $request)

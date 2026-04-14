@@ -22,7 +22,7 @@ class EventController extends Controller
     public function edit($id)
     {
         $event = Event::findOrFail($id);
-        return view('admin-editevent', compact('event'));
+        return view('admin.edit', compact('event'));
     }
 
     public function update(Request $request, $id)
