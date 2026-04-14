@@ -144,38 +144,7 @@
         </div>
     </header>
 
-    <aside class="sidebar">
-        <div class="sidebar-content" style="display: flex; flex-direction: column; height: 100%;">
-            <ul class="sidebar-menu" style="flex-grow: 1;">
-                <li><a href="{{ url('/admin/dashboard') }}" class="sidebar-item"><i class="ph ph-house sidebar-icon"></i><span class="sidebar-text">Home</span></a></li>
-                <li><a href="{{ route('admin.revenue') }}" class="sidebar-item"><i class="ph ph-currency-dollar sidebar-icon"></i><span class="sidebar-text">Revenue</span></a></li>
-                <li><a href="{{ route('admin.events.create') }}" class="sidebar-item"><i class="ph ph-plus-circle sidebar-icon"></i><span class="sidebar-text">Tambah Event</span></a></li>
-                <li><a href="{{ route('admin.statistik') }}" class="sidebar-item"><i class="ph ph-chart-bar sidebar-icon"></i><span class="sidebar-text">Analitik Penjualan</span></a></li>
-                <li>
-                    <a href="{{ route('admin.notifications') }}" class="sidebar-item active" style="position: relative;">
-                        <i class="ph ph-bell sidebar-icon"></i>
-                        <span class="sidebar-text">Notifikasi</span>
-                        @php $badgeCount = isset($pageUnreadCount) ? $pageUnreadCount : ($unreadCount ?? 0); @endphp
-                        @if($badgeCount > 0)
-                        <span style="position: absolute; right: 15px; margin-top: -3px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);">{{ $badgeCount }}</span>
-                        @endif
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ url('/admin/user-management') }}" class="sidebar-item {{ Request::is('admin/user-management*') ? 'active' : '' }}">
-                        <i class="ph ph-users-three sidebar-icon"></i>
-                        <span class="sidebar-text">User Management</span>
-                    </a>
-                </li>
-            </ul>
-            <div style="padding: 10px 0;">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; cursor: pointer;"><i class="ph ph-sign-out sidebar-icon"></i><span class="sidebar-text">Logout</span></button>
-                </form>
-            </div>
-        </div>
-    </aside>
+    <x-admin-sidebar :pageUnreadCount="$pageUnreadCount ?? ($unreadCount ?? 0)" />
 
     <main class="main-wrapper">
         <div class="header-title" style="margin-bottom: 20px;">

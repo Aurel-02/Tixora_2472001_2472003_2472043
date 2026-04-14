@@ -389,7 +389,6 @@
 
                 <div id="face-loading">
                     <div class="spinner"></div>
-                    <span>Memuat model AI pengenalan wajah...</span>
                 </div>
 
                 <div id="face-cam-wrapper">

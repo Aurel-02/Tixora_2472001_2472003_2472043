@@ -75,7 +75,7 @@ class DashboardController extends Controller
             $eventsByCategory[$catKey][] = $event;
         }
 
-        return view('admindashboard', compact(
+        return view('admin.dashboard', compact(
             'pending',
             'approved',
             'rejected',
@@ -209,7 +209,7 @@ class DashboardController extends Controller
         // Mark all as read when opening notifications page
         DB::table('notifikasi')->where('id_user', $adminId)->where('is_read', 0)->update(['is_read' => 1]);
 
-        return view('admin-notifikasi', compact('requests', 'purchases', 'pageUnreadCount'));
+        return view('admin.notifications', compact('requests', 'purchases', 'pageUnreadCount'));
     }
 
     public function approveEventManagement($id)
@@ -430,7 +430,7 @@ class DashboardController extends Controller
         $ticketsAvailable = $totalTickets - $ticketsSold;
         if ($ticketsAvailable < 0) $ticketsAvailable = 0;
 
-        return view('admin-detailevent', compact('event', 'ticketStats', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
+        return view('admin.events.detail', compact('event', 'ticketStats', 'totalTickets', 'ticketsSold', 'ticketsAvailable'));
     }
 }
 

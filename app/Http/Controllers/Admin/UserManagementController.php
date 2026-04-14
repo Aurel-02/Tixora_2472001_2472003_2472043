@@ -25,7 +25,7 @@ class UserManagementController extends Controller
         $inactiveUsers = $users->where('status', 'inactive')->count();
         $organizerCount = $users->filter(fn($u) => in_array($u->role, ['organizer', '2']))->count();
 
-        return view('admin-usermanagement', compact(
+        return view('admin.users.index', compact(
             'users', 'totalUsers', 'activeUsers', 'inactiveUsers', 'organizerCount'
         ));
     }
