@@ -44,6 +44,7 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             text-align: center;
             animation: fadeIn 0.8s ease-out forwards;
+            position: relative;
         }
         
         @keyframes fadeIn {
@@ -172,6 +173,25 @@
             padding-right: 45px;
         }
     
+        .back-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            color: var(--queen-pink);
+            font-size: 1.8rem;
+            text-decoration: none;
+            opacity: 0.7;
+            transition: opacity 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
         @media (max-width: 480px) {
             .login-container {
                 padding: 35px 25px;
@@ -179,12 +199,20 @@
             .logo {
                 font-size: 2.4rem;
             }
+            .back-btn {
+                top: 20px;
+                left: 20px;
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="login-container">
+        <a href="{{ url('/') }}" class="back-btn" title="Back to Home">
+            <i class="ph ph-arrow-left"></i>
+        </a>
         <div class="logo">TIXORA</div>
         <p class="subtitle">Log in to Your Concert Experience</p>
         
