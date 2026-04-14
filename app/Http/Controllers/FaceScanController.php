@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketMail;
 
 class FaceScanController extends Controller
 {
@@ -64,32 +66,61 @@ class FaceScanController extends Controller
              return response()->json(['status' => 'error', 'message' => 'Gagal mengidentifikasi wajah (Descriptor tidak valid). Pastikan wajah Anda terlihat jelas dalam foto.']);
         }
 
-        $latestDetail = DB::table('detail_transaksi')
+        $namaPemilik = $request->input('nama');
+        $emailPemilik = $request->input('email');
+
+        // Find the oldest unscanned ticket (now used for both identity and duplicate checking scope)
+        $unscannedDetail = DB::table('detail_transaksi')
             ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+            ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
+            ->join('event', 'tiket.id_event', '=', 'event.id_event')
             ->where('transaksi.id_user', Auth::id())
+            ->where('detail_transaksi.status_item', 'berhasil')
+            ->where(function($q) {
+                $q->whereNull('detail_transaksi.faceID')
+                  ->orWhere('detail_transaksi.faceID', '');
+            })
             ->orderBy('detail_transaksi.id_detail', 'desc')
-            ->select('detail_transaksi.id_detail', 'detail_transaksi.faceID')
+            ->select(
+                'detail_transaksi.id_detail', 
+                'detail_transaksi.kode_QR', 
+                'event.nama_event',
+                'event.id_event'
+            )
             ->first();
 
-        // Backend duplicate validation across the current transaction
-        if ($latestDetail && !empty($latestDetail->faceID)) {
-            $previousFaces = explode(',', $latestDetail->faceID);
-            foreach ($previousFaces as $prevFace) {
-                $prevFaceName = trim($prevFace);
-                if (empty($prevFaceName)) continue;
+        // Backend duplicate validation across faces for this user for the SAME event
+        if ($unscannedDetail) {
+            $previousDetails = DB::table('detail_transaksi')
+                ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+                ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
+                ->where('transaksi.id_user', Auth::id())
+                ->where('tiket.id_event', $unscannedDetail->id_event)
+                ->whereNotIn('detail_transaksi.status_item', ['cancel', 'batal'])
+                ->whereNotNull('detail_transaksi.faceID')
+                ->where('detail_transaksi.faceID', '!=', '')
+                ->select('detail_transaksi.faceID')
+                ->get();
 
-                $jsonFilename = preg_replace('/\.[^.]+$/', '.json', $prevFaceName);
-                $jsonPath = $facesPath . '/' . $jsonFilename;
+            foreach ($previousDetails as $detail) {
+                $prevFaceFiles = explode(',', $detail->faceID);
+                foreach ($prevFaceFiles as $prevFace) {
+                    $prevFaceName = trim($prevFace);
+                    if (empty($prevFaceName)) continue;
 
-                if (file_exists($jsonPath)) {
-                    $prevDescriptor = json_decode(file_get_contents($jsonPath), true);
-                    if (is_array($prevDescriptor) && count($prevDescriptor) === 128) {
-                        $distance = $this->calculateEuclideanDistance($descriptor, $prevDescriptor);
-                        if ($distance < 0.5) {
-                            return response()->json([
-                                'status' => 'error', 
-                                'message' => 'Wajah ini telah digunakan pada tiket sebelumnya. Harap gunakan wajah yang berbeda.'
-                            ]);
+                    $jsonFilename = preg_replace('/\.[^.]+$/', '.json', $prevFaceName);
+                    $jsonPath = $facesPath . '/' . $jsonFilename;
+
+                    if (file_exists($jsonPath)) {
+                        $prevDescriptor = json_decode(file_get_contents($jsonPath), true);
+                        if (is_array($prevDescriptor) && count($prevDescriptor) === 128) {
+                            $distance = $this->calculateEuclideanDistance($descriptor, $prevDescriptor);
+                            if ($distance < 0.5) {
+                                return response()->json([
+                                    'status' => 'error', 
+                                    'message' => 'Wajah ini telah digunakan pada tiket sebelumnya. Harap gunakan wajah yang berbeda.'
+                                ]);
+                            }
                         }
                     }
                 }
@@ -114,17 +145,23 @@ class FaceScanController extends Controller
             $jsonFilename = preg_replace('/\.[^.]+$/', '.json', $filename);
             file_put_contents($facesPath . '/' . $jsonFilename, json_encode($descriptor));
 
-            if ($latestDetail) {
-                $currentFaceID = $latestDetail->faceID;
-                if (empty($currentFaceID)) {
-                    $newFaceID = $filename;
-                } else {
-                    $newFaceID = $currentFaceID . ',' . $filename;
-                }
-
+            if ($unscannedDetail) {
                 DB::table('detail_transaksi')
-                    ->where('id_detail', $latestDetail->id_detail)
-                    ->update(['faceID' => $newFaceID]);
+                    ->where('id_detail', $unscannedDetail->id_detail)
+                    ->update([
+                        'faceID' => $filename,
+                        'nama_pemilik' => $namaPemilik,
+                        'email_pemilik' => $emailPemilik,
+                    ]);
+
+                // Send email explicitly to the user's provided ticket email
+                if ($emailPemilik) {
+                    try {
+                        Mail::to($emailPemilik)->send(new TicketMail($unscannedDetail->kode_QR, $unscannedDetail->nama_event));
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Failed to send individual QR Code Email: ' . $e->getMessage());
+                    }
+                }
             }
 
             return response()->json(['status' => 'success', 'message' => 'Image processed.', 'filename' => $filename]);

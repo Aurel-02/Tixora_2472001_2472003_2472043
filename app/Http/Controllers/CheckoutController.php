@@ -36,72 +36,67 @@ class CheckoutController extends Controller
         foreach ($tickets as $ticketId => $qty) {
             if ($qty <= 0) continue;
 
-            try {
-                $tiketInfo = DB::table('tiket')
-                    ->join('event', 'tiket.id_event', '=', 'event.id_event')
-                    ->where('tiket.id_tiket', $ticketId)
-                    ->select('event.nama_event')
-                    ->first();
-                $eventName = $tiketInfo ? $tiketInfo->nama_event : 'Event';
+            $tiketInfo = DB::table('tiket')
+                ->join('event', 'tiket.id_event', '=', 'event.id_event')
+                ->where('tiket.id_tiket', $ticketId)
+                ->select('event.nama_event')
+                ->first();
+            $eventName = $tiketInfo ? $tiketInfo->nama_event : 'Event';
 
-                // 1. Buat kode unik di Laravel
-                $randomCode = 'TIX-' . strtoupper(Str::random(10));
+            for ($i = 0; $i < $qty; $i++) {
+                try {
+                    $randomCode = 'TIX-' . strtoupper(Str::random(10));
 
-                // 2. Kirim 5 parameter (tambah $randomCode di akhir)
-                $res = DB::select('CALL sp_checkout_ticket(?, ?, ?, ?, ?)', [
-                    $userId,
-                    $ticketId,
-                    (int)$qty,
-                    $paymentMethod,
-                    $randomCode // Parameter ke-5
-                ]);
+                    $res = DB::select('CALL sp_checkout_ticket(?, ?, ?, ?, ?)', [
+                        $userId,
+                        $ticketId,
+                        1,
+                        $paymentMethod,
+                        $randomCode
+                    ]);
 
-                if (!empty($res)) {
-                    $status = $res[0]->status ?? 'FAILED';
-                    $message = $res[0]->pesan ?? 'Unknown error occurred.';
-                    
-                    if ($status === 'SUCCESS') {
-                        $totalQtyToScan += (int)$qty;
+                    if (!empty($res)) {
+                        $status = $res[0]->status ?? 'FAILED';
+                        $message = $res[0]->pesan ?? 'Unknown error occurred.';
+                        
+                        if ($status === 'SUCCESS') {
+                            $totalQtyToScan += 1;
 
-                        // Di sini kamu bisa panggil fungsi kirim email pakai $randomCode
-                        if(Auth::user()->email) {
-                            Mail::to(Auth::user()->email)->send(new TicketMail($randomCode, $eventName));
+                            DB::table('notifikasi')->insert([
+                                'id_user' => $userId,
+                                'pesan' => "Pembelian 1 tiket event $eventName berhasil",
+                                'is_read' => 0,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]);
+                            $results[] = [
+                                'ticket_id' => $ticketId,
+                                'message' => $message
+                            ];
+                        } else if ($status === 'WAITING') {
+                            DB::table('notifikasi')->insert([
+                                'id_user' => $userId,
+                                'pesan' => "Anda masuk waiting list untuk 1 tiket event $eventName",
+                                'is_read' => 0,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]);
+                            $results[] = [
+                                'ticket_id' => $ticketId,
+                                'message' => $message
+                            ];
+                        } else {
+                            $errors[] = "Ticket ID $ticketId: $message";
                         }
-
-                        DB::table('notifikasi')->insert([
-                            'id_user' => $userId,
-                            'pesan' => "Pembelian tiket event $eventName berhasil",
-                            'is_read' => 0,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]);
-                        $results[] = [
-                            'ticket_id' => $ticketId,
-                            'message' => $message
-                        ];
-                    } else if ($status === 'WAITING') {
-                        DB::table('notifikasi')->insert([
-                            'id_user' => $userId,
-                            'pesan' => "Anda masuk waiting list untuk tiket event $eventName",
-                            'is_read' => 0,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]);
-                        $results[] = [
-                            'ticket_id' => $ticketId,
-                            'message' => $message // Pesan "Anda masuk daftar tunggu"
-                        ];
-                    } else {
-                        $errors[] = "Ticket ID $ticketId: $message";
                     }
+                } catch (\Exception $e) {
+                    Log::error('Individual Ticket Checkout Error: ' . $e->getMessage(), [
+                        'user_id' => $userId,
+                        'ticket_id' => $ticketId,
+                        'qty_index' => $i
+                    ]);
+                    $errors[] = "Failed to process 1 ticket ID $ticketId.";
                 }
-            } catch (\Exception $e) {
-                Log::error('Individual Ticket Checkout Error: ' . $e->getMessage(), [
-                    'user_id' => $userId,
-                    'ticket_id' => $ticketId,
-                    'qty' => $qty
-                ]);
-                $errors[] = "Failed to process ticket ID $ticketId.";
             }
         }
 

@@ -344,35 +344,7 @@
             img.onload = async () => {
                 const descriptor = await checkFaceDuplicate(img);
                 if (descriptor) {
-                    fetch("{{ route('face-scan.upload') }}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({ 
-                            image: imageDataUrl, 
-                            descriptor: JSON.stringify(Array.from(descriptor)) 
-                        })
-                    }).then(response => response.json())
-                      .then(data => {
-                          if (data.status === 'success') {
-                              savedFaceDescriptors.push(descriptor);
-                              processScanSuccess();
-                          } else {
-                              Swal.fire({
-                                icon: 'error', 
-                                title: 'Ditolak', 
-                                text: data.message,
-                                background: 'var(--jacarta)',
-                                color: 'var(--queen-pink)',
-                                confirmButtonColor: 'var(--middle-purple)'
-                              });
-                          }
-                      }).catch(err => {
-                          console.error(err);
-                          Swal.fire({icon: 'error', title: 'Upload Gagal', text: 'Gagal mengunggah foto wajah.'});
-                      });
+                    promptIdentityAndUpload(imageDataUrl, null, descriptor);
                 }
             };
         }
@@ -387,41 +359,105 @@
                     img.onload = async () => {
                         const descriptor = await checkFaceDuplicate(img);
                         if (descriptor) {
-                            const formData = new FormData();
-                            formData.append('image_file', file);
-                            formData.append('descriptor', JSON.stringify(Array.from(descriptor)));
-                            
-                            fetch("{{ route('face-scan.upload') }}", {
-                                method: "POST",
-                                headers: {
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: formData
-                            }).then(response => response.json())
-                              .then(data => {
-                                  if (data.status === 'success') {
-                                      savedFaceDescriptors.push(descriptor);
-                                      processScanSuccess();
-                                  } else {
-                                      Swal.fire({
-                                        icon: 'error', 
-                                        title: 'Ditolak', 
-                                        text: data.message,
-                                        background: 'var(--jacarta)',
-                                        color: 'var(--queen-pink)',
-                                        confirmButtonColor: 'var(--middle-purple)'
-                                      });
-                                  }
-                              }).catch(err => {
-                                  console.error(err);
-                                  Swal.fire({icon: 'error', title: 'Upload Gagal', text: 'Gagal mengunggah foto wajah.'});
-                              });
+                            promptIdentityAndUpload(null, file, descriptor);
                         }
                     };
                 };
                 reader.readAsDataURL(file);
             }
             event.target.value = '';
+        }
+
+        async function promptIdentityAndUpload(imageDataUrl, fileObj, descriptor) {
+            const { value: formValues } = await Swal.fire({
+                title: 'Identitas Tiket',
+                html:
+                    '<p style="margin-bottom: 15px; font-size: 0.9rem;">Silakan masukkan data untuk tiket ini. QR Code akan dikirim ke email ini.</p>' +
+                    '<input id="swal-input-name" class="swal2-input" placeholder="Nama Pemilik Tiket" style="width: 80%;">' +
+                    '<input id="swal-input-email" type="email" class="swal2-input" placeholder="Email Penerima QR" style="width: 80%;">',
+                focusConfirm: false,
+                background: 'var(--jacarta)',
+                color: 'var(--queen-pink)',
+                confirmButtonColor: 'var(--middle-purple)',
+                confirmButtonText: 'Simpan & Lanjutkan',
+                allowOutsideClick: false,
+                preConfirm: () => {
+                    const name = document.getElementById('swal-input-name').value;
+                    const email = document.getElementById('swal-input-email').value;
+                    if (!name || !email) {
+                        Swal.showValidationMessage('Nama dan Email harus diisi!');
+                        return false;
+                    }
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if(!emailRegex.test(email)) {
+                        Swal.showValidationMessage('Format email tidak valid!');
+                        return false;
+                    }
+                    return { nama: name, email: email };
+                }
+            });
+
+            if (formValues) {
+                Swal.fire({
+                    title: 'Menyimpan Data...',
+                    text: 'Sedang menyimpan wajah dan mengirim tiket...',
+                    allowOutsideClick: false,
+                    background: 'var(--jacarta)',
+                    color: 'var(--queen-pink)',
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                let fetchPromise;
+                if (imageDataUrl) {
+                    fetchPromise = fetch("{{ route('face-scan.upload') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ 
+                            image: imageDataUrl, 
+                            descriptor: JSON.stringify(Array.from(descriptor)),
+                            nama: formValues.nama,
+                            email: formValues.email
+                        })
+                    });
+                } else if (fileObj) {
+                    const formData = new FormData();
+                    formData.append('image_file', fileObj);
+                    formData.append('descriptor', JSON.stringify(Array.from(descriptor)));
+                    formData.append('nama', formValues.nama);
+                    formData.append('email', formValues.email);
+                    
+                    fetchPromise = fetch("{{ route('face-scan.upload') }}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: formData
+                    });
+                }
+
+                fetchPromise.then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            savedFaceDescriptors.push(descriptor);
+                            processScanSuccess();
+                        } else {
+                            Swal.fire({
+                                icon: 'error', 
+                                title: 'Ditolak', 
+                                text: data.message,
+                                background: 'var(--jacarta)',
+                                color: 'var(--queen-pink)',
+                                confirmButtonColor: 'var(--middle-purple)'
+                            });
+                        }
+                    }).catch(err => {
+                        console.error(err);
+                        Swal.fire({icon: 'error', title: 'Upload Gagal', text: 'Gagal mengunggah foto wajah.'});
+                    });
+            }
         }
 
         function processScanSuccess() {

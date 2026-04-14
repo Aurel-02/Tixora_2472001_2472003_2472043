@@ -79,6 +79,8 @@ class CheckInController extends Controller
                 'detail_transaksi.status_item',
                 'detail_transaksi.kode_QR',
                 'detail_transaksi.faceID',
+                'detail_transaksi.nama_pemilik',
+                'detail_transaksi.email_pemilik',
                 'tiket.jenis_tiket',
                 'tiket.harga',
                 'event.id_event',
@@ -127,8 +129,8 @@ class CheckInController extends Controller
             'message' => 'Tiket ditemukan!',
             'ticket'  => [
                 'id_detail'           => $detail->id_detail,
-                'nama_penonton'       => $detail->nama_lengkap,
-                'email'               => $detail->email,
+                'nama_penonton'       => $detail->nama_pemilik ?: $detail->nama_lengkap,
+                'email'               => $detail->email_pemilik ?: $detail->email,
                 'nama_event'          => $detail->nama_event,
                 'tanggal_pelaksanaan' => $detail->tanggal_pelaksanaan,
                 'waktu_pelaksanaan'   => $detail->waktu_pelaksanaan,
@@ -235,6 +237,7 @@ class CheckInController extends Controller
                 'detail_transaksi.faceID',
                 'detail_transaksi.kode_QR',
                 'detail_transaksi.jumlah_beli',
+                'detail_transaksi.nama_pemilik',
                 'tiket.jenis_tiket',
                 'event.nama_event',
                 'event.tanggal_pelaksanaan',
@@ -246,7 +249,7 @@ class CheckInController extends Controller
 
         $bestMatch = null;
         $bestDist  = PHP_FLOAT_MAX;
-        $threshold = 0.5;
+        $threshold = 0.58;
 
         foreach ($allDetails as $detail) {
             $faceFiles = explode(',', $detail->faceID);
@@ -287,7 +290,7 @@ class CheckInController extends Controller
                 'distance' => round($bestDist, 4),
                 'face_url' => $faceUrl,
                 'ticket'   => [
-                    'nama_penonton'       => $det->nama_lengkap,
+                    'nama_penonton'       => $det->nama_pemilik ?: $det->nama_lengkap,
                     'nama_event'          => $det->nama_event,
                     'tanggal_pelaksanaan' => $det->tanggal_pelaksanaan,
                     'lokasi_event'        => $det->lokasi_event,
