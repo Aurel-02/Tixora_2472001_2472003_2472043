@@ -359,6 +359,8 @@ class CheckInController extends Controller
                     'detail_transaksi.kode_QR',
                     'detail_transaksi.checked_in',
                     'detail_transaksi.jumlah_beli',
+                    'detail_transaksi.nama_pemilik',
+                    'detail_transaksi.email_pemilik',
                     'tiket.jenis_tiket',
                     'user.nama_lengkap',
                     'user.email'

@@ -243,8 +243,8 @@
                             <tr>
                                 <td style="opacity: 0.5;">{{ $i + 1 }}</td>
                                 <td style="font-family: monospace; letter-spacing: 1px;">{{ $d->kode_QR }}</td>
-                                <td style="font-weight: 600; color: #fff;">{{ $d->nama_lengkap }}</td>
-                                <td style="opacity: 0.8;">{{ $d->email }}</td>
+                                <td style="font-weight: 600; color: #fff;">{{ $d->nama_pemilik ?: $d->nama_lengkap }}</td>
+                                <td style="opacity: 0.8;">{{ $d->email_pemilik ?: $d->email }}</td>
                                 <td>{{ $d->jenis_tiket }}</td>
                                 <td style="text-align: center; font-weight: 600;">{{ $d->jumlah_beli }}</td>
                                 <td style="text-align: center;">
