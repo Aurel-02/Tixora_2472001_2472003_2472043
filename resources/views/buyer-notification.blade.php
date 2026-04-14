@@ -238,69 +238,12 @@
 </head>
 <body>
 
-@php
-    $unreadNotifCount = 0;
-    if(auth()->check()) {
-        $unreadNotifCount = \Illuminate\Support\Facades\DB::table('notifikasi')->where('id_user', auth()->id())->where('is_read', 0)->count();
-    }
-@endphp
 
 
-    <header class="topbar">
-        <div class="logo">TIXORA</div>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div class="search-box" style="display: flex; align-items: center; border: 1px solid rgba(243, 200, 221, 0.4); border-radius: 50px; background: rgba(58, 52, 91, 0.4); padding: 8px 18px; min-width: 250px; transition: all 0.3s ease;">
-                <i class="ph ph-magnifying-glass" style="color: var(--queen-pink); font-size: 1.1rem; margin-right: 10px;"></i>
-                <input type="text" id="globalSearch" placeholder="Search events..." style="width: 100%; border: none; outline: none; background: transparent; color: #fff; font-size: 0.95rem; font-family: 'Outfit', sans-serif;" />
-            </div>
-            <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
-                @if(auth()->user()->photo_profile)
-                    <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                @else
-                    {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
-                @endif
-            </a>
-        </div>
-    </header>
 
-    <aside class="sidebar">
-        <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
-            <ul class="sidebar-menu" style="flex-grow: 1;">
-                <li>
-                    <a href="{{ url('/dashboard') }}" class="sidebar-item">
-                        <i class="ph ph-house sidebar-icon"></i>
-                        <span class="sidebar-text">Home</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('my-tickets') }}" class="sidebar-item">
-                        <i class="ph ph-ticket sidebar-icon"></i>
-                        <span class="sidebar-text">My Tickets</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('buyer.notification') }}" class="sidebar-item active" style="position: relative;">
-                        <i class="ph ph-bell sidebar-icon"></i>
-                        <span class="sidebar-text">Notifications</span>
-                    
-            @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-                <span style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: #E74C3C; color: white; border-radius: 50%; width: 22px; height: 22px; display:flex; align-items:center; justify-content:center; font-size: 0.75rem; font-weight: bold; box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);">{{ $unreadNotifCount }}</span>
-            @endif
-    </a>
-                </li>
-            </ul>
+    <x-buyer-topbar />
 
-            <div style="padding: 10px 0;">
-                <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
-                    @csrf
-                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; padding: 15px 22px; cursor: pointer; transition: all 0.3s ease;">
-                        <i class="ph ph-sign-out sidebar-icon"></i>
-                        <span class="sidebar-text">Logout</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </aside>
+    <x-buyer-sidebar />
 
     <main class="main-wrapper">
         <div class="section-header">

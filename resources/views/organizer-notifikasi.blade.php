@@ -310,69 +310,9 @@
 </head>
 <body>
 
-    <header class="topbar">
-        <div class="logo">TIXORA</div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-        <a href="{{ route('profile.edit') }}" class="profile" title="My Profile" style="text-decoration:none;">
-            @if(auth()->check() && auth()->user()->photo_profile)
-                <img src="{{ asset(auth()->user()->photo_profile) }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-            @else
-                {{ strtoupper(substr(auth()->user()->nama_lengkap ?? 'U', 0, 1)) }}
-            @endif
-        </a>
-        </div>
-    </header>
+    <x-organizer-topbar />
 
-    <aside class="sidebar">
-        <div class="sidebar-content" style="display: flex; flex-direction: column; height: calc(100vh - var(--topbar-height));">
-            <ul class="sidebar-menu" style="flex-grow: 1; padding-top: 20px;">
-                <li>
-                    <a href="{{ url('/organizerdashboard') }}" class="sidebar-item">
-                        <i class="ph ph-house sidebar-icon"></i>
-                        <span class="sidebar-text">Home</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('organizer.statistik') }}" class="sidebar-item">
-                        <i class="ph ph-chart-bar sidebar-icon"></i>
-                        <span class="sidebar-text">Analitik Penjualan</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('organizer.revenue') }}" class="sidebar-item">
-                        <i class="ph ph-currency-dollar sidebar-icon"></i>
-                        <span class="sidebar-text">Revenue</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('organizer.checkin') }}" class="sidebar-item">
-                        <i class="ph ph-qr-code sidebar-icon"></i>
-                        <span class="sidebar-text">Check In</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('organizer.notifications') }}" class="sidebar-item active" style="position: relative;">
-                        <i class="ph ph-bell sidebar-icon"></i>
-                        <span class="sidebar-text">Notifications</span>
-                        @php $badgeCount = isset($pageUnreadCount) ? $pageUnreadCount : ($unreadCount ?? 0); @endphp
-                        @if($badgeCount > 0)
-                        <span style="position: absolute; right: 15px; margin-top: -3px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);">{{ $badgeCount }}</span>
-                        @endif
-                    </a>
-                </li>
-            </ul>
-
-            <div style="padding: 10px 0;">
-                <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
-                    @csrf
-                    <button type="submit" class="sidebar-item" style="background: transparent; border: none; color: var(--queen-pink); width: 100%; text-align: left; padding: 15px 22px; cursor: pointer;">
-                        <i class="ph ph-sign-out sidebar-icon"></i>
-                        <span class="sidebar-text">Logout</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </aside>
+    <x-organizer-sidebar />
 
     <main class="main-wrapper">
         <div class="section-header">
