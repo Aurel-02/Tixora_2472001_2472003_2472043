@@ -79,3 +79,9 @@ Route::get('/admin/statistik', [\App\Http\Controllers\StatistikController::class
 Route::get('/admin/notifikasi', [DashboardController::class, 'adminNotifications'])->name('admin.notifications');
 Route::post('/admin/approve-permohonan/{id}', [DashboardController::class, 'approveEventManagement'])->name('admin.permohonan.approve');
 Route::post('/admin/reject-permohonan/{id}', [DashboardController::class, 'rejectEventManagement'])->name('admin.permohonan.reject');
+
+// ── Admin User Management ──
+Route::get('/admin/user-management', [\App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('admin.users.index');
+Route::post('/admin/users/{id}/deactivate', [\App\Http\Controllers\Admin\UserManagementController::class, 'deactivate'])->name('admin.users.deactivate');
+Route::post('/admin/users/{id}/activate', [\App\Http\Controllers\Admin\UserManagementController::class, 'activate'])->name('admin.users.activate');
+Route::delete('/admin/users/{id}', [\App\Http\Controllers\Admin\UserManagementController::class, 'destroy'])->name('admin.users.destroy');

@@ -235,6 +235,12 @@
                         <span class="sidebar-text">Notifikasi</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ url('/admin/user-management') }}" class="sidebar-item {{ Request::is('admin/user-management*') ? 'active' : '' }}">
+                        <i class="ph ph-users-three sidebar-icon"></i>
+                        <span class="sidebar-text">User Management</span>
+                    </a>
+                </li>
             </ul>
 
             <div style="padding: 10px 0;">

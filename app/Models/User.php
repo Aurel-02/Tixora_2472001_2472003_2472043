@@ -31,7 +31,7 @@ class User extends Authenticatable
      *
      * @var bool
      */
-    public $timestamps = false;
+    public $timestamps = true;
 
     /**
      * The attributes that are mass assignable.
@@ -45,6 +45,7 @@ class User extends Authenticatable
         'password',
         'role',
         'photo_profile',
+        'status',
     ];
 
     /**
