@@ -247,6 +247,10 @@
             transition: border-color 0.3s;
         }
         .filter-select:focus { border-color: var(--middle-purple); }
+        .filter-select option {
+            background: var(--jacarta);
+            color: #fff;
+        }
 
         /* ── User Table Card ── */
         .table-card {
@@ -610,9 +614,6 @@
                 <i class="ph ph-users-three"></i>
                 User Management
             </h1>
-            <div style="font-size: 0.85rem; opacity: 0.5;">
-                Kelola dan pantau semua akun pengguna Tixora
-            </div>
         </div>
 
         @if(session('success'))
@@ -635,7 +636,7 @@
                 <div class="stat-icon" style="background: rgba(99,179,237,0.12); color: #63b3ed;">
                     <i class="ph ph-users"></i>
                 </div>
-                <div class="stat-value" id="statTotal">{{ $users->count() ?? '—' }}</div>
+                <div class="stat-value" id="statTotal">{{ $totalUsers }}</div>
                 <div class="stat-label">Total Pengguna</div>
             </div>
             <div class="stat-card">
@@ -643,7 +644,7 @@
                     <i class="ph ph-user-check"></i>
                 </div>
                 <div class="stat-value" style="color: #84d8a5;" id="statActive">
-                    {{ $users->where('status', 'active')->count() ?? '—' }}
+                    {{ $activeUsers }}
                 </div>
                 <div class="stat-label">Akun Aktif</div>
             </div>
@@ -652,7 +653,7 @@
                     <i class="ph ph-user-minus"></i>
                 </div>
                 <div class="stat-value" style="color: #ef5350;" id="statInactive">
-                    {{ $users->where('status', 'inactive')->count() ?? '—' }}
+                    {{ $inactiveUsers }}
                 </div>
                 <div class="stat-label">Akun Nonaktif</div>
             </div>
@@ -661,7 +662,7 @@
                     <i class="ph ph-star"></i>
                 </div>
                 <div class="stat-value" style="color: #ecc94b;" id="statOrganizer">
-                    {{ $users->where('role', 'organizer')->count() ?? '—' }}
+                    {{ $organizerCount }}
                 </div>
                 <div class="stat-label">Organizer</div>
             </div>
@@ -677,7 +678,6 @@
                 <option value="">Semua Role</option>
                 <option value="buyer">Buyer</option>
                 <option value="organizer">Organizer</option>
-                <option value="admin">Admin</option>
             </select>
             <select class="filter-select" id="filterStatus">
                 <option value="">Semua Status</option>
@@ -730,10 +730,8 @@
                         <!-- Role -->
                         <td>
                             @php $role = $user->role ?? 'buyer'; @endphp
-                            @if($role === 'organizer')
+                            @if(in_array($role, ['organizer', '2']))
                                 <span class="badge badge-organizer"><i class="ph ph-star-four"></i> Organizer</span>
-                            @elseif($role === 'admin')
-                                <span class="badge badge-admin"><i class="ph ph-shield-check"></i> Admin</span>
                             @else
                                 <span class="badge badge-buyer"><i class="ph ph-user"></i> Buyer</span>
                             @endif
@@ -894,90 +892,36 @@
     </div>
 
     <script>
-        // ── Filter & Search Logic ──
-        const tableSearch = document.getElementById('tableSearch');
-        const globalSearch = document.getElementById('globalSearch');
-        const filterRole   = document.getElementById('filterRole');
-        const filterStatus = document.getElementById('filterStatus');
-        const rows = Array.from(document.querySelectorAll('#usersBody tr[data-name]'));
-        const ROWS_PER_PAGE = 10;
-        let currentPage = 1;
-
-        function applyFilter() {
-            const q      = (tableSearch.value || globalSearch.value || '').toLowerCase().trim();
-            const role   = filterRole.value.toLowerCase();
-            const status = filterStatus.value.toLowerCase();
-
-            const visible = rows.filter(row => {
-                const name  = row.dataset.name || '';
-                const email = row.dataset.email || '';
-                const r     = (row.dataset.role || '').toLowerCase();
-                const s     = (row.dataset.status || '').toLowerCase();
-
-                const matchQ      = !q      || name.includes(q) || email.includes(q);
-                const matchRole   = !role   || r === role;
-                const matchStatus = !status || s === status;
-                return matchQ && matchRole && matchStatus;
-            });
-
-            rows.forEach(r => r.style.display = 'none');
-
-            const total = visible.length;
-            const totalPages = Math.max(1, Math.ceil(total / ROWS_PER_PAGE));
-            currentPage = Math.min(currentPage, totalPages);
-
-            const start = (currentPage - 1) * ROWS_PER_PAGE;
-            const end   = start + ROWS_PER_PAGE;
-            visible.slice(start, end).forEach(r => r.style.display = '');
-
-            document.getElementById('paginationInfo').textContent =
-                total === 0
-                    ? 'Tidak ada pengguna ditemukan'
-                    : `Menampilkan ${start + 1}–${Math.min(end, total)} dari ${total} pengguna`;
-
-            renderPagination(total, totalPages);
-        }
-
-        function renderPagination(total, totalPages) {
-            const container = document.getElementById('paginationBtns');
-            container.innerHTML = '';
-
-            if (totalPages <= 1) return;
-
-            const prev = document.createElement('button');
-            prev.className = 'pg-btn';
-            prev.innerHTML = '<i class="ph ph-caret-left"></i>';
-            prev.disabled = currentPage === 1;
-            prev.onclick = () => { currentPage--; applyFilter(); };
-            container.appendChild(prev);
-
-            for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'pg-btn' + (i === currentPage ? ' active' : '');
-                btn.textContent = i;
-                btn.onclick = () => { currentPage = i; applyFilter(); };
-                container.appendChild(btn);
-            }
-
-            const next = document.createElement('button');
-            next.className = 'pg-btn';
-            next.innerHTML = '<i class="ph ph-caret-right"></i>';
-            next.disabled = currentPage === totalPages;
-            next.onclick = () => { currentPage++; applyFilter(); };
-            container.appendChild(next);
-        }
-
-        tableSearch.addEventListener('input', () => { currentPage = 1; applyFilter(); });
-        globalSearch.addEventListener('input', () => { currentPage = 1; applyFilter(); });
-        filterRole.addEventListener('change', () => { currentPage = 1; applyFilter(); });
-        filterStatus.addEventListener('change', () => { currentPage = 1; applyFilter(); });
-        applyFilter();
-
-        // ── Swal Confirm Helpers ──
+        // ── Swal Theme (defined first so session alerts can use it) ──
         const swalTheme = {
             background: '#3A345B',
             color: '#F3C8DD',
         };
+
+        // ── Auto-show SweetAlert from session ──
+        @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Tidak Dapat Dihapus',
+            html: `{!! addslashes(session('error')) !!}`,
+            confirmButtonText: 'Mengerti',
+            ...swalTheme,
+            confirmButtonColor: '#ef5350',
+        });
+        @endif
+
+        @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            html: `{!! addslashes(session('success')) !!}`,
+            confirmButtonText: 'OK',
+            timer: 3000,
+            timerProgressBar: true,
+            ...swalTheme,
+            confirmButtonColor: '#84d8a5',
+        });
+        @endif
 
         function confirmDeactivate(form, name) {
             Swal.fire({

@@ -49,6 +49,7 @@ Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventC
 Route::get('/organizer/notifications', [\App\Http\Controllers\NotifikasiController::class, 'organizer'])->middleware(['auth', 'role:2'])->name('organizer.notifications');
 Route::get('/organizer/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.revenue');
 Route::get('/organizer/checkin', [CheckInController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.checkin');
+Route::get('/organizer/checkin/report', [CheckInController::class, 'report'])->middleware(['auth', 'role:2'])->name('organizer.checkin.report');
 Route::post('/organizer/checkin/scan-qr', [CheckInController::class, 'scanQr'])->middleware(['auth', 'role:2'])->name('checkin.scan-qr');
 Route::post('/organizer/checkin/confirm', [CheckInController::class, 'confirmCheckin'])->middleware(['auth', 'role:2'])->name('checkin.confirm');
 Route::post('/organizer/checkin/sync-face', [CheckInController::class, 'syncFace'])->middleware(['auth', 'role:2'])->name('checkin.sync-face');

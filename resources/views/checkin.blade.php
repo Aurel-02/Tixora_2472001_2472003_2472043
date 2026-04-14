@@ -303,8 +303,23 @@
 
 <main class="main-wrapper">
 
-    <div class="section-header">
-        <i class="ph ph-scan"></i> Check In Tiket Penonton
+    <div class="section-header" style="justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <i class="ph ph-scan"></i> Check In Tiket
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="event-selector" style="background: rgba(58,52,91,0.8); border: 1px solid rgba(243,200,221,0.3); color: #fff; padding: 10px 15px; border-radius: 10px; font-size: 0.95rem; outline: none; cursor: pointer;">
+                @foreach($events as $ev)
+                    <option value="{{ $ev->id_event }}" style="background: var(--jacarta); color: #fff;">{{ $ev->nama_event }} - {{ \Carbon\Carbon::parse($ev->tanggal_pelaksanaan)->format('d M Y') }}</option>
+                @endforeach
+                @if($events->isEmpty())
+                    <option value="">Belum ada event</option>
+                @endif
+            </select>
+            <a href="{{ route('organizer.checkin.report') }}" style="background: var(--middle-purple); color: var(--jacarta); text-decoration: none; padding: 10px 18px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: 0.3s; box-shadow: 0 4px 10px rgba(209,131,169,0.3);">
+                <i class="ph ph-chart-line-up"></i> Check-in Report
+            </a>
+        </div>
     </div>
 
     <div class="checkin-container">
@@ -531,10 +546,11 @@ async function doScanSearch(kode) {
     Swal.fire({ title:'Mencari tiket...', allowOutsideClick:false, background:'#3A345B', color:'#F3C8DD', didOpen:()=>Swal.showLoading() });
 
     try {
+        const eventId = document.getElementById('event-selector') ? document.getElementById('event-selector').value : '';
         const res  = await fetch(URL_SCAN_QR, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json' },
-            body: JSON.stringify({ kode_qr: kode })
+            body: JSON.stringify({ kode_qr: kode, id_event: eventId })
         });
         const data = await res.json();
         Swal.close();
@@ -744,10 +760,11 @@ async function detectAndSync(imgEl) {
     }
 
     try {
+        const eventId = document.getElementById('event-selector') ? document.getElementById('event-selector').value : '';
         const res  = await fetch(URL_FACE_SYNC, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json' },
-            body: JSON.stringify({ descriptor: JSON.stringify(descriptor) })
+            body: JSON.stringify({ descriptor: JSON.stringify(descriptor), id_event: eventId })
         });
         const data = await res.json();
         Swal.close();

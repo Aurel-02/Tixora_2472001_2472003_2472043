@@ -13,7 +13,27 @@ class CheckInController extends Controller
      */
     public function index()
     {
-        return view('checkin');
+        $organizerId = Auth::id();
+
+        $ownedEventIds = DB::table('event')
+            ->where('id_user', $organizerId)
+            ->pluck('id_event')
+            ->toArray();
+
+        $approvedEventIds = DB::table('permohonan_events')
+            ->where('id_user', $organizerId)
+            ->where('status', 'approved')
+            ->pluck('id_event')
+            ->toArray();
+
+        $myEventIds = array_unique(array_merge($ownedEventIds, $approvedEventIds));
+
+        $events = DB::table('event')
+            ->whereIn('id_event', $myEventIds)
+            ->orderBy('tanggal_pelaksanaan', 'desc')
+            ->get();
+
+        return view('checkin', compact('events'));
     }
 
     private function isOrganizerOfEvent($eventId, $organizerId): bool
@@ -85,6 +105,15 @@ class CheckInController extends Controller
             return response()->json([
                 'status'  => 'unauthorized',
                 'message' => 'Anda bukan organizer dari event "' . $detail->nama_event . '". Anda tidak dapat melakukan check-in untuk tiket event ini.',
+                'event_name' => $detail->nama_event,
+            ]);
+        }
+
+        $selectedEventId = $request->input('id_event');
+        if ($selectedEventId && $detail->id_event != $selectedEventId) {
+            return response()->json([
+                'status'  => 'unauthorized',
+                'message' => 'Tiket ini adalah untuk "' . $detail->nama_event . '", bukan event yang sedang Anda pilih.',
                 'event_name' => $detail->nama_event,
             ]);
         }
@@ -166,18 +195,24 @@ class CheckInController extends Controller
         $facesPath   = public_path('faces');
         $organizerId = Auth::id();
 
-        $ownedEventIds = DB::table('event')
-            ->where('id_user', $organizerId)
-            ->pluck('id_event')
-            ->toArray();
+        $selectedEventId = $request->input('id_event');
 
-        $approvedEventIds = DB::table('permohonan_events')
-            ->where('id_user', $organizerId)
-            ->where('status', 'approved')
-            ->pluck('id_event')
-            ->toArray();
+        if ($selectedEventId) {
+            $myEventIds = [$selectedEventId];
+        } else {
+            $ownedEventIds = DB::table('event')
+                ->where('id_user', $organizerId)
+                ->pluck('id_event')
+                ->toArray();
 
-        $myEventIds = array_unique(array_merge($ownedEventIds, $approvedEventIds));
+            $approvedEventIds = DB::table('permohonan_events')
+                ->where('id_user', $organizerId)
+                ->where('status', 'approved')
+                ->pluck('id_event')
+                ->toArray();
+
+            $myEventIds = array_unique(array_merge($ownedEventIds, $approvedEventIds));
+        }
 
         if (empty($myEventIds)) {
             return response()->json([
@@ -278,5 +313,61 @@ class CheckInController extends Controller
             $sum += ($a[$i] - $b[$i]) ** 2;
         }
         return sqrt($sum);
+    }
+
+    public function report(Request $request)
+    {
+        $organizerId = Auth::id();
+
+        $ownedEventIds = DB::table('event')
+            ->where('id_user', $organizerId)
+            ->pluck('id_event')
+            ->toArray();
+
+        $approvedEventIds = DB::table('permohonan_events')
+            ->where('id_user', $organizerId)
+            ->where('status', 'approved')
+            ->pluck('id_event')
+            ->toArray();
+
+        $myEventIds = array_unique(array_merge($ownedEventIds, $approvedEventIds));
+
+        $events = DB::table('event')
+            ->whereIn('id_event', $myEventIds)
+            ->orderBy('tanggal_pelaksanaan', 'desc')
+            ->get();
+
+        $selectedEventId = $request->input('event_id', $events->first()->id_event ?? null);
+        
+        $reportData = collect();
+        $totalCheckIn = 0;
+        $totalNotCheckIn = 0;
+        $totalTickets = 0;
+
+        if ($selectedEventId && in_array($selectedEventId, $myEventIds)) {
+            $tickets = DB::table('detail_transaksi')
+                ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+                ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
+                ->join('user', 'transaksi.id_user', '=', 'user.id_user')
+                ->where('tiket.id_event', $selectedEventId)
+                ->where('detail_transaksi.status_item', 'berhasil')
+                ->select(
+                    'detail_transaksi.id_detail',
+                    'detail_transaksi.kode_QR',
+                    'detail_transaksi.checked_in',
+                    'detail_transaksi.jumlah_beli',
+                    'tiket.jenis_tiket',
+                    'user.nama_lengkap',
+                    'user.email'
+                )
+                ->get();
+            
+            $reportData = $tickets;
+            $totalTickets = $tickets->sum('jumlah_beli');
+            $totalCheckIn = $tickets->where('checked_in', 1)->sum('jumlah_beli');
+            $totalNotCheckIn = $tickets->where('checked_in', 0)->sum('jumlah_beli');
+        }
+
+        return view('checkin-report', compact('events', 'selectedEventId', 'reportData', 'totalTickets', 'totalCheckIn', 'totalNotCheckIn'));
     }
 }
