@@ -42,8 +42,8 @@ Route::get('/organizer/dashboard', [DashboardController::class, 'organizer'])->m
 Route::get('/organizer/events', [DashboardController::class, 'organizer'])->middleware(['auth', 'role:2']);
 Route::get('/organizer/event/{id}', [DashboardController::class, 'showEventOrganizer'])->middleware(['auth', 'role:2'])->name('organizer.event.detail');
 Route::get('/organizer/statistik', [\App\Http\Controllers\StatistikController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.statistik');
-Route::post('/organizer/event/{id}/update-description', [\App\Http\Controllers\EditEventController::class, 'updateDescription'])->middleware(['auth', 'role:2'])->name('organizer.event.update-description');
-Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventController::class, 'addQuota'])->middleware(['auth', 'role:2'])->name('organizer.event.add-quota');
+Route::post('/organizer/event/{id}/update-description', [\App\Http\Controllers\EditEventController::class, 'updateDescription'])->middleware(['auth', 'role:2,1'])->name('organizer.event.update-description');
+Route::post('/organizer/event/{id}/add-quota', [\App\Http\Controllers\EditEventController::class, 'addQuota'])->middleware(['auth', 'role:2,1'])->name('organizer.event.add-quota');
 Route::get('/organizer/notifications', [\App\Http\Controllers\NotifikasiController::class, 'organizer'])->middleware(['auth', 'role:2'])->name('organizer.notifications');
 Route::get('/organizer/revenue', [\App\Http\Controllers\RevenueController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.revenue');
 Route::get('/organizer/checkin', [CheckInController::class, 'index'])->middleware(['auth', 'role:2'])->name('organizer.checkin');
