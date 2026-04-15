@@ -23,24 +23,21 @@ class RevenueController extends Controller
             $events = Event::all();
             
             foreach ($events as $event) {
-                // Pendapatan admin 90%
-                $revResult = DB::select("SELECT pendapatan_event(?) as rev", [$event->id_event]);
-                $eventRev = (float)($revResult[0]->rev ?? 0);
-                
-                // Total penjualan
+                // Admin logic calculation
                 $rawSales = DB::table('detail_transaksi')
                     ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
                     ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
                     ->where('tiket.id_event', $event->id_event)
                     ->where(function($q) {
                         $q->where('detail_transaksi.status_item', 'berhasil')
-                          ->orWhere('transaksi.status_transaksi', 'Selesai');
+                          ->orWhereIn('transaksi.status_transaksi', ['lunas', 'Selesai']);
                     })
                     ->select(DB::raw('SUM(detail_transaksi.subtotal) as total, SUM(detail_transaksi.jumlah_beli) as tickets'))
                     ->first();
                 
                 $eventTotal = (float)($rawSales->total ?? 0);
                 $eventTickets = (int)($rawSales->tickets ?? 0);
+                $eventRev = $eventTotal * 0.90; // Calculate Admin's 90% immediately
 
                 if ($eventTotal > 0 || $eventTickets > 0) {
                     $eventEarnings[] = [
@@ -65,8 +62,7 @@ class RevenueController extends Controller
             $events = Event::where('id_user', $organizerId)->get();
 
             // Total Jatah Organizer
-            $totalResult = DB::select("SELECT hitung_pendapatan_organizer(?) as total", [$organizerId]);
-            $totalJatahOrganizer = (float)($totalResult[0]->total ?? 0);
+            $totalJatahOrganizer = 0; // Initialize directly
 
             foreach ($events as $event) {
                 // Hitung pendapatan organizer
@@ -76,7 +72,7 @@ class RevenueController extends Controller
                     ->where('tiket.id_event', $event->id_event)
                     ->where(function($q) {
                         $q->where('detail_transaksi.status_item', 'berhasil')
-                          ->orWhere('transaksi.status_transaksi', 'Selesai');
+                          ->orWhereIn('transaksi.status_transaksi', ['lunas', 'Selesai']);
                     })
                     ->select(DB::raw('SUM(detail_transaksi.subtotal) as total, SUM(detail_transaksi.jumlah_beli) as tickets'))
                     ->first();
@@ -93,8 +89,8 @@ class RevenueController extends Controller
                         'revenue' => $eventRev,
                         'tickets' => $eventTickets
                     ];
-                    
                     $totalUangMasuk += $eventTotal;
+                    $totalJatahOrganizer += $eventRev; // Accumulate organizer share securely
                     $totalTransactions += $eventTickets;
                 }
             }
@@ -129,7 +125,7 @@ class RevenueController extends Controller
             ->join('event', 'tiket.id_event', '=', 'event.id_event')
             ->where(function($q) {
                 $q->where('detail_transaksi.status_item', 'berhasil')
-                  ->orWhere('transaksi.status_transaksi', 'Selesai');
+                  ->orWhereIn('transaksi.status_transaksi', ['lunas', 'Selesai']);
             })
             ->select(
                 'event.nama_event',
