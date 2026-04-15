@@ -14,10 +14,35 @@ class UserManagementController extends Controller
      */
     public function index()
     {
-        $users = User::whereIn('role', ['buyer', 'organizer', '2', '3'])
-                     ->orderByRaw("FIELD(role, 'organizer', 'buyer')")
+        $usersBuilder = User::whereIn('role', ['buyer', 'organizer', '2', '3'])
+                     ->orderByRaw("FIELD(role, 'organizer', '2', 'buyer', '3')")
                      ->orderBy('nama_lengkap')
-                     ->get();
+                     ->get()
+                     ->map(function($u) {
+                         return (object)[
+                             'id_user' => $u->id_user,
+                             'nama_lengkap' => $u->nama_lengkap,
+                             'email' => $u->email,
+                             'role' => $u->role,
+                             'status' => $u->status,
+                             'photo_profile' => $u->photo_profile,
+                             'created_at' => $u->created_at,
+                         ];
+                     });
+
+        $admins = DB::table('admin')->get()->map(function($a) {
+            return (object)[
+                'id_user' => $a->id,
+                'nama_lengkap' => $a->nama,
+                'email' => $a->email,
+                'role' => 'admin',
+                'status' => 'active', 
+                'photo_profile' => null,
+                'created_at' => $a->created_at ?? null,
+            ];
+        });
+        
+        $users = collect($admins)->merge($usersBuilder);
 
         // Hitung stats
         $totalUsers    = $users->count();
@@ -30,6 +55,38 @@ class UserManagementController extends Controller
         ));
     }
 
+    private function checkRestrictions($user, $action)
+    {
+        // 1. Pengecekan event yang di pegang oleh Organizer
+        if (in_array($user->role, ['organizer', '2'])) {
+            $activeEventsCount = DB::table('event')
+                ->where('id_user', $user->id_user)
+                ->whereDate('tanggal_pelaksanaan', '>=', now()->toDateString())
+                ->count();
+
+            if ($activeEventsCount > 0) {
+                return "Akun \"{$user->nama_lengkap}\" tidak dapat {$action} karena masih memegang {$activeEventsCount} event yang sedang atau belum berlangsung.";
+            }
+        }
+
+        // 2. Pengecekan tiket checkin (untuk buyer/user yang sudah beli tiket)
+        $uncheckedCount = DB::table('detail_transaksi')
+            ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+            ->join('kategori_tiket', 'detail_transaksi.id_kategori_tiket', '=', 'kategori_tiket.id_kategori_tiket')
+            ->join('event', 'kategori_tiket.id_event', '=', 'event.id_event')
+            ->where('transaksi.id_user', $user->id_user)
+            ->where('detail_transaksi.status_item', 'berhasil')
+            ->where('detail_transaksi.checked_in', 0)
+            ->whereDate('event.tanggal_pelaksanaan', '>=', now()->toDateString())
+            ->count();
+
+        if ($uncheckedCount > 0) {
+            return "Akun \"{$user->nama_lengkap}\" tidak dapat {$action} karena masih memiliki {$uncheckedCount} tiket yang belum di-scan untuk event mendatang.";
+        }
+
+        return null;
+    }
+
     /**
      * Nonaktifkan akun user.
      */
@@ -38,6 +95,11 @@ class UserManagementController extends Controller
         $user = User::where('id_user', $id)
                     ->whereIn('role', ['buyer', 'organizer', '2', '3'])
                     ->firstOrFail();
+
+        $error = $this->checkRestrictions($user, 'dinonaktifkan');
+        if ($error) {
+            return redirect()->route('admin.users.index')->with('error', $error);
+        }
 
         $user->update(['status' => 'inactive']);
 
@@ -62,7 +124,6 @@ class UserManagementController extends Controller
 
     /**
      * Hapus akun user 
-    
      */
     public function destroy($id)
     {
@@ -70,29 +131,9 @@ class UserManagementController extends Controller
                     ->whereIn('role', ['buyer', 'organizer', '2', '3'])
                     ->firstOrFail();
 
-        // Pengecekan tiket checkin
-        $uncheckedCount = DB::table('detail_transaksi')
-            ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
-            ->where('transaksi.id_user', $user->id_user)
-            ->where('detail_transaksi.status_item', 'berhasil')
-            ->where('detail_transaksi.checked_in', 0)
-            ->count();
-
-        if ($uncheckedCount > 0) {
-            return redirect()->route('admin.users.index')
-                ->with('error', "Akun \"{$user->nama_lengkap}\" tidak dapat dihapus karena masih memiliki {$uncheckedCount} tiket yang belum di-check-in.");
-        }
-
-        // Pengecekan event yang di pegang oleh Organizer
-        if (in_array($user->role, ['organizer', '2'])) {
-            $activeEventsCount = \App\Models\Event::where('id_user', $user->id_user)
-                ->whereDate('tanggal_pelaksanaan', '>=', now()->toDateString())
-                ->count();
-
-            if ($activeEventsCount > 0) {
-                return redirect()->route('admin.users.index')
-                    ->with('error', "Akun \"{$user->nama_lengkap}\" tidak dapat dihapus karena masih memiliki {$activeEventsCount} event yang sedang atau akan berlangsung.");
-            }
+        $error = $this->checkRestrictions($user, 'dihapus');
+        if ($error) {
+            return redirect()->route('admin.users.index')->with('error', $error);
         }
 
         $nama = $user->nama_lengkap;

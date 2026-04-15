@@ -671,8 +671,10 @@
 
                         <!-- Role -->
                         <td>
-                            @php $role = $user->role ?? 'buyer'; @endphp
-                            @if(in_array($role, ['organizer', '2']))
+                            @php $role = strtolower($user->role ?? 'buyer'); @endphp
+                            @if(in_array($role, ['admin', '1']))
+                                <span class="badge badge-admin"><i class="ph ph-shield-check"></i> Admin</span>
+                            @elseif(in_array($role, ['organizer', '2']))
                                 <span class="badge badge-organizer"><i class="ph ph-star-four"></i> Organizer</span>
                             @else
                                 <span class="badge badge-buyer"><i class="ph ph-user"></i> Buyer</span>
@@ -705,15 +707,15 @@
                                 <button
                                     class="btn-icon btn-icon-info"
                                     title="Lihat Detail"
-                                    onclick="openDetail({
-                                        id: {{ $user->id_user ?? 'null' }},
-                                        name: @json($user->nama_lengkap ?? 'Tanpa Nama'),
-                                        email: @json($user->email ?? '-'),
-                                        role: @json($user->role ?? 'buyer'),
-                                        status: @json($user->status ?? 'active'),
-                                        phone: @json($user->no_telp ?? '-'),
-                                        joined: @json($user->created_at ? \Carbon\Carbon::parse($user->created_at)->format('d F Y') : '-')
-                                    })"
+                                    onclick='openDetail({
+                                        id: {{ $user->id_user ?? "null" }},
+                                        name: @json($user->nama_lengkap ?? "Tanpa Nama"),
+                                        email: @json($user->email ?? "-"),
+                                        role: @json($user->role ?? "buyer"),
+                                        status: @json($user->status ?? "active"),
+                                        phone: @json($user->no_telp ?? "-"),
+                                        joined: @json($user->created_at ? \Carbon\Carbon::parse($user->created_at)->format("d F Y") : "-")
+                                    })'
                                 >
                                     <i class="ph ph-eye"></i>
                                 </button>
@@ -726,7 +728,7 @@
                                         type="button"
                                         class="btn-icon btn-icon-warning"
                                         title="Nonaktifkan Akun"
-                                        onclick="confirmDeactivate(this.closest('form'), @json($user->nama_lengkap ?? 'user ini'))"
+                                        onclick='confirmDeactivate(this.closest("form"), @json($user->nama_lengkap ?? "user ini"))'
                                     >
                                         <i class="ph ph-user-minus"></i>
                                     </button>
@@ -739,7 +741,7 @@
                                         class="btn-icon"
                                         style="background: rgba(132,216,165,0.12); color: #84d8a5; border: 1px solid rgba(132,216,165,0.25);"
                                         title="Aktifkan Akun"
-                                        onclick="confirmActivate(this.closest('form'), @json($user->nama_lengkap ?? 'user ini'))"
+                                        onclick='confirmActivate(this.closest("form"), @json($user->nama_lengkap ?? "user ini"))'
                                     >
                                         <i class="ph ph-user-check"></i>
                                     </button>
@@ -755,7 +757,7 @@
                                         type="button"
                                         class="btn-icon btn-icon-danger"
                                         title="Hapus Akun"
-                                        onclick="confirmDelete(this.closest('form'), @json($user->nama_lengkap ?? 'user ini'))"
+                                        onclick='confirmDelete(this.closest("form"), @json($user->nama_lengkap ?? "user ini"))'
                                     >
                                         <i class="ph ph-trash"></i>
                                     </button>
