@@ -59,29 +59,26 @@ class UserManagementController extends Controller
     {
         // 1. Pengecekan event yang di pegang oleh Organizer
         if (in_array($user->role, ['organizer', '2'])) {
-            $activeEventsCount = DB::table('event')
+            $eventsCount = DB::table('event')
                 ->where('id_user', $user->id_user)
-                ->whereDate('tanggal_pelaksanaan', '>=', now()->toDateString())
                 ->count();
 
-            if ($activeEventsCount > 0) {
-                return "Akun \"{$user->nama_lengkap}\" tidak dapat {$action} karena masih memegang {$activeEventsCount} event yang sedang atau belum berlangsung.";
+            if ($eventsCount > 0) {
+                return "Akun \"{$user->nama_lengkap}\" tidak dapat {$action} karena organizer ini masih memiliki / mengelola event.";
             }
         }
 
         // 2. Pengecekan tiket checkin (untuk buyer/user yang sudah beli tiket)
         $uncheckedCount = DB::table('detail_transaksi')
             ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
-            ->join('kategori_tiket', 'detail_transaksi.id_kategori_tiket', '=', 'kategori_tiket.id_kategori_tiket')
-            ->join('event', 'kategori_tiket.id_event', '=', 'event.id_event')
+            ->join('tiket', 'detail_transaksi.id_tiket', '=', 'tiket.id_tiket')
             ->where('transaksi.id_user', $user->id_user)
             ->where('detail_transaksi.status_item', 'berhasil')
             ->where('detail_transaksi.checked_in', 0)
-            ->whereDate('event.tanggal_pelaksanaan', '>=', now()->toDateString())
             ->count();
 
         if ($uncheckedCount > 0) {
-            return "Akun \"{$user->nama_lengkap}\" tidak dapat {$action} karena masih memiliki {$uncheckedCount} tiket yang belum di-scan untuk event mendatang.";
+            return "Akun \"{$user->nama_lengkap}\" tidak dapat {$action} karena masih memiliki tiket yang belum di-scan QR.";
         }
 
         return null;
@@ -101,6 +98,7 @@ class UserManagementController extends Controller
             return redirect()->route('admin.users.index')->with('error', $error);
         }
 
+        $user->timestamps = false;
         $user->update(['status' => 'inactive']);
 
         return redirect()->route('admin.users.index')
@@ -116,6 +114,7 @@ class UserManagementController extends Controller
                     ->whereIn('role', ['buyer', 'organizer', '2', '3'])
                     ->firstOrFail();
 
+        $user->timestamps = false;
         $user->update(['status' => 'active']);
 
         return redirect()->route('admin.users.index')
