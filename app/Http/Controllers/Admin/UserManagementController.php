@@ -58,7 +58,7 @@ class UserManagementController extends Controller
     private function checkRestrictions($user, $action)
     {
         // 1. Pengecekan event yang di pegang oleh Organizer
-        if (in_array($user->role, ['organizer', '2'])) {
+        if (in_array(strtolower($user->role), ['organizer', '2'])) {
             $eventsCount = DB::table('event')
                 ->where('id_user', $user->id_user)
                 ->count();
