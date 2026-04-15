@@ -324,7 +324,11 @@
 
     <x-organizer-topbar />
 
-    <x-organizer-sidebar />
+    @if(isset($role) && ($role == '1' || $role == 'admin'))
+        <x-admin-sidebar />
+    @else
+        <x-organizer-sidebar />
+    @endif
 
     <main class="main-wrapper">
         <div class="page-header">
