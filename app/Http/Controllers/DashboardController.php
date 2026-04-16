@@ -203,7 +203,7 @@ class DashboardController extends Controller
             ->get();
 
         // Calculate unread count before marking them as read for the page header badge
-        $adminId = session('login_admin.id') ?? auth()->id();
+        $adminId = session('login_admin.id') ?? Auth::id();
         $pageUnreadCount = DB::table('notifikasi')->where('id_user', $adminId)->where('is_read', 0)->count();
 
         // Mark all as read when opening notifications page
