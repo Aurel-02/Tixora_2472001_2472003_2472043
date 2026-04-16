@@ -637,7 +637,6 @@
                         <th>Pengguna</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th>Bergabung</th>
                         <th style="text-align: center;">Aksi</th>
                     </tr>
                 </thead>
@@ -693,11 +692,6 @@
                                     <span class="dot"></span> Nonaktif
                                 </span>
                             @endif
-                        </td>
-
-                        <!-- Join Date -->
-                        <td style="font-size: 0.85rem; opacity: 0.7;">
-                            {{ $user->created_at ? \Carbon\Carbon::parse($user->created_at)->format('d M Y') : '-' }}
                         </td>
 
                         <!-- Actions -->
@@ -819,10 +813,7 @@
                     <span class="label">No. Telepon</span>
                     <span class="value" id="modalPhone">—</span>
                 </div>
-                <div class="detail-item">
-                    <span class="label">Bergabung</span>
-                    <span class="value" id="modalJoined">—</span>
-                </div>
+
                 <div class="detail-item" style="grid-column: span 2;">
                     <span class="label">Email</span>
                     <span class="value" id="modalEmail">—</span>
@@ -919,7 +910,7 @@
             document.getElementById('modalRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
             document.getElementById('modalStatus').textContent = user.status === 'active' ? 'Aktif ✓' : 'Nonaktif ✗';
             document.getElementById('modalPhone').textContent = user.phone || '-';
-            document.getElementById('modalJoined').textContent = user.joined;
+
 
             document.getElementById('detailModal').classList.add('open');
             document.body.style.overflow = 'hidden';
