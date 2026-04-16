@@ -26,6 +26,7 @@ class UserManagementController extends Controller
                              'role' => $u->role,
                              'status' => $u->status,
                              'photo_profile' => $u->photo_profile,
+                             'no_telp' => $u->no_telp,
                              'created_at' => $u->created_at,
                          ];
                      });
