@@ -6,6 +6,7 @@
     <title>Tixora - Checkout Details</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --jacarta: #3A345B;
@@ -673,6 +674,7 @@
             
             let selectedMethod = '';
             let timerInterval;
+            let isExpired = false;
 
             // Modal Controls
             openBtn.addEventListener('click', () => {
@@ -726,14 +728,17 @@
             });
 
             donePaymentBtn.addEventListener('click', () => {
+                if (isExpired) return;
                 switchStep('stepSuccess');
                 if(timerInterval) clearInterval(timerInterval);
                 document.getElementById('finalPaymentMethod').value = selectedMethod;
             });
 
             function startPaymentTimer() {
+                isExpired = false;
+                donePaymentBtn.disabled = false;
                 if(timerInterval) clearInterval(timerInterval);
-                let timeLeft = 30 * 60; 
+                let timeLeft = 5; 
                 const display = document.getElementById('paymentTimerDisplay');
                 
                 timerInterval = setInterval(() => {
@@ -744,8 +749,20 @@
                     display.innerText = `${pad(m)} : ${pad(s)}`;
                     
                     if (timeLeft <= 0) {
+                        isExpired = true;
+                        donePaymentBtn.disabled = true;
                         clearInterval(timerInterval);
                         display.innerText = "EXPIRED";
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Expired',
+                            text: 'Waktu expired dan payment gagal',
+                            confirmButtonColor: '#D183A9',
+                            background: '#3A345B',
+                            color: '#F3C8DD'
+                        }).then(() => {
+                            window.location.href = '/dashboard';
+                        });
                     }
                     timeLeft--;
                 }, 1000);
